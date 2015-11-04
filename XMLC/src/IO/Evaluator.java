@@ -3,7 +3,9 @@ package IO;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import Data.AVTable;
 import Learner.AbstractLearner;
@@ -12,7 +14,7 @@ public class Evaluator {
 
 	
 	
-    public double[] computePerformanceMetrics(AbstractLearner learner, AVTable data) {
+    static public Map<String,Double> computePerformanceMetrics(AbstractLearner learner, AVTable data) {
 		System.out.println("--> Computing Hamming loss and F-measure...");
 
 		double macroF = 0.0;
@@ -96,9 +98,9 @@ public class Evaluator {
 		
 		macroF = macroF/(double) presentedlabels;
 		
-		double[] arr = new double[2];
-		arr[0] = HL;
-		arr[1] = macroF;
+		Map<String,Double> arr = new HashMap<String,Double>();
+		arr.put("Hamming loss", HL);
+		arr.put("macro F-measure", macroF);
 		
 		return arr;
 

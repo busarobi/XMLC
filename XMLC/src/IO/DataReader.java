@@ -25,6 +25,8 @@ public class DataReader {
 	
 	public AVTable read() throws Exception
 	{
+		System.out.print( "Reading " + this.fileName + "..." );
+		
 		BufferedReader fp = new BufferedReader(new FileReader(this.fileName));
 		Vector<int[]> vy = new Vector<int[]>();
 		Vector<AVPair[]> vx = new Vector<AVPair[]>();
@@ -90,6 +92,8 @@ public class DataReader {
 		data.y = new int[data.n][];
 		for(int i=0;i<data.n;i++)
 			data.y[i] = vy.elementAt(i);
+		
+		System.out.println( "Done." );
 		
 		return data;
 	}

@@ -217,9 +217,7 @@ public class OnlinePLT {
 					indexx = 0;
 					
 					for (int l = 0; l < this.d; l++) {
-					
 						this.w[j][l] += (this.gamma * mult * this.grad[j][l]);
-						
 					}
 					
 					this.bias[j] += (this.gamma * mult * this.gradbias[j]);
