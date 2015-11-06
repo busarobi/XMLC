@@ -94,6 +94,10 @@ public class DataReader {
 			data.y[i] = vy.elementAt(i);
 		
 		System.out.println( "Done." );
+
+		System.out.println( "    -->  num x dim: labels " 
+		           + data.n + " x "+ data.d + " : " + data.m );
+		
 		
 		return data;
 	}

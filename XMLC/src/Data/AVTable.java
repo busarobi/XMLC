@@ -9,7 +9,7 @@ public class AVTable {
 	
 	
 	static public double[] getPrior( AVTable data){
-		double[] prior = new double[data.d];
+		double[] prior = new double[data.m];
 
 		int[] indices = new int[data.n];
 		for( int i = 0; i < data.n; i++ ) indices[i] = 0;

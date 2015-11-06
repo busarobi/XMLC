@@ -23,6 +23,7 @@ import Data.ComparablePair;
 import IO.DataReader;
 import IO.Evaluator;
 import IO.Result;
+import preprocessing.FeatureHasher;
 
 public class MLLogisitcRegression extends AbstractLearner {
 	protected int epochs = 20;
@@ -58,6 +59,8 @@ public class MLLogisitcRegression extends AbstractLearner {
 		this.m = data.m;
 		this.d = data.d;
 
+		System.out.println( "Num. of labels: " + this.m + " Dim: " + this.d );
+		
 		this.w = new double[this.m][];
 		this.bias = new double[this.m];
 
@@ -84,14 +87,14 @@ public class MLLogisitcRegression extends AbstractLearner {
 		}
 		
 		// learning rate
-		this.gamma = 50.0;
+		this.gamma = 10.0;
 		// step size for learning rate
 		this.step = 2000;
 		this.T = 1;
 		// decay of gradient
-		this.delta = 0.3;
+		this.delta = 0.0;
 				
-		this.epochs = 100;
+		this.epochs = 30;
 	}
 
 	@Override
@@ -154,6 +157,7 @@ public class MLLogisitcRegression extends AbstractLearner {
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
 					System.out.println("\t\t" + dateFormat.format(date));
+					System.out.println("Weight: " + this.w[0][0] );
 				}
 
 			}
@@ -162,8 +166,8 @@ public class MLLogisitcRegression extends AbstractLearner {
 			
 			
 			//save model !!!!!!!!!!!!!!!!!!!!!!!
-			//String modelFile = this.getProperties().getProperty("ModelFile");
-			//this.savemodel(modelFile);
+			String modelFile = this.getProperties().getProperty("ModelFile");
+			this.savemodel(modelFile);
 		}
 
 	}
@@ -388,10 +392,24 @@ public class MLLogisitcRegression extends AbstractLearner {
 		// create the classifier and set the configuration
 		MLLogisitcRegression learner = new MLLogisitcRegression(args[0]);
 
+		// feature hasher
+		FeatureHasher fh = null;
+		
 		// reading train data
 		DataReader datareader = new DataReader(learner.getProperties().getProperty("TrainFile"));
-		AVTable data = datareader.read();
+		AVTable data = datareader.read();		
 
+		if (learner.getProperties().containsKey("FeatureHashing")) {
+			int featureNum = Integer.parseInt(learner.getProperties().getProperty("FeatureHashing"));
+			fh = new FeatureHasher(0, featureNum);
+			
+			System.out.print( "Feature hashing (dim: " + featureNum + ")...");			
+			data = fh.transformSparse(data);			
+			System.out.println( "Done.");
+		}
+		
+		
+		
 		// train
 		String inputmodelFile = learner.getProperties().getProperty("InputModelFile");
 		if (inputmodelFile == null ) {
@@ -407,8 +425,10 @@ public class MLLogisitcRegression extends AbstractLearner {
 		
 		// test
 		DataReader testdatareader = new DataReader(learner.getProperties().getProperty("TestFile"));
-		AVTable testdata = testdatareader.read();
-		
+		AVTable testdata = testdatareader.read();		
+		if (fh != null ) {
+			testdata = fh.transformSparse(testdata);			
+		}
 		
 		
 		
@@ -423,22 +443,18 @@ public class MLLogisitcRegression extends AbstractLearner {
         
 		
 		// evaluate (OFO)
-		learner.validateThresholdOFO(data);
-		
-		// evaluate
-		Map<String,Double> perfOFO = Evaluator.computePerformanceMetrics(learner, testdata);
-		for ( String perfName : perfOFO.keySet() ) {
-			System.out.println("##### " + perfName + ": "  + perfOFO.get(perfName));
-		}
+//		learner.validateThresholdOFO(data);
+//		Map<String,Double> perfOFO = Evaluator.computePerformanceMetrics(learner, testdata);
+//		for ( String perfName : perfOFO.keySet() ) {
+//			System.out.println("##### " + perfName + ": "  + perfOFO.get(perfName));
+//		}
 
 		// evaluate (EXU)
-		learner.validateThresholdEXU(data);
-		
-		// evaluate
-		Map<String,Double> perfEXU = Evaluator.computePerformanceMetrics(learner, testdata);
-		for ( String perfName : perfEXU.keySet() ) {
-			System.out.println("##### " + perfName + ": "  + perfEXU.get(perfName));
-		}
+//		learner.validateThresholdEXU(data);
+//		Map<String,Double> perfEXU = Evaluator.computePerformanceMetrics(learner, testdata);
+//		for ( String perfName : perfEXU.keySet() ) {
+//			System.out.println("##### " + perfName + ": "  + perfEXU.get(perfName));
+//		}
 		
 		
 	}
