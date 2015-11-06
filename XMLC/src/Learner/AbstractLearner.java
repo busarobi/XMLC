@@ -24,6 +24,9 @@ public abstract class AbstractLearner {
 	public abstract Evaluator test( AVTable data );
 	public abstract double getPosteriors(AVPair[] x, int label);
 	
+	public abstract void savemodel(String fname );
+	public abstract void loadmodel(String fname );
+	
 	public int getPrediction(AVPair[] x, int label){
 		if ( this.thresholds[label] < getPosteriors(x, label) )
 			return 1;

@@ -1,7 +1,19 @@
 package Learner;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Map;
 import java.util.Random;
 
@@ -20,10 +32,10 @@ public class MLLogisitcRegression extends AbstractLearner {
 	protected double[] bias = null;
 	protected double[] gradbias = null;
 
-	protected double gamma = 0.6; // learning rate
-	protected int step = 200;
-	protected double delta = 0.1;
-
+	protected double gamma = 0; // learning rate
+	protected int step = 0;
+	protected double delta = 0;
+    protected int OFOepochs = 1;
 	// uniform sampling of negatives, the number of negatives is r times more as
 	// many as positives
 	protected int r = 1;
@@ -61,6 +73,9 @@ public class MLLogisitcRegression extends AbstractLearner {
 
 			this.bias[i] = 2.0 * rand.nextDouble() - 1.0;
 
+			if ((i % 100) == 0)
+				System.out.println( "Model: "+ i +" (" + this.m + ")" );
+
 		}
 
 		this.thresholds = new double[this.m];
@@ -69,18 +84,22 @@ public class MLLogisitcRegression extends AbstractLearner {
 		}
 		
 		// learning rate
-		this.gamma = 3.0;
+		this.gamma = 50.0;
 		// step size for learning rate
-		this.step = 20000;
+		this.step = 2000;
 		this.T = 1;
 		// decay of gradient
-		this.delta = 0.9;
+		this.delta = 0.3;
+				
+		this.epochs = 100;
 	}
 
 	@Override
 	public void train(AVTable data) {
 		for (int ep = 0; ep < this.epochs; ep++) {
 
+			System.out.println("--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
+			
 			// random permutation
 			ArrayList<Integer> indiriectIdx = new ArrayList<Integer>();
 			for (int i = 0; i < this.traindata.n; i++) {
@@ -128,14 +147,23 @@ public class MLLogisitcRegression extends AbstractLearner {
 				}
 
 				this.T++;
-				
-				if ((this.T % 10000) == 0)
-					System.out.println("  --> Mult: " + (this.gamma * mult));
 
+				if ((i % 1000) == 0) {
+					System.out.println( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
+					System.out.println("  --> Mult: " + (this.gamma * mult));
+					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+					Date date = new Date();
+					System.out.println("\t\t" + dateFormat.format(date));
+				}
 
 			}
 
-			System.out.println("--> Epoch: " +  ep + " (" + this.epochs +")" );
+			System.out.println("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
+			
+			
+			//save model !!!!!!!!!!!!!!!!!!!!!!!
+			//String modelFile = this.getProperties().getProperty("ModelFile");
+			//this.savemodel(modelFile);
 		}
 
 	}
@@ -212,6 +240,132 @@ public class MLLogisitcRegression extends AbstractLearner {
 		
 	}
 	
+
+	
+	public void validateThresholdOFO( AVTable data ) {		
+		int[] TP = new int[this.m];
+		int[] P = new int[this.m];
+		int[] PredP = new int[this.m];
+		
+		int[] indices = new int[data.n];
+		for( int i = 0; i < data.n; i++ ) indices[i] = 0;
+		
+		//double[] prior = AVTable.getPrior(data);
+		
+		for( int i = 0; i < this.m; i++ ) {
+			TP[i] = 0;
+			P[i] = 0;
+			PredP[i] = 0;
+						
+			this.thresholds[i] = ((double) TP[i]) / ((double) P[i] + PredP[i]);
+		}
+		
+		for( int e = 0; e < this.OFOepochs; e++ ) { 
+			for (int i = 0; i < this.m; i++) {
+
+				// assume that the labels are ordered
+				int currentLabel = 0;
+				for (int j = 0; j < data.n; j++) {
+					if ((indices[j] < data.y[j].length) && (data.y[j][indices[j]] == i)) {
+						currentLabel = 1;
+						indices[j]++;
+					} else {
+						currentLabel = 0;
+					}
+
+					double post = this.getPosteriors(data.x[j], i);
+					if (post > this.thresholds[i]) {
+						PredP[i]++;
+						if (currentLabel == 1)
+							TP[i]++;
+					}
+					if (currentLabel == 1)
+						P[i]++;
+
+					this.thresholds[i] = ((double) TP[i]) / ((double) P[i] + PredP[i]);
+				}
+												
+			}
+
+		}
+		
+		for( int i=0; i < this.m; i++ )
+			System.out.println( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
+		
+	}
+	
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	// Old OFO
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	
+	public void validateThresholdEXU( AVTable data ) {		
+		int[] at = new int[this.m];
+		int[] bt = new int[this.m];
+		
+		int[] indices = new int[data.n];
+		for( int i = 0; i < data.n; i++ ) indices[i] = 0;
+		
+		double[] prior = AVTable.getPrior(data);
+		
+		for( int i = 0; i < this.m; i++ ) {
+			//at[i] = (int) Math.round(prior[i] * 1000);
+			//bt[i] = 1000;
+			at[i] = 0;
+			bt[i] = 0;
+			
+			double F00 = (2.0 * at[i]) / ((double) bt[i]);
+			double F01 = (2.0 * at[i]) / ((double) bt[i]+1);
+			double F11 = (2.0 * (at[i]+1)) / ((double) bt[i]+2);
+			
+			
+			this.thresholds[i] = (F01 - F00) / (2*F01 - F00 - F11 );
+		}
+		
+		for( int e = 0; e < this.OFOepochs; e++ ) { 
+			for (int i = 0; i < this.m; i++) {
+
+				// assume that the labels are ordered
+				int currentLabel = 0;
+				for (int j = 0; j < data.n; j++) {
+					if ((indices[j] < data.y[j].length) && (data.y[j][indices[j]] == i)) {
+						currentLabel = 1;
+						indices[j]++;
+					} else {
+						currentLabel = 0;
+					}
+
+					double post = this.getPosteriors(data.x[j], i);
+					if (post > this.thresholds[i]) {
+						bt[i]++;
+						if (currentLabel == 1)
+							at[i]++;
+					}
+					if (currentLabel == 1)
+						bt[i]++;
+
+					double F00 = (2.0 * at[i]) / ((double) bt[i]);
+					double F01 = (2.0 * at[i]) / ((double) bt[i]+1);
+					double F11 = (2.0 * (at[i]+1)) / ((double) bt[i]+2);
+					
+					
+					this.thresholds[i] = (F01 - F00) / (2*F01 - F00 - F11 );
+					//this.thresholds[i] = ((prior[i] * (F01 - F00)) + F00) / ((prior[i] * (2*F01 - F11 ) ) + F00 + F01 );
+				}
+												
+			}
+
+		}
+		
+		for( int i=0; i < this.m; i++ )
+			System.out.println( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
+		
+	}
+	
+	
+	
+	
 	public double getPosteriors(AVPair[] x, int label) {
 		double posterior = 0.0;
 		for (int i = 0; i < x.length; i++) {
@@ -239,20 +393,133 @@ public class MLLogisitcRegression extends AbstractLearner {
 		AVTable data = datareader.read();
 
 		// train
-		learner.allocateClassifiers(data);
-		learner.train(data);
+		String inputmodelFile = learner.getProperties().getProperty("InputModelFile");
+		if (inputmodelFile == null ) {
+			learner.allocateClassifiers(data);
+			learner.train(data);
 
-		// validate threshold
-		learner.validateThresholdEUM(data);
+			String modelFile = learner.getProperties().getProperty("ModelFile");
+			learner.savemodel(modelFile);
+		} else {
+			learner.loadmodel(inputmodelFile);
+		}
+		
 		
 		// test
 		DataReader testdatareader = new DataReader(learner.getProperties().getProperty("TestFile"));
 		AVTable testdata = testdatareader.read();
-
-		// evaluate
+		
+		
+		
+		
+		
+		// evaluate (EUM)
+		 
+		learner.validateThresholdEUM(data);
 		Map<String,Double> perf = Evaluator.computePerformanceMetrics(learner, testdata);
 		for ( String perfName : perf.keySet() ) {
 			System.out.println("##### " + perfName + ": "  + perf.get(perfName));
+		}
+        
+		
+		// evaluate (OFO)
+		learner.validateThresholdOFO(data);
+		
+		// evaluate
+		Map<String,Double> perfOFO = Evaluator.computePerformanceMetrics(learner, testdata);
+		for ( String perfName : perfOFO.keySet() ) {
+			System.out.println("##### " + perfName + ": "  + perfOFO.get(perfName));
+		}
+
+		// evaluate (EXU)
+		learner.validateThresholdEXU(data);
+		
+		// evaluate
+		Map<String,Double> perfEXU = Evaluator.computePerformanceMetrics(learner, testdata);
+		for ( String perfName : perfEXU.keySet() ) {
+			System.out.println("##### " + perfName + ": "  + perfEXU.get(perfName));
+		}
+		
+		
+	}
+
+	@Override
+	public void savemodel(String fname) {
+		// TODO Auto-generated method stub
+		try{
+			System.out.print( "Saving model (" + fname + ")..." );
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+			          new FileOutputStream(fname)));
+			    
+			for(int i = 0; i< this.m; i++ ){
+				writer.write( ""+ this.bias[i] );
+				for(int j = 0; j< this.d; j++ ){
+					writer.write( " "+ this.w[i][j] );
+				}
+				writer.write( "\n" );
+			}
+			
+			writer.write( ""+ this.thresholds[0] );
+			for(int i = 1; i< this.m; i++ ){
+				writer.write( " "+ this.thresholds[i] );
+			}
+			writer.write( "\n" );
+			
+			writer.close();
+			System.out.println( "Done." );
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+		}
+		
+	}
+
+	@Override
+	public void loadmodel(String fname) {		
+		try {
+			System.out.println( "Loading model (" + fname + ")..." );
+			Path p = Paths.get(fname);
+
+			BufferedReader reader = Files.newBufferedReader(p);
+		    String line = null;
+		    
+		    // read file
+		    ArrayList<String> lines = new ArrayList<String>(); 
+		    while ((line = reader.readLine()) != null) {
+		        lines.add(line);
+		    }
+		    
+		    reader.close();
+		    
+		    // process lines
+		    // allocate the model
+		    this.m = lines.size()-1;
+		    this.w = new double[this.m][];
+		    this.bias = new double[this.m];
+		    
+		    for( int i = 0; i < this.m; i++ ){
+		    	String[] values =  lines.get(i).split( " " );
+		    	this.w[i] = new double[values.length-1];
+		    	
+		    	this.bias[i] = Double.parseDouble(values[0]);
+		    	for( int j=1; j < values.length; j++ ){
+		    		this.w[i][j-1] = Double.parseDouble(values[j]);
+		    	}
+		    }
+		    
+		    this.d = this.w[0].length;
+		    
+		    // last line for thresholds
+		    this.thresholds = new double[this.m];
+		    String[] values =  lines.get(lines.size()-1).split( " " );
+	    	for( int j=0; j < values.length; j++ ){
+	    		this.thresholds[j] = Double.parseDouble(values[j]);
+	    	}
+		    
+		    
+		    
+		    System.out.println( "Done." );
+		} catch (IOException x) {
+		    System.err.format("IOException: %s%n", x);
 		}
 		
 	}
