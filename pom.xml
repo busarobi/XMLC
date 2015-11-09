@@ -5,7 +5,7 @@
   <version>0.0.1-SNAPSHOT</version>
   <build>
     <sourceDirectory>XMLC/src</sourceDirectory>
-    <testSourceDirectory>XMLC/src/test</testSourceDirectory>
+    <testSourceDirectory>XMLC/test</testSourceDirectory>
     <plugins>
 	  <plugin>
 	    <artifactId>maven-compiler-plugin</artifactId>
