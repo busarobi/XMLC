@@ -2,7 +2,6 @@ package Learner;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -18,13 +17,15 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Random;
 
+import org.apache.commons.math3.analysis.function.Sigmoid;
+
 import Data.AVPair;
 import Data.AVTable;
 import Data.ComparablePair;
 import IO.DataReader;
 import IO.Evaluator;
-import IO.Result;
 import preprocessing.FeatureHasher;
+import util.MasterSeed;
 
 public class MLLogisitcRegression extends AbstractLearner {
 	protected int epochs = 20;
@@ -48,10 +49,49 @@ public class MLLogisitcRegression extends AbstractLearner {
 	// 0 = "vanila"
 	protected int updateMode = 0;
 
-	protected Random rand = new Random();
+	Random shuffleRand;
 
 	public MLLogisitcRegression(String propertyFileName) {
 		super(propertyFileName);
+		shuffleRand = MasterSeed.nextRandom();
+		
+		System.out.println("#####################################################" );
+		System.out.println("#### Leraner: LogReg" );
+		
+		// learning rate
+		this.gamma = 10.0;
+		if ( this.properties.containsKey("gamma") ) {
+			double val = Double.parseDouble(this.properties.getProperty("gamma"));
+			this.gamma = val;
+		} 
+		System.out.println("#### gamma: " + this.gamma );
+		
+		// step size for learning rate
+		this.step = 2000;
+		if ( this.properties.containsKey("step") ) {
+			int val = Integer.parseInt(this.properties.getProperty("step"));
+			this.step = val;			
+		}
+		System.out.println("#### step: " + this.step );
+		
+		// decay of gradient
+		this.delta = 0.0;
+		if ( this.properties.containsKey("delta") ) {
+			double val = Double.parseDouble(this.properties.getProperty("delta"));
+			this.delta = val;
+		} 
+		System.out.println("#### delta: " + this.delta );
+		
+		
+		this.epochs = 30;
+		if ( this.properties.containsKey("epochs") ) {
+			int val = Integer.parseInt(this.properties.getProperty("epochs"));
+			this.epochs = val;			
+		}
+		System.out.println("#### epochs: " + this.epochs );
+		System.out.println("#####################################################" );
+		shuffleRand = MasterSeed.nextRandom();
+
 		System.out.println("#####################################################" );
 		System.out.println("#### Leraner: LogReg" );
 		
@@ -96,6 +136,9 @@ public class MLLogisitcRegression extends AbstractLearner {
 		this.d = data.d;
 
 		System.out.println( "Num. of labels: " + this.m + " Dim: " + this.d );
+		Random allocationRand = MasterSeed.nextRandom();
+		
+		System.out.print( "Allocate the learners..." );
 		
 		System.out.print( "Allocate the learners..." );
 		
@@ -110,9 +153,9 @@ public class MLLogisitcRegression extends AbstractLearner {
 			this.grad[i] = new double[d];
 
 			for (int j = 0; j < d; j++)
-				this.w[i][j] = 2.0 * rand.nextDouble() - 1.0;
+				this.w[i][j] = 2.0 * allocationRand.nextDouble() - 1.0;
 
-			this.bias[i] = 2.0 * rand.nextDouble() - 1.0;
+			this.bias[i] = 2.0 * allocationRand.nextDouble() - 1.0;
 
 //			if ((i % 100) == 0)
 //				System.out.println( "Model: "+ i +" (" + this.m + ")" );
@@ -135,12 +178,13 @@ public class MLLogisitcRegression extends AbstractLearner {
 			System.out.println("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 			
 			// random permutation
-			ArrayList<Integer> indiriectIdx = new ArrayList<Integer>();
+			ArrayList<Integer> indiriectIdx = new ArrayList<Integer>(this.traindata.n);
 			for (int i = 0; i < this.traindata.n; i++) {
 				indiriectIdx.add(new Integer(i));
 			}
 
-			Collections.shuffle(indiriectIdx);
+			Collections.shuffle(indiriectIdx,shuffleRand);
+			
 
 			for (int i = 0; i < traindata.n; i++) {
 				double mult = 1.0 / (Math.ceil(this.T / ((double) this.step)));
@@ -342,7 +386,6 @@ public class MLLogisitcRegression extends AbstractLearner {
 		int[] indices = new int[data.n];
 		for( int i = 0; i < data.n; i++ ) indices[i] = 0;
 		
-		double[] prior = AVTable.getPrior(data);
 		
 		for( int i = 0; i < this.m; i++ ) {
 			//at[i] = (int) Math.round(prior[i] * 1000);
@@ -399,18 +442,17 @@ public class MLLogisitcRegression extends AbstractLearner {
 	}
 	
 	
-	
-	
+	Sigmoid s = new Sigmoid();
 	public double getPosteriors(AVPair[] x, int label) {
 		double posterior = 0.0;
 		for (int i = 0; i < x.length; i++) {
-			posterior += (x[i].value * this.w[label][x[i].index]);
+			posterior += x[i].value * this.w[label][x[i].index];
 		}
 		posterior += this.bias[label];
-		posterior = 1.0 / (1.0 + Math.exp(-posterior));
+		posterior = s.value(posterior);
 		return posterior;
 	}
-
+	
 	@Override
 	public Evaluator test(AVTable data) {
 		// TODO Auto-generated method stub
@@ -437,6 +479,11 @@ public class MLLogisitcRegression extends AbstractLearner {
 			System.out.print( "Feature hashing (dim: " + featureNum + ")...");			
 			data = fh.transformSparse(data);			
 			System.out.println( "Done.");
+		}
+		
+		if (learner.getProperties().containsKey("seed")) {
+			long seed = Long.parseLong(learner.getProperties().getProperty("seed"));
+			MasterSeed.setSeed(seed);
 		}
 		
 		
