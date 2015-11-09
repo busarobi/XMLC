@@ -17,6 +17,7 @@ public class HashFunction {
 	}
 	
 	public int hash(int index) {
+		this.murmur.reset();
 		this.murmur.update(index);
 		if (this.isSign) return (int) (this.murmur.getValue() % 2 * 2 - 1);
 		return (int) (this.murmur.getValue() % this.period);
