@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -495,7 +496,7 @@ public class MLLogisitcRegression extends AbstractLearner {
 			System.out.println( "Loading model (" + fname + ")..." );
 			Path p = Paths.get(fname);
 
-			BufferedReader reader = Files.newBufferedReader(p);
+			BufferedReader reader = Files.newBufferedReader(p, Charset.forName("UTF-8"));
 		    String line = null;
 		    
 		    // read file

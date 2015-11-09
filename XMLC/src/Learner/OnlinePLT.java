@@ -300,7 +300,7 @@ public class OnlinePLT {
 		
 	    NodeComparator nodeComparator = new NodeComparator();
 		
-		PriorityQueue<Node> queue = new PriorityQueue<Node>(nodeComparator);
+		PriorityQueue<Node> queue = new PriorityQueue<Node>(11, nodeComparator);
 		
 		
 		queue.add(new Node(0,1.0));
