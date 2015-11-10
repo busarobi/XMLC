@@ -27,6 +27,14 @@
 		    </goals>
 		  </execution>
 	    </executions>
+	    <configuration>
+	      <archive>
+	        <manifest>
+	          <addClasspath>true</addClasspath>
+	          <mainClass>Learner.MLLogisitcRegression</mainClass>
+	        </manifest>
+	      </archive>
+	    </configuration>
 	  </plugin>
     </plugins>
   </build>
