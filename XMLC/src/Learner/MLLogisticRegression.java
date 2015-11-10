@@ -42,7 +42,8 @@ public class MLLogisticRegression extends AbstractLearner {
 	// uniform sampling of negatives, the number of negatives is r times more as
 	// many as positives
 	protected int r = 1;
-
+	protected boolean geomWeighting = true;
+	
 	protected int T = 1;	
 	protected AVTable traindata = null;
 
@@ -58,75 +59,26 @@ public class MLLogisticRegression extends AbstractLearner {
 		System.out.println("#####################################################" );
 		System.out.println("#### Leraner: LogReg" );
 		
-		// learning rate
-		this.gamma = 10.0;
-		if ( this.properties.containsKey("gamma") ) {
-			double val = Double.parseDouble(this.properties.getProperty("gamma"));
-			this.gamma = val;
-		} 
+		// learning rate		
+		this.gamma = Double.parseDouble(this.properties.getProperty("gamma", "10.0"));
 		System.out.println("#### gamma: " + this.gamma );
 		
 		// step size for learning rate
-		this.step = 2000;
-		if ( this.properties.containsKey("step") ) {
-			int val = Integer.parseInt(this.properties.getProperty("step"));
-			this.step = val;			
-		}
+		this.step = Integer.parseInt(this.properties.getProperty("step", "2000") );
 		System.out.println("#### step: " + this.step );
 		
 		// decay of gradient
-		this.delta = 0.0;
-		if ( this.properties.containsKey("delta") ) {
-			double val = Double.parseDouble(this.properties.getProperty("delta"));
-			this.delta = val;
-		} 
+		this.delta = Double.parseDouble(this.properties.getProperty("delta", "0.0") );
 		System.out.println("#### delta: " + this.delta );
-		
-		
-		this.epochs = 30;
-		if ( this.properties.containsKey("epochs") ) {
-			int val = Integer.parseInt(this.properties.getProperty("epochs"));
-			this.epochs = val;			
+		if (this.delta < Double.MIN_VALUE ){
+			this.geomWeighting = false;
+			System.out.println( "#### No geom. weighting!");
 		}
+		
+		this.epochs = Integer.parseInt(this.properties.getProperty("epochs", "30"));
 		System.out.println("#### epochs: " + this.epochs );
-		System.out.println("#####################################################" );
-		shuffleRand = MasterSeed.nextRandom();
 
-		System.out.println("#####################################################" );
-		System.out.println("#### Leraner: LogReg" );
-		
-		// learning rate
-		this.gamma = 10.0;
-		if ( this.properties.containsKey("gamma") ) {
-			double val = Double.parseDouble(this.properties.getProperty("gamma"));
-			this.gamma = val;
-		} 
-		System.out.println("#### gamma: " + this.gamma );
-		
-		// step size for learning rate
-		this.step = 2000;
-		if ( this.properties.containsKey("step") ) {
-			int val = Integer.parseInt(this.properties.getProperty("step"));
-			this.step = val;			
-		}
-		System.out.println("#### step: " + this.step );
-		
-		// decay of gradient
-		this.delta = 0.0;
-		if ( this.properties.containsKey("delta") ) {
-			double val = Double.parseDouble(this.properties.getProperty("delta"));
-			this.delta = val;
-		} 
-		System.out.println("#### delta: " + this.delta );
-		
-		
-		this.epochs = 30;
-		if ( this.properties.containsKey("epochs") ) {
-			int val = Integer.parseInt(this.properties.getProperty("epochs"));
-			this.epochs = val;			
-		}
-		System.out.println("#### epochs: " + this.epochs );
-		System.out.println("#####################################################" );
+		System.out.println("#####################################################" );		
 	}
 
 	@Override
@@ -140,17 +92,12 @@ public class MLLogisticRegression extends AbstractLearner {
 		
 		System.out.print( "Allocate the learners..." );
 		
-		System.out.print( "Allocate the learners..." );
-		
 		this.w = new double[this.m][];
 		this.bias = new double[this.m];
 
-		this.grad = new double[this.m][];
-		this.gradbias = new double[this.m];
 
 		for (int i = 0; i < this.m; i++) {
 			this.w[i] = new double[d];
-			this.grad[i] = new double[d];
 
 			for (int j = 0; j < d; j++)
 				this.w[i][j] = 2.0 * allocationRand.nextDouble() - 1.0;
@@ -162,6 +109,15 @@ public class MLLogisticRegression extends AbstractLearner {
 
 		}
 
+		if (this.geomWeighting) {
+			this.grad = new double[this.m][];
+			this.gradbias = new double[this.m];
+			
+			for (int i = 0; i < this.m; i++) {				
+				this.grad[i] = new double[d];				
+			}			
+		}
+		
 		this.thresholds = new double[this.m];
 		for (int i = 0; i < this.m; i++) {
 			this.thresholds[i] = 0.2;
@@ -203,25 +159,34 @@ public class MLLogisticRegression extends AbstractLearner {
 					// update the models
 					double inc = (currLabel - posterior);
 
-					int indexx = 0;
-					for (int l = 0; l < this.d; l++) {
-						if ((indexx < traindata.x[currIdx].length) && (traindata.x[currIdx][indexx].index == l)) {
-							this.grad[j][l] = (inc * traindata.x[currIdx][indexx].value) + (this.grad[j][l] * this.delta);
-							indexx++;
-						} else {
-							this.grad[j][l] += (this.grad[j][l] * this.delta);
+					if (this.geomWeighting) 
+					{
+						// in case of geometric weighting all weights need to be updated
+						int indexx = 0;
+						for (int l = 0; l < this.d; l++) {
+							if ((indexx < traindata.x[currIdx].length) && (traindata.x[currIdx][indexx].index == l)) {
+								this.grad[j][l] = (inc * traindata.x[currIdx][indexx].value) + (this.grad[j][l] * this.delta);
+								indexx++;
+							} else {
+								this.grad[j][l] += (this.grad[j][l] * this.delta);
+							}
 						}
+
+						this.gradbias[j] = inc + this.gradbias[j] * this.delta;
+
+						//indexx = 0;
+						for (int l = 0; l < this.d; l++) {
+							this.w[j][l] += (this.gamma * mult * this.grad[j][l]);
+						}
+
+						this.bias[j] += (this.gamma * mult * this.gradbias[j]);
+					} else {
+						// vanilla update of weights
+						for( int l = 0; l < traindata.x[currIdx].length; l++) {
+							this.w[j][traindata.x[currIdx][l].index] += (this.gamma * mult * inc * traindata.x[currIdx][l].value);
+						}
+						this.bias[j] += (this.gamma * mult * inc);
 					}
-
-					this.gradbias[j] = inc + this.gradbias[j] * this.delta;
-
-					//indexx = 0;
-					for (int l = 0; l < this.d; l++) {
-						this.w[j][l] += (this.gamma * mult * this.grad[j][l]);
-					}
-
-					this.bias[j] += (this.gamma * mult * this.gradbias[j]);
-
 				}
 
 				this.T++;
