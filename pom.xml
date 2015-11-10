@@ -31,7 +31,7 @@
 	      <archive>
 	        <manifest>
 	          <addClasspath>true</addClasspath>
-	          <mainClass>Learner.MLLogisitcRegression</mainClass>
+	          <mainClass>Learner.MLLogisticRegression</mainClass>
 	        </manifest>
 	      </archive>
 	    </configuration>

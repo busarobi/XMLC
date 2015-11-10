@@ -27,7 +27,7 @@ import IO.Evaluator;
 import preprocessing.FeatureHasher;
 import util.MasterSeed;
 
-public class MLLogisitcRegression extends AbstractLearner {
+public class MLLogisticRegression extends AbstractLearner {
 	protected int epochs = 20;
 
 	protected double[][] w = null;
@@ -51,7 +51,7 @@ public class MLLogisitcRegression extends AbstractLearner {
 
 	Random shuffleRand;
 
-	public MLLogisitcRegression(String propertyFileName) {
+	public MLLogisticRegression(String propertyFileName) {
 		super(propertyFileName);
 		shuffleRand = MasterSeed.nextRandom();
 		
@@ -463,7 +463,7 @@ public class MLLogisitcRegression extends AbstractLearner {
 		System.out.println("Working Directory = " + System.getProperty("user.dir"));
 
 		// create the classifier and set the configuration
-		MLLogisitcRegression learner = new MLLogisitcRegression(args[0]);
+		MLLogisticRegression learner = new MLLogisticRegression(args[0]);
 
 		// feature hasher
 		FeatureHasher fh = null;
