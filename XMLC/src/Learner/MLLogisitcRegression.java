@@ -52,6 +52,41 @@ public class MLLogisitcRegression extends AbstractLearner {
 
 	public MLLogisitcRegression(String propertyFileName) {
 		super(propertyFileName);
+		System.out.println("#####################################################" );
+		System.out.println("#### Leraner: LogReg" );
+		
+		// learning rate
+		this.gamma = 10.0;
+		if ( this.properties.containsKey("gamma") ) {
+			double val = Double.parseDouble(this.properties.getProperty("gamma"));
+			this.gamma = val;
+		} 
+		System.out.println("#### gamma: " + this.gamma );
+		
+		// step size for learning rate
+		this.step = 2000;
+		if ( this.properties.containsKey("step") ) {
+			int val = Integer.parseInt(this.properties.getProperty("step"));
+			this.step = val;			
+		}
+		System.out.println("#### step: " + this.step );
+		
+		// decay of gradient
+		this.delta = 0.0;
+		if ( this.properties.containsKey("delta") ) {
+			double val = Double.parseDouble(this.properties.getProperty("delta"));
+			this.delta = val;
+		} 
+		System.out.println("#### delta: " + this.delta );
+		
+		
+		this.epochs = 30;
+		if ( this.properties.containsKey("epochs") ) {
+			int val = Integer.parseInt(this.properties.getProperty("epochs"));
+			this.epochs = val;			
+		}
+		System.out.println("#### epochs: " + this.epochs );
+		System.out.println("#####################################################" );
 	}
 
 	@Override
@@ -61,6 +96,8 @@ public class MLLogisitcRegression extends AbstractLearner {
 		this.d = data.d;
 
 		System.out.println( "Num. of labels: " + this.m + " Dim: " + this.d );
+		
+		System.out.print( "Allocate the learners..." );
 		
 		this.w = new double[this.m][];
 		this.bias = new double[this.m];
@@ -77,8 +114,8 @@ public class MLLogisitcRegression extends AbstractLearner {
 
 			this.bias[i] = 2.0 * rand.nextDouble() - 1.0;
 
-			if ((i % 100) == 0)
-				System.out.println( "Model: "+ i +" (" + this.m + ")" );
+//			if ((i % 100) == 0)
+//				System.out.println( "Model: "+ i +" (" + this.m + ")" );
 
 		}
 
@@ -86,23 +123,16 @@ public class MLLogisitcRegression extends AbstractLearner {
 		for (int i = 0; i < this.m; i++) {
 			this.thresholds[i] = 0.2;
 		}
-		
-		// learning rate
-		this.gamma = 10.0;
-		// step size for learning rate
-		this.step = 2000;
-		this.T = 1;
-		// decay of gradient
-		this.delta = 0.0;
-				
-		this.epochs = 30;
+		System.out.println( "Done." );
 	}
 
 	@Override
 	public void train(AVTable data) {
+		this.T = 1;
+		
 		for (int ep = 0; ep < this.epochs; ep++) {
 
-			System.out.println("--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
+			System.out.println("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 			
 			// random permutation
 			ArrayList<Integer> indiriectIdx = new ArrayList<Integer>();
@@ -422,9 +452,6 @@ public class MLLogisitcRegression extends AbstractLearner {
 		} else {
 			learner.loadmodel(inputmodelFile);
 		}
-		
-		
-		
 		
 		
 		// test
