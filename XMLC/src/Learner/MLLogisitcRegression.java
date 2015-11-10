@@ -258,9 +258,9 @@ public class MLLogisitcRegression extends AbstractLearner {
 		//double[] prior = AVTable.getPrior(data);
 		
 		for( int i = 0; i < this.m; i++ ) {
-			TP[i] = 0;
-			P[i] = 0;
-			PredP[i] = 0;
+			TP[i] = 1;
+			P[i] = 10;
+			PredP[i] = 10;
 						
 			this.thresholds[i] = ((double) TP[i]) / ((double) P[i] + PredP[i]);
 		}
@@ -317,8 +317,8 @@ public class MLLogisitcRegression extends AbstractLearner {
 		for( int i = 0; i < this.m; i++ ) {
 			//at[i] = (int) Math.round(prior[i] * 1000);
 			//bt[i] = 1000;
-			at[i] = 0;
-			bt[i] = 0;
+			at[i] = 1;
+			bt[i] = 20;
 			
 			double F00 = (2.0 * at[i]) / ((double) bt[i]);
 			double F01 = (2.0 * at[i]) / ((double) bt[i]+1);
@@ -424,6 +424,9 @@ public class MLLogisitcRegression extends AbstractLearner {
 		}
 		
 		
+		
+		
+		
 		// test
 		DataReader testdatareader = new DataReader(learner.getProperties().getProperty("TestFile"));
 		AVTable testdata = testdatareader.read();		
@@ -431,31 +434,46 @@ public class MLLogisitcRegression extends AbstractLearner {
 			testdata = fh.transformSparse(testdata);			
 		}
 		
-		
+		String validFileName = learner.getProperties().getProperty("ValidFile");
+		AVTable validdata = null;
+		if (validFileName == null ) {
+			validdata = data;
+		} else {
+			DataReader validdatareader = new DataReader(learner.getProperties().getProperty("ValidFile"));
+			validdata = validdatareader.read();
+			if (fh != null ) {
+				validdata = fh.transformSparse(validdata);			
+			}
+			
+		}
 		
 		
 		// evaluate (EUM)
-		 
-		learner.validateThresholdEUM(data);
+		learner.validateThresholdEUM(validdata);
 		Map<String,Double> perf = Evaluator.computePerformanceMetrics(learner, testdata);
-		for ( String perfName : perf.keySet() ) {
-			System.out.println("##### " + perfName + ": "  + perf.get(perfName));
-		}
-        
-		
+        		
 		// evaluate (OFO)
-//		learner.validateThresholdOFO(data);
-//		Map<String,Double> perfOFO = Evaluator.computePerformanceMetrics(learner, testdata);
-//		for ( String perfName : perfOFO.keySet() ) {
-//			System.out.println("##### " + perfName + ": "  + perfOFO.get(perfName));
-//		}
+		learner.validateThresholdOFO(validdata);
+		Map<String,Double> perfOFO = Evaluator.computePerformanceMetrics(learner, testdata);
 
 		// evaluate (EXU)
-//		learner.validateThresholdEXU(data);
-//		Map<String,Double> perfEXU = Evaluator.computePerformanceMetrics(learner, testdata);
-//		for ( String perfName : perfEXU.keySet() ) {
-//			System.out.println("##### " + perfName + ": "  + perfEXU.get(perfName));
-//		}
+		learner.validateThresholdEXU(validdata);
+		Map<String,Double> perfEXU = Evaluator.computePerformanceMetrics(learner, testdata);
+
+
+		for ( String perfName : perf.keySet() ) {
+			System.out.println("##### EUM" + perfName + ": "  + perf.get(perfName));
+		}
+		
+		
+		for ( String perfName : perfOFO.keySet() ) {
+			System.out.println("##### OFO" + perfName + ": "  + perfOFO.get(perfName));
+		}
+
+		
+		for ( String perfName : perfEXU.keySet() ) {
+			System.out.println("##### EXU " + perfName + ": "  + perfEXU.get(perfName));
+		}
 		
 		
 	}
