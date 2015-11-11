@@ -9,6 +9,7 @@ import java.util.Properties;
 import Data.AVPair;
 import Data.AVTable;
 import IO.Evaluator;
+import threshold.ThresholdTuning;
 
 
 public abstract class AbstractLearner {
@@ -21,7 +22,7 @@ public abstract class AbstractLearner {
 	// abstract functions
 	public abstract void allocateClassifiers( AVTable data );
 	public abstract void train( AVTable data );
-	public abstract Evaluator test( AVTable data );
+	//public abstract Evaluator test( AVTable data );
 	public abstract double getPosteriors(AVPair[] x, int label);
 	
 	public abstract void savemodel(String fname );
@@ -32,6 +33,11 @@ public abstract class AbstractLearner {
 			return 1;
 		else return 0;
 	}
+
+	public void tuneThreshold( ThresholdTuning t, AVTable data ){
+		this.thresholds = t.validate(data, this);
+	}
+	
 	
 	public AbstractLearner( String propertyFile ){
 		this.readProperty( propertyFile );

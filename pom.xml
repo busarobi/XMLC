@@ -33,7 +33,7 @@
           </descriptorRefs>	    
 	      <archive>
 	        <manifest>
-	          <mainClass>Learner.MLLogisticRegression</mainClass>
+	          <mainClass>Learner.MLLogisticRegressionNSampling</mainClass>
 	        </manifest>
 	      </archive>
 	    </configuration>

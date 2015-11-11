@@ -25,6 +25,10 @@ import Data.ComparablePair;
 import IO.DataReader;
 import IO.Evaluator;
 import preprocessing.FeatureHasher;
+import threshold.TTEum;
+import threshold.TTExu;
+import threshold.TTOfo;
+import threshold.ThresholdTuning;
 import util.MasterSeed;
 
 public class MLLogisticRegression extends AbstractLearner {
@@ -38,10 +42,8 @@ public class MLLogisticRegression extends AbstractLearner {
 	protected double gamma = 0; // learning rate
 	protected int step = 0;
 	protected double delta = 0;
-    protected int OFOepochs = 1;
-	// uniform sampling of negatives, the number of negatives is r times more as
-	// many as positives
-	protected int r = 1;
+    //protected int OFOepochs = 1;
+	
 	protected boolean geomWeighting = true;
 	
 	protected int T = 1;	
@@ -125,6 +127,39 @@ public class MLLogisticRegression extends AbstractLearner {
 		System.out.println( "Done." );
 	}
 
+	protected void updatedPosteriors( int currIdx, int j, double mult, double inc ) {
+		if (this.geomWeighting) 
+		{
+			// in case of geometric weighting all weights need to be updated
+			int indexx = 0;
+			for (int l = 0; l < this.d; l++) {
+				if ((indexx < traindata.x[currIdx].length) && (traindata.x[currIdx][indexx].index == l)) {
+					this.grad[j][l] = (inc * traindata.x[currIdx][indexx].value) + (this.grad[j][l] * this.delta);
+					indexx++;
+				} else {
+					this.grad[j][l] += (this.grad[j][l] * this.delta);
+				}
+			}
+
+			this.gradbias[j] = inc + this.gradbias[j] * this.delta;
+
+			//indexx = 0;
+			for (int l = 0; l < this.d; l++) {
+				this.w[j][l] += (this.gamma * mult * this.grad[j][l]);
+			}
+
+			this.bias[j] += (this.gamma * mult * this.gradbias[j]);
+		} else {
+			// vanilla update of weights
+			for( int l = 0; l < traindata.x[currIdx].length; l++) {
+				this.w[j][traindata.x[currIdx][l].index] += (this.gamma * mult * inc * traindata.x[currIdx][l].value);
+			}
+			this.bias[j] += (this.gamma * mult * inc);
+		}
+		
+	}
+	
+	
 	@Override
 	public void train(AVTable data) {
 		this.T = 1;
@@ -158,35 +193,9 @@ public class MLLogisticRegression extends AbstractLearner {
 
 					// update the models
 					double inc = (currLabel - posterior);
-
-					if (this.geomWeighting) 
-					{
-						// in case of geometric weighting all weights need to be updated
-						int indexx = 0;
-						for (int l = 0; l < this.d; l++) {
-							if ((indexx < traindata.x[currIdx].length) && (traindata.x[currIdx][indexx].index == l)) {
-								this.grad[j][l] = (inc * traindata.x[currIdx][indexx].value) + (this.grad[j][l] * this.delta);
-								indexx++;
-							} else {
-								this.grad[j][l] += (this.grad[j][l] * this.delta);
-							}
-						}
-
-						this.gradbias[j] = inc + this.gradbias[j] * this.delta;
-
-						//indexx = 0;
-						for (int l = 0; l < this.d; l++) {
-							this.w[j][l] += (this.gamma * mult * this.grad[j][l]);
-						}
-
-						this.bias[j] += (this.gamma * mult * this.gradbias[j]);
-					} else {
-						// vanilla update of weights
-						for( int l = 0; l < traindata.x[currIdx].length; l++) {
-							this.w[j][traindata.x[currIdx][l].index] += (this.gamma * mult * inc * traindata.x[currIdx][l].value);
-						}
-						this.bias[j] += (this.gamma * mult * inc);
-					}
+					
+					updatedPosteriors( currIdx, j, mult, inc );
+					
 				}
 
 				this.T++;
@@ -206,205 +215,12 @@ public class MLLogisticRegression extends AbstractLearner {
 			
 			
 			//save model !!!!!!!!!!!!!!!!!!!!!!!
-			String modelFile = this.getProperties().getProperty("ModelFile");
-			this.savemodel(modelFile);
+			//String modelFile = this.getProperties().getProperty("ModelFile");
+			//this.savemodel(modelFile);
 		}
 
 	}
 
-	
-	public void validateThresholdEUM( AVTable data ) {
-		
-		double avgFmeasure = 0.0;
-		// for labels
-		int[] indices = new int[data.n];
-		for( int i = 0; i < data.n; i++ ) indices[i] = 0;
-		
-		for( int i = 0; i < this.m; i++ ) {
-			ArrayList<ComparablePair> posteriors = new ArrayList<>();
-			int[] labels = new int[data.n];
-			
-			for( int j = 0; j < data.n; j++ ) {
-				double post = this.getPosteriors(data.x[j], i);
-				//System.out.println ( post );
-				ComparablePair entry = new ComparablePair( post, j);
-				posteriors.add(entry);
-			}
-			
-			Collections.sort(posteriors);
-			
-			// assume that the labels are ordered
-			int numOfPositives = 0;
-			for( int j = 0; j < data.n; j++ ) {
-				if ( (indices[j] < data.y[j].length) &&  (data.y[j][indices[j]] == i) ){ 
-					labels[j] = 1;
-				    numOfPositives++;
-				    indices[j]++;
-				} else {
-					labels[j] = 0;
-//					if ((indices[j] < data.y[j].length) && (data.y[j][indices[j]] < j ) ) 
-//						indices[j]++;
-				}
-			}
-
-			// tune the threshold			
-			// every instance is predicted as positive first with a threshold = 0.0
-			int tp = numOfPositives;
-			int predictedPositives = data.n;
-			double Fmeasure = ((double) tp) / ((double) ( numOfPositives + predictedPositives )); 
-			double maxthreshold = 0.0;
-			double maxFmeasure = Fmeasure;
-
-			
-			for( int j = 0; j < data.n; j++ ) {				
-				int ind = posteriors.get(j).getValue();
-				if ( labels[ind] == 1 ){
-					tp--;
-				}
-				predictedPositives--;
-				
-				Fmeasure = ((double) tp) / ((double) ( numOfPositives + predictedPositives ));
-				
-				if (maxFmeasure < Fmeasure ) {
-					maxFmeasure = Fmeasure;
-					maxthreshold = posteriors.get(j).getKey();
-				}
-			}			
-			
-			System.out.println( "Class: " + i +" (" + numOfPositives + ")\t" 
-			                         +" F: " + String.format("%.4f", maxFmeasure ) 
-			                         + " Th: " + String.format("%.4f", maxthreshold) );
-			
-			this.thresholds[i] = maxthreshold;
-			avgFmeasure += maxFmeasure;
-			
-		}
-		
-		System.out.printf( "Validated macro F-measure: %.5f\n", (avgFmeasure / (double) this.m) ) ;
-		
-	}
-	
-
-	
-	public void validateThresholdOFO( AVTable data ) {		
-		int[] TP = new int[this.m];
-		int[] P = new int[this.m];
-		int[] PredP = new int[this.m];
-		
-		int[] indices = new int[data.n];
-		for( int i = 0; i < data.n; i++ ) indices[i] = 0;
-		
-		//double[] prior = AVTable.getPrior(data);
-		
-		for( int i = 0; i < this.m; i++ ) {
-			TP[i] = 1;
-			P[i] = 10;
-			PredP[i] = 10;
-						
-			this.thresholds[i] = ((double) TP[i]) / ((double) P[i] + PredP[i]);
-		}
-		
-		for( int e = 0; e < this.OFOepochs; e++ ) { 
-			for (int i = 0; i < this.m; i++) {
-
-				// assume that the labels are ordered
-				int currentLabel = 0;
-				for (int j = 0; j < data.n; j++) {
-					if ((indices[j] < data.y[j].length) && (data.y[j][indices[j]] == i)) {
-						currentLabel = 1;
-						indices[j]++;
-					} else {
-						currentLabel = 0;
-					}
-
-					double post = this.getPosteriors(data.x[j], i);
-					if (post > this.thresholds[i]) {
-						PredP[i]++;
-						if (currentLabel == 1)
-							TP[i]++;
-					}
-					if (currentLabel == 1)
-						P[i]++;
-
-					this.thresholds[i] = ((double) TP[i]) / ((double) P[i] + PredP[i]);
-				}
-												
-			}
-
-		}
-		
-		for( int i=0; i < this.m; i++ )
-			System.out.println( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
-		
-	}
-	
-	
-	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	// Old OFO
-	////////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	
-	public void validateThresholdEXU( AVTable data ) {		
-		int[] at = new int[this.m];
-		int[] bt = new int[this.m];
-		
-		int[] indices = new int[data.n];
-		for( int i = 0; i < data.n; i++ ) indices[i] = 0;
-		
-		
-		for( int i = 0; i < this.m; i++ ) {
-			//at[i] = (int) Math.round(prior[i] * 1000);
-			//bt[i] = 1000;
-			at[i] = 1;
-			bt[i] = 20;
-			
-			double F00 = (2.0 * at[i]) / ((double) bt[i]);
-			double F01 = (2.0 * at[i]) / ((double) bt[i]+1);
-			double F11 = (2.0 * (at[i]+1)) / ((double) bt[i]+2);
-			
-			
-			this.thresholds[i] = (F01 - F00) / (2*F01 - F00 - F11 );
-		}
-		
-		for( int e = 0; e < this.OFOepochs; e++ ) { 
-			for (int i = 0; i < this.m; i++) {
-
-				// assume that the labels are ordered
-				int currentLabel = 0;
-				for (int j = 0; j < data.n; j++) {
-					if ((indices[j] < data.y[j].length) && (data.y[j][indices[j]] == i)) {
-						currentLabel = 1;
-						indices[j]++;
-					} else {
-						currentLabel = 0;
-					}
-
-					double post = this.getPosteriors(data.x[j], i);
-					if (post > this.thresholds[i]) {
-						bt[i]++;
-						if (currentLabel == 1)
-							at[i]++;
-					}
-					if (currentLabel == 1)
-						bt[i]++;
-
-					double F00 = (2.0 * at[i]) / ((double) bt[i]);
-					double F01 = (2.0 * at[i]) / ((double) bt[i]+1);
-					double F11 = (2.0 * (at[i]+1)) / ((double) bt[i]+2);
-					
-					
-					this.thresholds[i] = (F01 - F00) / (2*F01 - F00 - F11 );
-					//this.thresholds[i] = ((prior[i] * (F01 - F00)) + F00) / ((prior[i] * (2*F01 - F11 ) ) + F00 + F01 );
-				}
-												
-			}
-
-		}
-		
-		for( int i=0; i < this.m; i++ )
-			System.out.println( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
-		
-	}
 	
 	
 	Sigmoid s = new Sigmoid();
@@ -418,12 +234,13 @@ public class MLLogisticRegression extends AbstractLearner {
 		return posterior;
 	}
 	
-	@Override
-	public Evaluator test(AVTable data) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+//	@Override
+//	public Evaluator test(AVTable data) {
+//		// TODO Auto-generated method stub
+//		return null;
+//	}
+	
+	
 	public static void main(String[] args) throws Exception {
 		System.out.println("Working Directory = " + System.getProperty("user.dir"));
 
@@ -488,15 +305,18 @@ public class MLLogisticRegression extends AbstractLearner {
 		
 		
 		// evaluate (EUM)
-		learner.validateThresholdEUM(validdata);
+		ThresholdTuning th = new TTEum( learner.m );
+		learner.tuneThreshold(th, validdata);
 		Map<String,Double> perf = Evaluator.computePerformanceMetrics(learner, testdata);
         		
 		// evaluate (OFO)
-		learner.validateThresholdOFO(validdata);
+		th = new TTOfo( learner.m );
+		learner.tuneThreshold(th, validdata);
 		Map<String,Double> perfOFO = Evaluator.computePerformanceMetrics(learner, testdata);
 
 		// evaluate (EXU)
-		learner.validateThresholdEXU(validdata);
+		th = new TTExu( learner.m );
+		learner.tuneThreshold(th, validdata);
 		Map<String,Double> perfEXU = Evaluator.computePerformanceMetrics(learner, testdata);
 
 
