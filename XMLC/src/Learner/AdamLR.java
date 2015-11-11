@@ -2,7 +2,7 @@ package Learner;
 
 import Data.AVTable;
 
-public class AdamLR extends MLLogisitcRegression {
+public class AdamLR extends MLLogisticRegression {
 
 	protected double beta1;
 	protected double beta2;
