@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Random;
 
+import Data.AVPair;
 import Data.AVTable;
 import IO.DataReader;
 import IO.Evaluator;
@@ -27,6 +28,13 @@ public class MLLogisticRegressionNSampling extends MLLogisticRegression {
 	protected int negativeSamplingMode = 0;
 	protected double negativeSamplingParameter = 1.0;
 	
+	protected int[][] labelDistribution = null;
+	protected int[][] truelabelDistribution = null;
+
+	protected double[] P = null;
+	protected double[] Pprime = null;
+	
+	
 	public MLLogisticRegressionNSampling(String propertyFileName) {
 		super(propertyFileName);
 		System.out.println("#####################################################" );
@@ -45,6 +53,26 @@ public class MLLogisticRegressionNSampling extends MLLogisticRegression {
 		
 	}
 	
+	public void allocateClassifiers(AVTable data) {
+		super.allocateClassifiers(data);
+		
+		this.labelDistribution = new int[this.m][];
+		this.truelabelDistribution = new int[this.m][];
+		
+		for( int i = 0; i < this.m; i++){
+			this.labelDistribution[i] = new int[2];
+			this.truelabelDistribution[i] = new int[2];
+		}
+		
+		this.P = new double[this.m];
+		this.Pprime = new double[this.m];
+		
+		for( int i = 0; i < this.m; i++){
+			this.P[i] = 1.0;
+			this.Pprime[i] = 1.0;
+		}
+		
+	}
 
 	public void train( AVTable data ){
 		this.T = 1;
@@ -76,9 +104,11 @@ public class MLLogisticRegressionNSampling extends MLLogisticRegression {
 					indicesToUpdate.add(traindata.y[currIdx][j]);
 					indicesToUpdateLabel.add(1.0);
 					
-					//labelDistribution[traindata.y[currIdx][j]]++;
+					this.truelabelDistribution[traindata.y[currIdx][j]][0]++;
+					this.labelDistribution[traindata.y[currIdx][j]][0]++;
 				}
-
+				
+				//double upweight = 1.0;
 				// select negatives to update
 				if (this.negativeSamplingMode == 0) {
 
@@ -87,11 +117,13 @@ public class MLLogisticRegressionNSampling extends MLLogisticRegression {
 					int indexy = 0;
 					int numOfNegatives = traindata.m - traindata.y[currIdx].length;
 					int numToSelect = (int) Math.ceil(this.negativeSamplingParameter * traindata.y[currIdx].length);
+					 
 					
 					if (numToSelect>numOfNegatives) {
 						numToSelect = numOfNegatives;
 					}
 					
+					//upweight = ((double)numToSelect/(double)numOfNegatives);
 					
 					for (int j = 0; j < traindata.m; ++j) {
 						// skip the positives
@@ -108,22 +140,30 @@ public class MLLogisticRegressionNSampling extends MLLogisticRegression {
 							--numToSelect;
 							
 							indicesToUpdate.add(j);
-							indicesToUpdateLabel.add(0.0);								
+							indicesToUpdateLabel.add(0.0);
+														
+							this.labelDistribution[j][1]++;
 						}
+						this.truelabelDistribution[j][1]++;
 					}
 
 				}
 
 				// update weights
+				
 				for (int j = 0; j < indicesToUpdate.size(); j++) {
 					int currLabelPos = indicesToUpdate.get(j);
 					double currLabel = indicesToUpdateLabel.get(j);
 
 					double posterior = getPosteriors(traindata.x[currIdx],
 							currLabelPos);
-				
+									
 					double inc = (currLabel - posterior);
 					updatedPosteriors( currIdx, currLabelPos, mult, inc );
+//					if (currLabel>0.0)
+//						updatedPosteriors( currIdx, currLabelPos, mult, inc );
+//					else
+//						updatedPosteriors( currIdx, currLabelPos, upweight * mult, inc );
 				}
 				
 				this.T++;
@@ -141,15 +181,35 @@ public class MLLogisticRegressionNSampling extends MLLogisticRegression {
 
 			System.out.println("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 			
-			
+			for( int i = 0; i < this.m; i++ ){
+				this.P[i] = ((double)this.truelabelDistribution[i][0])/(((double)this.truelabelDistribution[i][0]+this.truelabelDistribution[i][1]));
+				this.Pprime[i] = ((double)this.labelDistribution[i][0])/(((double)this.labelDistribution[i][0]+this.labelDistribution[i][1]));
+			}
+				
 			//save model !!!!!!!!!!!!!!!!!!!!!!!
 			//String modelFile = this.getProperties().getProperty("ModelFile");
 			//this.savemodel(modelFile);
+			
+//			double sum = 0.0;
+//			for( int i = 0; i < this.m; i++ )
+//				this.labelDistribution[i] = 1 - (this.labelDistribution[i] / ((double) (this.T-1)));						
+//			for( int i = 0; i < this.m; i++ )
+//				sum += this.labelDistribution[i];
+//			for( int i = 0; i < this.m; i++ )
+//				this.labelDistribution[i] /= sum;
+//			this.truelabelDistribution = AVTable.getPrior( data );
 		}
 
 	}
 	
 
+	public double getPosteriors(AVPair[] x, int label) {
+		double post = super.getPosteriors(x, label);
+		if (this.truelabelDistribution!=null)
+			post = post * ( this.Pprime[label] / this.P[label] );
+		return post;
+	}
+	
 	public static void main(String[] args) throws Exception {
 		System.out.println("Working Directory = " + System.getProperty("user.dir"));
 
