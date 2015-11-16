@@ -1,49 +1,45 @@
 package preprocessing;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import Data.AVPair;
 import Data.AVTable;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import util.HashFunction;
 
 public class FeatureHasher {
-	
+
 
 	private HashFunction hash;
 	private HashFunction sign;
 	private HashFunction[] taskhash;
+	private HashFunction[] tasksign;
 	private boolean isMultiTask = false;
 	private int nFeatures;
-	private boolean withSharedTask;
+	private int nTasks;
 
 	public FeatureHasher(int seed, int nFeatures) {
 		this.nFeatures = nFeatures;
 		this.hash = new HashFunction(seed, nFeatures);
 		this.sign = new HashFunction(seed + 1);
 	}
-	
-	public FeatureHasher(int seed, int nFeatures, int nTasks,
-			             boolean sharedTask) {
+
+	public FeatureHasher(int seed, int nFeatures, int nTasks) {
 		this(seed, nFeatures);
 		this.isMultiTask = true;
-		this.withSharedTask = sharedTask;
+		this.nTasks = nTasks;
 		this.taskhash = new HashFunction[nTasks];
+		this.tasksign = new HashFunction[nTasks];
 		for (int i = 0; i < nTasks; i++) {
-			this.taskhash[i] = new HashFunction(seed + i + 2, nFeatures); 
+			this.taskhash[i] = new HashFunction(seed + i, nFeatures);
+			this.tasksign[i] = new HashFunction(seed + nTasks + i);
 		}
 	}
-	
-	public double[] transformRow(AVPair[] row) {
-		int nPairs = row.length;
-		double[] result = new double[nPairs];
-		//TODO
-		return result;
-	}
-	
+
 	public AVPair[] transformRowSparse(AVPair[] row) throws IllegalStateException {
-		if (this.isMultiTask)
-			throw new IllegalStateException("In the multitask setting this a task index is necessary.");
+		if (this.isMultiTask) {
+			throw new IllegalArgumentException("In the multitask setting a task id is necessary.");
+		}
 		HashMap<Integer, Double> sums = new HashMap<Integer, Double>(this.nFeatures);
 		for (AVPair pair : row) {
 			int hi = this.hash.hash(pair.index);
@@ -60,38 +56,33 @@ public class FeatureHasher {
 		}
 		return result;
 	}
-	
+
+	private AVPair[] convertHashMap(HashMap<Integer, Double> hm) {
+		ArrayList<AVPair> result = new ArrayList<AVPair>(hm.size());
+		for (Integer key : hm.keySet()) {
+			if (Math.abs(hm.get(key)) > 1e-10) {
+				AVPair pair = new AVPair();
+				pair.index = key;
+				pair.value = hm.get(key);
+				result.add(pair);
+			}
+		}
+		return result.toArray(new AVPair[result.size()]);
+	}
+
 	public AVPair[] transformRowSparse(AVPair[] row, int taskid) {
-		if (true)
-			throw new NotImplementedException();
-		if (!this.isMultiTask)
-			return transformRowSparse(row);
-		//TODO:
+		if (!this.isMultiTask) {
+			throw new IllegalArgumentException("The task id is only used in multi-task feature hashing");
+		}
 		HashMap<Integer, Double> sums = new HashMap<Integer, Double>(this.nFeatures);
 		for (AVPair pair : row) {
-			int hi = this.hash.hash(pair.index);
+			int hi = this.taskhash[taskid].hash(pair.index);
 			double val = sums.containsKey(hi) ? sums.get(hi) : 0.0;
-			sums.put(hi, val + pair.value * this.sign.hash(pair.index));
+			sums.put(hi, val + pair.value * this.tasksign[taskid].hash(pair.index));
 		}
-		AVPair[] result = new AVPair[sums.size()];
-		int i = 0;
-		for (Integer key : sums.keySet()) {
-			result[i] = new AVPair();
-			result[i].index = key;
-			result[i].value = sums.get(key);
-			i++;
-		}
-		return result;
+		return this.convertHashMap(sums);
 	}
-	
-	public double[][] transform(AVTable data) {
-		double[][] result = new double[data.n][data.d];
-		for (int i = 0; i < data.n; i++) {
-			result[i] = this.transformRow(data.x[i]);
-		}
-		return result;
-	}
-	
+
 	public AVTable transformSparse(AVTable data) {
 		AVTable result = new AVTable();
 		result.n = data.n;
@@ -99,9 +90,23 @@ public class FeatureHasher {
 		result.d = this.nFeatures;
 		result.y = data.y;
 		result.x = new AVPair[result.n][];
-		for (int i = 0; i < result.n; i++) {
-			result.x[i] = this.transformRowSparse(data.x[i]);
-		}		
+		if (this.isMultiTask) {
+			for (int row = 0; row < result.n; row++) {
+				HashMap<Integer, Double> sums = new HashMap<Integer, Double>(this.nFeatures);
+				for (int t = 0; t < this.nTasks; t++) {
+					for (AVPair pair : data.x[row]) {
+						int hi = this.taskhash[t].hash(pair.index);
+						double val = sums.containsKey(hi) ? sums.get(hi) : 0.0;
+						sums.put(hi, val + pair.value * this.tasksign[t].hash(pair.index));
+					}
+				}
+				result.x[row] = convertHashMap(sums);
+			}
+		} else {
+			for (int i = 0; i < result.n; i++) {
+				result.x[i] = this.transformRowSparse(data.x[i]);
+			}
+		}
 		return result;
 	}
 
@@ -114,6 +119,46 @@ public class FeatureHasher {
 		AVPair[] result = fh.transformRowSparse(test);
 		for (AVPair p : result) {
 			System.out.println("Index: " + p.index + " Value: " + p.value);
+		}
+		System.out.println();
+
+		test = new AVPair[3];
+		test[0] = new AVPair();
+		test[0].index = 0;
+		test[0].value = 0.1;
+		test[1] = new AVPair();
+		test[1].index = 1;
+		test[1].value = 0.3;
+		test[2] = new AVPair();
+		test[2].index = 2;
+		test[2].value = 0.5;
+		int nTasks = 3;
+		fh = new FeatureHasher(0, 4, nTasks);
+		result = fh.transformRowSparse(test, 1);
+		for (int i = 0; i < nTasks; i++) {
+			System.out.println("Task #" + i + ":");
+			result = fh.transformRowSparse(test, i);
+			for (AVPair p : result) {
+				System.out.println("Index: " + p.index + " Value: " + p.value);
+			}
+		}
+		System.out.println();
+
+		fh = new FeatureHasher(1, 2, 2);
+		AVTable input = new AVTable();
+		input.d = 3;
+		input.n = 2;
+		input.m = 2;
+		input.y = new int[][] { { 0, 1 }, { 1, 0 } };
+		input.x = new AVPair[][] {
+			{ new AVPair(0, 0.1), new AVPair(2, -0.3) },
+			{ new AVPair(1, 0.2), new AVPair(2, 0.05) }
+		};
+		AVTable cv_table = fh.transformSparse(input);
+		for (int i = 0; i < cv_table.n; i++) {
+			for (int j = 0; j < cv_table.x[i].length; j++) {
+				System.out.println("Index: " + cv_table.x[i][j].index + " Value: " + cv_table.x[i][j].value);
+			}
 		}
 	}
 
