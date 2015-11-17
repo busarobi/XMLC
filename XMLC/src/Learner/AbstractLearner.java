@@ -39,8 +39,8 @@ public abstract class AbstractLearner {
 	}
 	
 	
-	public AbstractLearner( String propertyFile ){
-		this.readProperty( propertyFile );
+	public AbstractLearner( Properties properties ){
+		this.properties = properties;
 	}
 	
 	
@@ -58,25 +58,7 @@ public abstract class AbstractLearner {
 	}
 	
 	
-	
-	public void readProperty(String fname) {
-		System.out.print("Reading property file...");
-		properties = new Properties();
-		try {
-			FileInputStream in = new FileInputStream(fname);
-			properties.load(in);
-			in.close();
-		} catch (FileNotFoundException e) {
-			System.err.println(e.getMessage());
-			System.exit(-1);
-		} catch (IOException e) {
-			System.err.println(e.getMessage());
-			System.exit(-1);
-		}
-		System.out.println("Done.");
-
-	}
-	
+		
 	public Properties getProperties() {
 		return properties;
 	}

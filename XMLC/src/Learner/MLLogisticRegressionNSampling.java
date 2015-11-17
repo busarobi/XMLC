@@ -5,18 +5,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Map;
+import java.util.Properties;
 import java.util.Random;
 
 import Data.AVPair;
 import Data.AVTable;
-import IO.DataReader;
-import IO.Evaluator;
-import preprocessing.FeatureHasher;
-import threshold.TTEum;
-import threshold.TTExu;
-import threshold.TTOfo;
-import threshold.ThresholdTuning;
 import util.MasterSeed;
 
 public class MLLogisticRegressionNSampling extends MLLogisticRegression {
@@ -35,8 +28,8 @@ public class MLLogisticRegressionNSampling extends MLLogisticRegression {
 	protected double[] Pprime = null;
 	
 	
-	public MLLogisticRegressionNSampling(String propertyFileName) {
-		super(propertyFileName);
+	public MLLogisticRegressionNSampling(Properties properties) {
+		super(properties);
 		System.out.println("#####################################################" );
 		System.out.println("#### Leraner: LogReg with Negative Sampling" );
 
@@ -210,99 +203,5 @@ public class MLLogisticRegressionNSampling extends MLLogisticRegression {
 		return post;
 	}
 	
-	public static void main(String[] args) throws Exception {
-		System.out.println("Working Directory = " + System.getProperty("user.dir"));
-
-		// create the classifier and set the configuration
-		MLLogisticRegressionNSampling learner = new MLLogisticRegressionNSampling(args[0]);
-
-		// feature hasher
-		FeatureHasher fh = null;
-		
-		// reading train data
-		DataReader datareader = new DataReader(learner.getProperties().getProperty("TrainFile"));
-		AVTable data = datareader.read();		
-
-		if (learner.getProperties().containsKey("FeatureHashing")) {
-			int featureNum = Integer.parseInt(learner.getProperties().getProperty("FeatureHashing"));
-			fh = new FeatureHasher(0, featureNum);
-			
-			System.out.print( "Feature hashing (dim: " + featureNum + ")...");			
-			data = fh.transformSparse(data);			
-			System.out.println( "Done.");
-		}
-		
-		if (learner.getProperties().containsKey("seed")) {
-			long seed = Long.parseLong(learner.getProperties().getProperty("seed"));
-			MasterSeed.setSeed(seed);
-		}
-		
-		
-		
-		// train
-		String inputmodelFile = learner.getProperties().getProperty("InputModelFile");
-		if (inputmodelFile == null ) {
-			learner.allocateClassifiers(data);
-			learner.train(data);
-
-			String modelFile = learner.getProperties().getProperty("ModelFile");
-			learner.savemodel(modelFile);
-		} else {
-			learner.loadmodel(inputmodelFile);
-		}
-		
-		
-		// test
-		DataReader testdatareader = new DataReader(learner.getProperties().getProperty("TestFile"));
-		AVTable testdata = testdatareader.read();		
-		if (fh != null ) {
-			testdata = fh.transformSparse(testdata);			
-		}
-		
-		String validFileName = learner.getProperties().getProperty("ValidFile");
-		AVTable validdata = null;
-		if (validFileName == null ) {
-			validdata = data;
-		} else {
-			DataReader validdatareader = new DataReader(learner.getProperties().getProperty("ValidFile"));
-			validdata = validdatareader.read();
-			if (fh != null ) {
-				validdata = fh.transformSparse(validdata);			
-			}
-			
-		}
-		
-		
-		// evaluate (EUM)
-		ThresholdTuning th = new TTEum( learner.m );
-		learner.tuneThreshold(th, validdata);
-		Map<String,Double> perf = Evaluator.computePerformanceMetrics(learner, testdata);
-        		
-		// evaluate (OFO)
-		th = new TTOfo( learner.m );
-		learner.tuneThreshold(th, validdata);
-		Map<String,Double> perfOFO = Evaluator.computePerformanceMetrics(learner, testdata);
-
-		// evaluate (EXU)
-		th = new TTExu( learner.m );
-		learner.tuneThreshold(th, validdata);
-		Map<String,Double> perfEXU = Evaluator.computePerformanceMetrics(learner, testdata);
-
-
-		for ( String perfName : perf.keySet() ) {
-			System.out.println("##### EUM" + perfName + ": "  + perf.get(perfName));
-		}
-		
-		
-		for ( String perfName : perfOFO.keySet() ) {
-			System.out.println("##### OFO" + perfName + ": "  + perfOFO.get(perfName));
-		}
-
-		
-		for ( String perfName : perfEXU.keySet() ) {
-			System.out.println("##### EXU " + perfName + ": "  + perfEXU.get(perfName));
-		}
-
-	}
 
 }
