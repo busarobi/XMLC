@@ -44,7 +44,7 @@ public abstract class AbstractLearner {
 	}
 	
 	
-	// naive implemntation checking all labels
+	// naive implementation checking all labels
 	public HashSet<Integer> getPositiveLabels(AVPair[] x) {
 		HashSet<Integer> positiveLabels = new HashSet<Integer>();
 		

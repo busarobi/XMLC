@@ -345,7 +345,7 @@ public class MLLogisticRegression extends AbstractLearner {
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
 			          new FileOutputStream(fname)));
 			    
-			for(int i = 0; i< this.m; i++ ){
+			for(int i = 0; i< this.w.length; i++ ){
 				writer.write( ""+ this.bias[i] );
 				for(int j = 0; j< this.d; j++ ){
 					writer.write( " "+ this.w[i][j] );
@@ -354,7 +354,7 @@ public class MLLogisticRegression extends AbstractLearner {
 			}
 			
 			writer.write( ""+ this.thresholds[0] );
-			for(int i = 1; i< this.m; i++ ){
+			for(int i = 1; i< this.thresholds.length; i++ ){
 				writer.write( " "+ this.thresholds[i] );
 			}
 			writer.write( "\n" );
