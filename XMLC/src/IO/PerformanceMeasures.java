@@ -3,8 +3,6 @@ package IO;
 import java.util.HashSet;
 
 import Data.AVTable;
-import Learner.SGDMLC;
-import jsat.classifiers.BaseUpdateableClassifier;
 
 public class PerformanceMeasures {
 	

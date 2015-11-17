@@ -1,7 +1,7 @@
 package IO;
 
 import Data.AVTable;
-import Learner.SGDMLC;
+
 
 public class Result {
 	protected double[][] posteriors = null;
