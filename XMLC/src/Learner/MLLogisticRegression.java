@@ -150,28 +150,29 @@ public class MLLogisticRegression extends AbstractLearner {
 		}
 		
 	}
-	
+
+	protected ArrayList<Integer> shuffleIndex() {
+		ArrayList<Integer> indirectIdx = new ArrayList<Integer>(this.traindata.n);
+		for (int i = 0; i < this.traindata.n; i++) {
+			indirectIdx.add(new Integer(i));
+		}
+		Collections.shuffle(indirectIdx, shuffleRand);
+		return indirectIdx;
+	}
 	
 	@Override
 	public void train(AVTable data) {
 		this.T = 1;
-		
+
 		for (int ep = 0; ep < this.epochs; ep++) {
 
 			System.out.println("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
-			
-			// random permutation
-			ArrayList<Integer> indiriectIdx = new ArrayList<Integer>(this.traindata.n);
-			for (int i = 0; i < this.traindata.n; i++) {
-				indiriectIdx.add(new Integer(i));
-			}
 
-			Collections.shuffle(indiriectIdx,shuffleRand);
-			
+			ArrayList<Integer> indirectIdx = this.shuffleIndex();
 
 			for (int i = 0; i < traindata.n; i++) {
 				double mult = 1.0 / (Math.ceil(this.T / ((double) this.step)));
-				int currIdx = indiriectIdx.get(i);
+				int currIdx = indirectIdx.get(i);
 
 				int indexy = 0;
 				for (int j = 0; j < traindata.m; j++) {
