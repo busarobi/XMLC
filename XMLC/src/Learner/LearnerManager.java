@@ -97,8 +97,10 @@ public class LearnerManager {
 			learner.allocateClassifiers(data);
 			learner.train(data);
 
-			String modelFile = properties.getProperty("ModelFile");
-			learner.savemodel(modelFile);
+			String modelFile = properties.getProperty("ModelFile", null );
+			if (modelFile != null ) {				
+				learner.savemodel(modelFile);
+			}
 		} else {
 			learner.loadmodel(inputmodelFile);
 		}

@@ -1,8 +1,11 @@
 package Learner;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Properties;
@@ -77,7 +80,8 @@ public class PLT extends MLLogisticRegression {
 	@Override
 	public void train(AVTable data) {
 		for (int ep = 0; ep < this.epochs; ep++) {
-
+			
+			System.out.println("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 			// random permutation
 			ArrayList<Integer> indiriectIdx = new ArrayList<Integer>();
 			for (int i = 0; i < this.traindata.n; i++) {
@@ -183,11 +187,18 @@ public class PLT extends MLLogisticRegression {
 				
 				this.T++;
 
-				if ((this.T % 10000) == 0)
-					System.out.println("--> Mult: " + (this.gamma * mult));
+				if ((i % 1000) == 0) {
+					System.out.println( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
+					System.out.println("  --> Mult: " + (this.gamma * mult));
+					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+					Date date = new Date();
+					System.out.println("\t\t" + dateFormat.format(date));
+					System.out.println("Weight: " + this.w[0][0] );
+				}
 				
 			}
 			
+			System.out.println("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 		}
 		
 	}
