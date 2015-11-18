@@ -1,9 +1,16 @@
 package Learner;
 
+
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 
 import Data.AVPair;
@@ -55,6 +62,33 @@ public abstract class AbstractLearner {
 		}
 		
 		return positiveLabels;
+	}
+	
+	
+	public void outputPosteriors( String fname, AVTable data )
+	{
+		try{
+			System.out.print( "Saving posteriors (" + fname + ")..." );
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+			          new FileOutputStream(fname)));
+			    
+			for(int i = 0; i< data.n; i++ ){
+				//HashSet<Integer> predictedLabels = this.getPositiveLabels(data.x[i]);
+				//List<Integer> sortedList = new ArrayList<Integer>(predictedLabels);
+				//Collections.sort(sortedList);
+				//for( int j : sortedList ){
+				for( int j = 0; j < this.m; j++ ){
+					writer.write( j + ":" + this.getPosteriors(data.x[i], j) + " " );
+				}
+				writer.write( "\n" );
+			}
+						
+			writer.close();
+			System.out.println( "Done." );
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+		}
+		
 	}
 	
 	
