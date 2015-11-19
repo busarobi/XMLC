@@ -33,7 +33,7 @@ public class Evaluator {
 			
 			
 			
-			if ((data.y[i] == null) || (data.y[i].length == 0) ) continue;
+			//if ((data.y[i] == null) || (data.y[i].length == 0) ) continue;
 			
 			
 			HashSet<Integer> predictedLabels = learner.getPositiveLabels(data.x[i]);
@@ -43,15 +43,19 @@ public class Evaluator {
 			// Hamming
 			int tploc = 0, fn = 0;
 			int tmpsize = 0;
-			for(int trueLabel: data.y[i]) {
-				if (trueLabel < m ) { // this label was seen in the training
-					tmpsize++;
-					if(predictedLabels.contains(trueLabel)) {
-						tploc++;
-					} else {
-						fn++;
+			if ((data.y[i] != null) || (data.y[i].length >= 0) ) {				
+				for(int trueLabel: data.y[i]) {
+					if (trueLabel < m ) { // this label was seen in the training
+						tmpsize++;
+						if(predictedLabels.contains(trueLabel)) {
+							tploc++;
+						} else {
+							fn++;
+						}
 					}
-				}
+				}				
+			} else {
+				fn += predictedLabels.size();
 			}
 			
 			HL += (fn + (tmpsize - tploc));
@@ -59,14 +63,17 @@ public class Evaluator {
 			
 			
 			// F-score
-			for(int trueLabel: data.y[i]) {
-				if (trueLabel>= m) continue; // this label is not seen in the training
+			if ((data.y[i] != null) && (data.y[i].length > 0) ) {
+				for(int trueLabel: data.y[i]) {
+					if (trueLabel>= m) continue; // this label is not seen in the training
+					
+					if(predictedLabels.contains(trueLabel)) {
+						tp[trueLabel]++;
+					}
+					yloc[trueLabel]++;
+				}				
+			} 
 				
-				if(predictedLabels.contains(trueLabel)) {
-					tp[trueLabel]++;
-				}
-				yloc[trueLabel]++;
-			}
 
 			for(int predictedLabel: predictedLabels) {
 				haty[predictedLabel]++;
