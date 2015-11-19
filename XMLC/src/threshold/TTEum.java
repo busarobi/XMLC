@@ -54,7 +54,7 @@ public class TTEum extends ThresholdTuning {
 			// every instance is predicted as positive first with a threshold = 0.0
 			int tp = numOfPositives;
 			int predictedPositives = data.n;
-			double Fmeasure = ((double) tp) / ((double) ( numOfPositives + predictedPositives )); 
+			double Fmeasure = ((2.0*tp)) / ((double) ( numOfPositives + predictedPositives )); 
 			double maxthreshold = 0.0;
 			double maxFmeasure = Fmeasure;
 
@@ -66,7 +66,7 @@ public class TTEum extends ThresholdTuning {
 				}
 				predictedPositives--;
 				
-				Fmeasure = ((double) tp) / ((double) ( numOfPositives + predictedPositives ));
+				Fmeasure = ((2.0*tp)) / ((double) ( numOfPositives + predictedPositives ));
 				
 				if (maxFmeasure < Fmeasure ) {
 					maxFmeasure = Fmeasure;
@@ -74,9 +74,9 @@ public class TTEum extends ThresholdTuning {
 				}
 			}			
 			
-//			System.out.println( "Class: " + i +" (" + numOfPositives + ")\t" 
-//			                         +" F: " + String.format("%.4f", maxFmeasure ) 
-//			                         + " Th: " + String.format("%.4f", maxthreshold) );
+			System.out.println( "Class: " + i +" (" + numOfPositives + ")\t" 
+			                         +" F: " + String.format("%.4f", maxFmeasure ) 
+			                         + " Th: " + String.format("%.4f", maxthreshold) );
 			
 			thresholds[i] = maxthreshold;
 			avgFmeasure += maxFmeasure;
