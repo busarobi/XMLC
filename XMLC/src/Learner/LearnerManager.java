@@ -56,7 +56,7 @@ public class LearnerManager {
 			System.exit(-1);
 		}
 		System.out.println("Done.");
-		
+
 		return properties;
 	}
 
@@ -96,13 +96,15 @@ public class LearnerManager {
 	public void train() throws Exception {
 		// create the classifier and set the configuration		
 		String learnerName = properties.getProperty("Learner");
-		
+
 		if (learnerName.compareTo("MLLog")==0)
 			learner = new MLLogisticRegression(properties);
 		else if (learnerName.compareTo("MLLogNP") == 0)
 			learner = new MLLogisticRegressionNSampling(properties);
 		else if (learnerName.compareTo("PLT") == 0)
 			learner = new PLT(properties);
+		else if (learnerName.compareTo("AdamLR") == 0)
+			learner = new AdamLR(properties);
 		else {
 			System.err.println("Unknown learner");
 			System.exit(-1);
@@ -112,9 +114,9 @@ public class LearnerManager {
 			long seed = Long.parseLong(properties.getProperty("seed"));
 			MasterSeed.setSeed(seed);
 		}
-		
-		
-		
+
+
+
 		// train
 		String inputmodelFile = properties.getProperty("InputModelFile");
 		if (inputmodelFile == null ) {
@@ -139,7 +141,7 @@ public class LearnerManager {
 		ThresholdTuning th = new TTEum( learner.m, properties );
 		learner.tuneThreshold(th, validdata);
 		Map<String,Double> perf = Evaluator.computePerformanceMetrics(learner, testdata);
-        		
+
 		// evaluate (OFO)
 		th = new TTOfo( learner.m, properties );
 		learner.tuneThreshold(th, validdata);
@@ -154,13 +156,13 @@ public class LearnerManager {
 		for ( String perfName : perf.keySet() ) {
 			System.out.println("##### EUM" + perfName + ": "  + perf.get(perfName));
 		}
-		
-		
+
+
 		for ( String perfName : perfOFO.keySet() ) {
 			System.out.println("##### OFO" + perfName + ": "  + perfOFO.get(perfName));
 		}
 
-		
+
 		for ( String perfName : perfEXU.keySet() ) {
 			System.out.println("##### EXU " + perfName + ": "  + perfEXU.get(perfName));
 		}
