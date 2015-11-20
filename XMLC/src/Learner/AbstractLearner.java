@@ -2,20 +2,14 @@ package Learner;
 
 
 import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Properties;
 
 import Data.AVPair;
 import Data.AVTable;
-import IO.Evaluator;
 import threshold.ThresholdTuning;
 
 
@@ -36,9 +30,11 @@ public abstract class AbstractLearner {
 	public abstract void loadmodel(String fname );
 	
 	public int getPrediction(AVPair[] x, int label){
-		if ( this.thresholds[label] < getPosteriors(x, label) )
+		if ( this.thresholds[label] <= getPosteriors(x, label) ) {
 			return 1;
-		else return 0;
+		} else {
+			return 0;
+		}
 	}
 
 	public void tuneThreshold( ThresholdTuning t, AVTable data ){
