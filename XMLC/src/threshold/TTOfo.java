@@ -1,14 +1,19 @@
 package threshold;
 
+import java.util.Properties;
+
 import Data.AVTable;
 import Learner.AbstractLearner;
 
 public class TTOfo extends ThresholdTuning {
 	protected int OFOepochs = 1;
+	protected int initValueDenum = 1;
 	
-	public TTOfo(int m) {
-		super(m);
-		// TODO Auto-generated constructor stub
+	public TTOfo(int m, Properties properties) {
+		super(m, properties);
+		
+		this.OFOepochs = Integer.parseInt(properties.getProperty("ThresholdEpochs", "1") );
+		this.initValueDenum = Integer.parseInt(properties.getProperty("InitValueDenum", "1") );
 	}
 
 	@Override
@@ -24,8 +29,8 @@ public class TTOfo extends ThresholdTuning {
 		
 		for( int i = 0; i < this.m; i++ ) {
 			TP[i] = 1;
-			P[i] = 10;
-			PredP[i] = 10;
+			P[i] = this.initValueDenum;
+			PredP[i] = this.initValueDenum;
 						
 			this.thresholds[i] = ((double) TP[i]) / ((double) P[i] + PredP[i]);
 		}

@@ -2,6 +2,7 @@ package threshold;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Properties;
 
 import Data.AVTable;
 import Data.ComparablePair;
@@ -9,9 +10,8 @@ import Learner.AbstractLearner;
 
 public class TTEum extends ThresholdTuning {
 
-	public TTEum(int m) {
-		super(m);
-		// TODO Auto-generated constructor stub
+	public TTEum(int m, Properties properties) {
+		super(m, properties );		
 	}
 
 	@Override

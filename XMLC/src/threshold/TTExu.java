@@ -1,14 +1,18 @@
 package threshold;
 
+import java.util.Properties;
+
 import Data.AVTable;
 import Learner.AbstractLearner;
 
 public class TTExu extends ThresholdTuning {
 	protected int epochs = 1;
+	protected int initValueDenum = 1;
 	
-	public TTExu(int m) {
-		super(m);
-		this.epochs = 1;
+	public TTExu(int m, Properties properties) {
+		super(m, properties);
+		this.epochs = Integer.parseInt(properties.getProperty("ThresholdEpochs", "1") );
+		this.initValueDenum = Integer.parseInt(properties.getProperty("InitValueDenum", "1") );
 	}
 
 	@Override
@@ -24,7 +28,7 @@ public class TTExu extends ThresholdTuning {
 			//at[i] = (int) Math.round(prior[i] * 1000);
 			//bt[i] = 1000;
 			at[i] = 1;
-			bt[i] = 20;
+			bt[i] = this.initValueDenum;
 			
 			double F00 = (2.0 * at[i]) / ((double) bt[i]);
 			double F01 = (2.0 * at[i]) / ((double) bt[i]+1);
