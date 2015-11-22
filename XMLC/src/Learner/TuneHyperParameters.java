@@ -33,6 +33,7 @@ public class TuneHyperParameters extends LearnerManager {
 		protected AVTable traindata =null;
 		protected AVTable validdata =null;
 		protected String info = "";
+		protected boolean ready = false;
 		
 		public SimpleThread( Properties prop, AVTable train, AVTable valid, AVTable test, String info ){
 			this.properties = prop;
@@ -43,6 +44,7 @@ public class TuneHyperParameters extends LearnerManager {
 		}
 		
 		protected AbstractLearner learner = null;
+		
 		@Override
 		public void run() {
 			// TODO Auto-generated method stub
@@ -78,13 +80,15 @@ public class TuneHyperParameters extends LearnerManager {
 				System.out.println("##### " + perfName + ": "  + perf.get(perfName));
 				this.info += "##### " + perfName + ": "  + perf.get(perfName) + "\n";
 			}
-			
+			ready = true;
 		}
 		public String getInfo() {
 			return info;
 		}
 		
-		
+		public boolean isReady() {
+			return this.ready;					
+		}
 		
 	}
 	
@@ -116,18 +120,21 @@ public class TuneHyperParameters extends LearnerManager {
 			this.readTestData();
 			
 			// gamma
-			List<String> gammaArray = Arrays.asList("40.0","30.0","20.0","10.0","5.0","1.0","0.5","0.1","0.05","0.01","0.005","0.001");
+			List<String> gammaArray = Arrays.asList("100.0","70.0","50.0","40.0","30.0","20.0","10.0","5.0","1.0","0.5","0.1","0.05","0.01","0.005","0.001");
 			hyperparameters.put("gamma", gammaArray);
 			// step
-			List<String> stepArray = Arrays.asList("10000","5000","2000","1000","500","200","100","50","10");
+			List<String> stepArray = Arrays.asList("50000","30000","20000","10000","5000","2000","1000","500","200","100","50","10");
 			hyperparameters.put("step", stepArray);
 			// delta
-			List<String> deltaArray = Arrays.asList("0.0","0.1","0.01");
+			//List<String> deltaArray = Arrays.asList("0.0","0.1","0.01");
+			List<String> deltaArray = Arrays.asList("0.0");
 			hyperparameters.put("delta", deltaArray);
 			
 			// epochs
 			List<String> epochArray = Arrays.asList("50","100","200","500");
+			//List<String> epochArray = Arrays.asList("2","3","4","5");
 			hyperparameters.put("epochs", epochArray);
+			
 			
 		} catch (Exception e ){
 			System.out.println(e.getMessage());			
@@ -166,8 +173,8 @@ public class TuneHyperParameters extends LearnerManager {
 
 	public void run (String fname) throws Exception{
 		
-		int numWorkers = 3;
-		int numOfTrial = 6;
+		int numWorkers = 12;
+		int numOfTrial = 100;
 		
 		ExecutorService executor = Executors.newFixedThreadPool(numWorkers);//creating a pool of 5 threads
 		SimpleThread[] workers = new SimpleThread[numOfTrial];
@@ -176,28 +183,42 @@ public class TuneHyperParameters extends LearnerManager {
 			Properties prop = getUpdatedProperties();
 			String info = getInfoString(prop);
 			
-			workers[hpi] = new SimpleThread( properties, traindata, validdata, testdata, info );
+			workers[hpi] = new SimpleThread( prop, traindata, validdata, testdata, info );
 			executor.execute(workers[hpi]);
 		}	    
 		
 		executor.shutdown();
-		while (!executor.isTerminated()) {}
-		
 		
 		Writer writer = null;
 		writer = new BufferedWriter(new OutputStreamWriter(
 		          new FileOutputStream(fname), "utf-8"));
-
 		// output
 		writer.write("Train Filename: " + this.properties.getProperty("TrainFile") + "\n");
 		writer.write("Test Filename: " + this.properties.getProperty("TestFile") + "\n");
 		writer.write("Learner: " + this.properties.getProperty("Learner") + "\n");
 		writer.flush();
+
 		
-		for( int hpi = 0; hpi < numOfTrial; hpi++ ){			
-			writer.write(workers[hpi].getInfo());
-			writer.flush();
-		}	    
+		while (!executor.isTerminated()) {
+			Thread.sleep(1000);
+			for( int i = 0; i < workers.length; i++ ) {
+				if (workers[i] != null ) {
+					if (workers[i].isReady()) {
+						writer.write( "#######################################################\n" );
+						writer.write( "------------> JOB: " + (i+1) + " (" + workers.length + ")" +"\n" );
+						writer.write(workers[i].getInfo());
+						writer.flush();						
+						
+						workers[i] = null;
+					}
+				}
+			}
+			
+		}
+//		for( int hpi = 0; hpi < numOfTrial; hpi++ ){			
+//			writer.write(workers[hpi].getInfo());
+//			writer.flush();
+//		}	    
 		
 		writer.close();
 	}

@@ -192,7 +192,7 @@ public class MLLogisticRegression extends AbstractLearner {
 
 				this.T++;
 
-				if ((i % 1000) == 0) {
+				if ((i % 10000) == 0) {
 					System.out.println( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
 					System.out.println("  --> Mult: " + (this.gamma * mult));
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");

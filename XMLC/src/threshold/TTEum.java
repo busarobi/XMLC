@@ -74,9 +74,9 @@ public class TTEum extends ThresholdTuning {
 				}
 			}			
 			
-			System.out.println( "Class: " + i +" (" + numOfPositives + ")\t" 
-			                         +" F: " + String.format("%.4f", maxFmeasure ) 
-			                         + " Th: " + String.format("%.4f", maxthreshold) );
+//			System.out.println( "Class: " + i +" (" + numOfPositives + ")\t" 
+//			                         +" F: " + String.format("%.4f", maxFmeasure ) 
+//			                         + " Th: " + String.format("%.4f", maxthreshold) );
 			
 			thresholds[i] = maxthreshold;
 			avgFmeasure += maxFmeasure;
