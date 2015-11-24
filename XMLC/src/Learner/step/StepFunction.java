@@ -1,4 +1,4 @@
-package Learner;
+package Learner.step;
 
 import jsat.linear.Vec;
 
