@@ -15,20 +15,22 @@ public class SparseVector extends Vec {
 	private static final long serialVersionUID = 1L;
 
 	private TreeMap<Integer, Double> tm;
+	private int N;
 
-	public SparseVector() {
+	public SparseVector(int length) {
 		tm = new TreeMap<Integer, Double>();
+		N = length;
 	}
 
-	public SparseVector(AVPair[] pairs) {
-		this();
+	public SparseVector(AVPair[] pairs, int length) {
+		this(length);
 		for (final AVPair pair : pairs) {
 			this.set(pair.index, pair.value);
 		}
 	}
 
 	public SparseVector(double[] dense) {
-		this();
+		this(dense.length);
 		for (int i=0; i < dense.length; i++) {
 			this.set(i, dense[i]);
 		}
@@ -36,7 +38,7 @@ public class SparseVector extends Vec {
 
 	@Override
 	public Vec clone() {
-		Vec result = new SparseVector();
+		Vec result = new SparseVector(N);
 		for (Integer key : tm.keySet()){
 			result.set(key, tm.get(key));
 		}
@@ -57,7 +59,7 @@ public class SparseVector extends Vec {
 
 	@Override
 	public int length() {
-		return tm.size();
+		return this.N;
 	}
 
 	@Override
@@ -86,7 +88,7 @@ public class SparseVector extends Vec {
 
 	@Override
 	public Iterator<IndexValue> getNonZeroIterator(int start) {
-		final int fnz = tm.firstKey();
+		final Integer fnz = tm.isEmpty() ? null : tm.firstKey();
 		Iterator<IndexValue> iter = new Iterator<IndexValue>() {
 			Integer nextnz = fnz;
 			IndexValue iv = new IndexValue(-1, Double.NaN);
@@ -116,23 +118,11 @@ public class SparseVector extends Vec {
 	}
 
 	public Vec sqrt() {
-		Vec result = new SparseVector();
+		Vec result = new SparseVector(N);
 		for (Integer key : tm.keySet()) {
 			result.set(key, Math.sqrt(tm.get(key)));
 		}
 		return result;
-	}
-
-	public static void main(String[] args) {
-		SparseVector test = new SparseVector();
-		test.set(0, 1.0);
-		test.set(1, 0.0);
-
-		SparseVector test2 = new SparseVector();
-		test2.set(1, 2.3);
-		test2.set(2, 1.7);
-		System.out.println(test.sqrt());
-
 	}
 
 }

@@ -9,6 +9,8 @@ import java.util.Properties;
 import Data.AVTable;
 import IO.DataReader;
 import IO.Evaluator;
+import Learner.step.AdamStep;
+import Learner.step.StepFunction;
 import preprocessing.FeatureHasher;
 import threshold.TTEum;
 import threshold.TTExu;
@@ -94,17 +96,23 @@ public class LearnerManager {
 	}
 	
 	public void train() throws Exception {
+		// Create step function:
+		StepFunction stepfunction;
+		String stepName = properties.getProperty("StepFunction");
+		if (stepName.compareTo("Adam") == 0)
+			stepfunction = new AdamStep(properties);
+		else {
+			stepfunction = new AdamStep(properties);
+		}
 		// create the classifier and set the configuration		
 		String learnerName = properties.getProperty("Learner");
 
 		if (learnerName.compareTo("MLLog")==0)
-			learner = new MLLogisticRegression(properties);
+			learner = new MLLogisticRegression(properties, stepfunction);
 		else if (learnerName.compareTo("MLLogNP") == 0)
 			learner = new MLLogisticRegressionNSampling(properties);
 		else if (learnerName.compareTo("PLT") == 0)
 			learner = new PLT(properties);
-		else if (learnerName.compareTo("AdamLR") == 0)
-			learner = new AdamLR(properties);
 		else {
 			System.err.println("Unknown learner");
 			System.exit(-1);

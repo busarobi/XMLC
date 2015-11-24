@@ -12,8 +12,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import Data.SparseVector;
-import Learner.step.AdamStep;
-import Learner.step.StepFunction;
 import jsat.linear.SubVector;
 import jsat.linear.Vec;
 import jsat.math.FunctionVec;

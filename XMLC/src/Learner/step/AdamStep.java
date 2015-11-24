@@ -3,6 +3,7 @@ package Learner.step;
 import java.util.Properties;
 
 import Data.SparseVector;
+import jsat.linear.SubVector;
 import jsat.linear.Vec;
 
 public class AdamStep implements StepFunction {
@@ -14,15 +15,14 @@ public class AdamStep implements StepFunction {
 	private double eps;
 	private double gamma;
 
-	private SparseVector firstMoments;
-	private SparseVector secondMoments;
-	private double bFirst;
-	private double bSecond;
+	private SparseVector firstMoments = null;
+	private SparseVector secondMoments = null;
+	private double bFirst = 0.0;
+	private double bSecond = 0.0;
 
 	public AdamStep(Properties properties) {
 		System.out.println("#####################################################");
 		System.out.println("#### Optimizer: Adam");
-		// Exponential decay rates for moment estimates in Adam
 		this.beta1 = Double.parseDouble(properties.getProperty("beta1", "0.9"));
 		System.out.println("#### beta1: " + this.beta1);
 		this.beta2 = Double.parseDouble(properties.getProperty("beta2", "0.999"));
@@ -32,15 +32,33 @@ public class AdamStep implements StepFunction {
 		this.gamma = Double.parseDouble(properties.getProperty("gamma", "0.002"));
 		System.out.println("#### gamma: " + this.gamma);
 		System.out.println("#####################################################");
+	}
 
-		firstMoments = new SparseVector();
-		secondMoments = new SparseVector();
-		bFirst = 0.0;
-		bSecond = 0.0;
+	public AdamStep(double gamma, double beta1, double beta2, double eps) {
+		this.beta1 = beta1;
+		this.beta2 = beta2;
+		this.eps = eps;
+		this.gamma = gamma;
+	}
+
+	private void allocate(int length) {
+		firstMoments = new SparseVector(length);
+		secondMoments = new SparseVector(length);
+	}
+
+	@Override
+	public void step(Vec w, Vec grad) {
+		int n = w.length();
+		double biasAdj = this.step(w, new SubVector(0, n - 1, grad),
+			                       w.get(n - 1), grad.get(n - 1));
+		w.set(n - 1, w.get(n - 1) - biasAdj);
 	}
 
 	@Override
 	public double step(Vec w, Vec grad, double bias, double biasGrad) {
+		if (firstMoments == null) {
+			allocate(w.length());
+		}
 		final double learningRate =
 			gamma * Math.sqrt(1.0 - Math.pow(beta2, T)) / (1.0 - Math.pow(beta1, T));
 		firstMoments.mutableMultiply(beta1);
@@ -52,6 +70,13 @@ public class AdamStep implements StepFunction {
 		bSecond = beta2 * bSecond + (1.0 - beta2) * Math.pow(biasGrad, 2.0);
 		T++;
 		return learningRate * bFirst / (Math.sqrt(bSecond) + eps);
+	}
+
+	@Override
+	public StepFunction clone() {
+		// This currently only clones the parameters but will not copy the internal state.
+		StepFunction newstep = new AdamStep(gamma, beta1, beta2, eps);
+		return newstep;
 	}
 
 }

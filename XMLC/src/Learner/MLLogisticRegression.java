@@ -21,24 +21,24 @@ import org.apache.commons.math3.analysis.function.Sigmoid;
 
 import Data.AVPair;
 import Data.AVTable;
+import Data.SparseVector;
+import Learner.step.StepFunction;
 import util.MasterSeed;
 
 public class MLLogisticRegression extends AbstractLearner {
 	protected int epochs = 20;
 
-	protected double[][] w = null;
-	protected double[][] grad = null;
-	protected double[] bias = null;
-	protected double[] gradbias = null;
+	protected SparseVector[] w = null;
+	protected StepFunction[] stepfunctions;
 
 	protected double gamma = 0; // learning rate
 	protected int step = 0;
 	protected double delta = 0;
     //protected int OFOepochs = 1;
-	
+
 	protected boolean geomWeighting = true;
-	
-	protected int T = 1;	
+
+	protected int T = 1;
 	protected AVTable traindata = null;
 
 	// 0 = "vanila"
@@ -46,21 +46,21 @@ public class MLLogisticRegression extends AbstractLearner {
 
 	Random shuffleRand;
 
-	public MLLogisticRegression(Properties properties) {
-		super(properties);
+	public MLLogisticRegression(Properties properties, StepFunction stepfunction) {
+		super(properties, stepfunction);
 		shuffleRand = MasterSeed.nextRandom();
-		
+
 		System.out.println("#####################################################" );
 		System.out.println("#### Leraner: LogReg" );
-		
-		// learning rate		
+
+		// learning rate
 		this.gamma = Double.parseDouble(this.properties.getProperty("gamma", "10.0"));
 		System.out.println("#### gamma: " + this.gamma );
-		
+
 		// step size for learning rate
 		this.step = Integer.parseInt(this.properties.getProperty("step", "2000") );
 		System.out.println("#### step: " + this.step );
-		
+
 		// decay of gradient
 		this.delta = Double.parseDouble(this.properties.getProperty("delta", "0.0") );
 		System.out.println("#### delta: " + this.delta );
@@ -68,11 +68,11 @@ public class MLLogisticRegression extends AbstractLearner {
 			this.geomWeighting = false;
 			System.out.println( "#### No geom. weighting!");
 		}
-		
+
 		this.epochs = Integer.parseInt(this.properties.getProperty("epochs", "30"));
 		System.out.println("#### epochs: " + this.epochs );
 
-		System.out.println("#####################################################" );		
+		System.out.println("#####################################################" );
 	}
 
 	@Override
@@ -83,72 +83,37 @@ public class MLLogisticRegression extends AbstractLearner {
 
 		System.out.println( "Num. of labels: " + this.m + " Dim: " + this.d );
 		Random allocationRand = MasterSeed.nextRandom();
-		
+
 		System.out.print( "Allocate the learners..." );
-		
-		this.w = new double[this.m][];
-		this.bias = new double[this.m];
 
-
-		for (int i = 0; i < this.m; i++) {
-			this.w[i] = new double[d];
-
-			for (int j = 0; j < d; j++)
-				this.w[i][j] = 2.0 * allocationRand.nextDouble() - 1.0;
-
-			this.bias[i] = 2.0 * allocationRand.nextDouble() - 1.0;
-
-//			if ((i % 100) == 0)
-//				System.out.println( "Model: "+ i +" (" + this.m + ")" );
-
-		}
-
-		if (this.geomWeighting) {
-			this.grad = new double[this.m][];
-			this.gradbias = new double[this.m];
-			
-			for (int i = 0; i < this.m; i++) {				
-				this.grad[i] = new double[d];				
-			}			
-		}
-		
+		this.w = new SparseVector[this.m];
 		this.thresholds = new double[this.m];
+		this.stepfunctions = new StepFunction[this.m];
 		for (int i = 0; i < this.m; i++) {
+			this.w[i] = new SparseVector(this.d + 1);
+			this.stepfunctions[i] = this.stepFunction.clone();
+
+			for (int j = 0; j <= d; j++)
+				this.w[i].set(j, 2.0 * allocationRand.nextDouble() - 1.0);
+
 			this.thresholds[i] = 0.2;
 		}
 		System.out.println( "Done." );
 	}
 
-	protected void updatedPosteriors( int currIdx, int j, double mult, double inc ) {
-		if (this.geomWeighting) 
-		{
-			// in case of geometric weighting all weights need to be updated
-			int indexx = 0;
-			for (int l = 0; l < this.d; l++) {
-				if ((indexx < traindata.x[currIdx].length) && (traindata.x[currIdx][indexx].index == l)) {
-					this.grad[j][l] = (inc * traindata.x[currIdx][indexx].value) + (this.grad[j][l] * this.delta);
-					indexx++;
-				} else {
-					this.grad[j][l] += (this.grad[j][l] * this.delta);
-				}
+	protected void updatedPosteriors( int currIdx, int label, double mult, double inc ) {
+		SparseVector grad = new SparseVector(this.d + 1);
+		int indexx = 0;
+		for (int feat = 0; feat < this.d; feat++) {
+			if ((indexx < traindata.x[currIdx].length) &&
+				(traindata.x[currIdx][indexx].index == feat)) {
+				grad.set(feat, inc * traindata.x[currIdx][indexx].value);
+				indexx++;
 			}
-
-			this.gradbias[j] = inc + this.gradbias[j] * this.delta;
-
-			//indexx = 0;
-			for (int l = 0; l < this.d; l++) {
-				this.w[j][l] += (this.gamma * mult * this.grad[j][l]);
-			}
-
-			this.bias[j] += (this.gamma * mult * this.gradbias[j]);
-		} else {
-			// vanilla update of weights
-			for( int l = 0; l < traindata.x[currIdx].length; l++) {
-				this.w[j][traindata.x[currIdx][l].index] += (this.gamma * mult * inc * traindata.x[currIdx][l].value);
-			}
-			this.bias[j] += (this.gamma * mult * inc);
 		}
-		
+		grad.set(this.d, inc);
+
+		this.stepfunctions[label].step(this.w[label], grad);
 	}
 
 	protected ArrayList<Integer> shuffleIndex() {
@@ -159,7 +124,7 @@ public class MLLogisticRegression extends AbstractLearner {
 		Collections.shuffle(indirectIdx, shuffleRand);
 		return indirectIdx;
 	}
-	
+
 	@Override
 	public void train(AVTable data) {
 		this.T = 1;
@@ -175,20 +140,20 @@ public class MLLogisticRegression extends AbstractLearner {
 				int currIdx = indirectIdx.get(i);
 
 				int indexy = 0;
-				for (int j = 0; j < traindata.m; j++) {
-					double posterior = getPosteriors(traindata.x[currIdx], j);
+				for (int label = 0; label < traindata.m; label++) {
+					double posterior = getPosteriors(traindata.x[currIdx], label);
 
 					double currLabel = 0.0;
-					if ((indexy < traindata.y[currIdx].length) && (traindata.y[currIdx][indexy] == j)) {
+					if ((indexy < traindata.y[currIdx].length) && (traindata.y[currIdx][indexy] == label)) {
 						currLabel = 1.0;
 						indexy++;
 					}
 
 					// update the models
-					double inc = (currLabel - posterior);
-					
-					updatedPosteriors( currIdx, j, mult, inc );
-					
+					double inc = posterior - currLabel;
+
+					updatedPosteriors( currIdx, label, mult, inc );
+
 				}
 
 				this.T++;
@@ -199,14 +164,14 @@ public class MLLogisticRegression extends AbstractLearner {
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
 					System.out.println("\t\t" + dateFormat.format(date));
-					System.out.println("Weight: " + this.w[0][0] );
+					System.out.println("Weight: " + this.w[0].get(0) );
 				}
 
 			}
 
 			System.out.println("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
-			
-			
+
+
 			//save model !!!!!!!!!!!!!!!!!!!!!!!
 			//String modelFile = this.getProperties().getProperty("ModelFile");
 			//this.savemodel(modelFile);
@@ -214,26 +179,19 @@ public class MLLogisticRegression extends AbstractLearner {
 
 	}
 
-	
-	
+
+
 	Sigmoid s = new Sigmoid();
+	@Override
 	public double getPosteriors(AVPair[] x, int label) {
 		double posterior = 0.0;
 		for (int i = 0; i < x.length; i++) {
-			posterior += x[i].value * this.w[label][x[i].index];
+			posterior += x[i].value * this.w[label].get(x[i].index);
 		}
-		posterior += this.bias[label];
+		posterior += this.w[label].get(this.d);
 		posterior = s.value(posterior);
 		return posterior;
 	}
-	
-//	@Override
-//	public Evaluator test(AVTable data) {
-//		// TODO Auto-generated method stub
-//		return null;
-//	}
-	
-	
 
 	@Override
 	public void savemodel(String fname) {
@@ -242,78 +200,81 @@ public class MLLogisticRegression extends AbstractLearner {
 			System.out.print( "Saving model (" + fname + ")..." );
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
 			          new FileOutputStream(fname)));
-			    
+
 			for(int i = 0; i< this.w.length; i++ ){
-				writer.write( ""+ this.bias[i] );
+				writer.write( ""+ this.w[i].get(this.d) );
 				for(int j = 0; j< this.d; j++ ){
-					writer.write( " "+ this.w[i][j] );
+					writer.write( " "+ this.w[i].get(j) );
 				}
 				writer.write( "\n" );
 			}
-			
+
 			writer.write( ""+ this.thresholds[0] );
 			for(int i = 1; i< this.thresholds.length; i++ ){
 				writer.write( " "+ this.thresholds[i] );
 			}
 			writer.write( "\n" );
-			
+
 			writer.close();
 			System.out.println( "Done." );
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
 		}
-		
+
 	}
 
 	@Override
-	public void loadmodel(String fname) {		
+	public void loadmodel(String fname) {
 		try {
 			System.out.println( "Loading model (" + fname + ")..." );
 			Path p = Paths.get(fname);
 
 			BufferedReader reader = Files.newBufferedReader(p, Charset.forName("UTF-8"));
 		    String line = null;
-		    
+
 		    // read file
-		    ArrayList<String> lines = new ArrayList<String>(); 
+		    ArrayList<String> lines = new ArrayList<String>();
 		    while ((line = reader.readLine()) != null) {
 		        lines.add(line);
 		    }
-		    
+
 		    reader.close();
-		    
+
 		    // process lines
 		    // allocate the model
 		    this.m = lines.size()-1;
-		    this.w = new double[this.m][];
-		    this.bias = new double[this.m];
-		    
+		    this.w = new SparseVector[this.m];
+
+		    double[][] weights = new double[this.m][];
 		    for( int i = 0; i < this.m; i++ ){
 		    	String[] values =  lines.get(i).split( " " );
-		    	this.w[i] = new double[values.length-1];
-		    	
-		    	this.bias[i] = Double.parseDouble(values[0]);
+		    	weights[i] = new double[values.length];
+		    	weights[i][values.length - 1] = Double.parseDouble(values[0]);
 		    	for( int j=1; j < values.length; j++ ){
-		    		this.w[i][j-1] = Double.parseDouble(values[j]);
+		    		weights[i][j - 1] = Double.parseDouble(values[j]);
 		    	}
 		    }
-		    
-		    this.d = this.w[0].length;
-		    
+
+		    this.d = weights[0].length - 1;
+		    for (int i = 0; i < this.m; i++) {
+		    	this.w[i] = new SparseVector(this.d + 1);
+		    this.w[i].set(this.d, weights[i][this.d]);
+		    }
+
 		    // last line for thresholds
 		    this.thresholds = new double[this.m];
 		    String[] values =  lines.get(lines.size()-1).split( " " );
 	    	for( int j=0; j < values.length; j++ ){
 	    		this.thresholds[j] = Double.parseDouble(values[j]);
 	    	}
-		    
-		    
-		    
+
+
+
 		    System.out.println( "Done." );
 		} catch (IOException x) {
 		    System.err.format("IOException: %s%n", x);
 		}
-		
+
 	}
 
 }
