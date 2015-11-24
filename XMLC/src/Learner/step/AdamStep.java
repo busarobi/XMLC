@@ -2,7 +2,7 @@ package Learner.step;
 
 import java.util.Properties;
 
-import Data.SparseVector;
+import Data.SparseVectorExt;
 import jsat.linear.SubVector;
 import jsat.linear.Vec;
 
@@ -15,8 +15,8 @@ public class AdamStep implements StepFunction {
 	private double eps;
 	private double gamma;
 
-	private SparseVector firstMoments = null;
-	private SparseVector secondMoments = null;
+	private SparseVectorExt firstMoments = null;
+	private SparseVectorExt secondMoments = null;
 	private double bFirst = 0.0;
 	private double bSecond = 0.0;
 
@@ -42,8 +42,8 @@ public class AdamStep implements StepFunction {
 	}
 
 	private void allocate(int length) {
-		firstMoments = new SparseVector(length);
-		secondMoments = new SparseVector(length);
+		firstMoments = new SparseVectorExt(length);
+		secondMoments = new SparseVectorExt(length);
 	}
 
 	@Override

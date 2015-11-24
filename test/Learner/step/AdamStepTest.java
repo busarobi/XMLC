@@ -11,7 +11,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import Data.SparseVector;
+import Data.SparseVectorExt;
 import jsat.linear.SubVector;
 import jsat.linear.Vec;
 import jsat.math.FunctionVec;
@@ -41,7 +41,7 @@ public class AdamStepTest {
 	@Test
 	public void testStep() {
 		// Adapted from JSATs test case
-		Vec x0 = new SparseVector(new double[21]);
+		Vec x0 = new SparseVectorExt(21);
 		for (int i = 0; i < 21; i++) {
 			x0.set(i, rand.nextDouble());
 		}
