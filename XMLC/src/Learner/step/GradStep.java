@@ -2,7 +2,6 @@ package Learner.step;
 
 import java.util.Properties;
 
-import jsat.linear.SubVector;
 import jsat.linear.Vec;
 
 public class GradStep implements StepFunction {
@@ -23,10 +22,7 @@ public class GradStep implements StepFunction {
 
 	@Override
 	public void step(Vec w, Vec grad) {
-		int n = w.length();
-		double biasAdj = this.step(w, new SubVector(0, n - 1, grad),
-			                       w.get(n - 1), grad.get(n - 1));
-		w.set(n - 1, w.get(n - 1) - biasAdj);
+		this.step(w, grad, 0.0, 0.0);
 	}
 
 	@Override

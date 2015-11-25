@@ -2,7 +2,6 @@ package Data;
 
 import java.util.List;
 
-import jsat.linear.IndexValue;
 import jsat.linear.SparseVector;
 import jsat.linear.Vec;
 
@@ -31,10 +30,12 @@ public class SparseVectorExt extends SparseVector {
 	}
 
 	public Vec sqrt() {
-		Vec result = new SparseVectorExt(this.length());
-		for (IndexValue iv : this) {
-			result.set(iv.getIndex(), Math.sqrt(iv.getValue()));
+		int[] idx = indexes.clone();
+		double[] vals = new double[values.length];
+		for (int i = 0; i < used; i++) {
+			vals[i] = Math.sqrt(values[i]);
 		}
+		Vec result = new SparseVectorExt(idx, vals, this.length(), used);
 		return result;
 	}
 
