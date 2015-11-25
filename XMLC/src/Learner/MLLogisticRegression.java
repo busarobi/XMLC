@@ -23,12 +23,13 @@ import Data.AVPair;
 import Data.AVTable;
 import Data.SparseVectorExt;
 import Learner.step.StepFunction;
+import jsat.linear.DenseVector;
 import util.MasterSeed;
 
 public class MLLogisticRegression extends AbstractLearner {
 	protected int epochs = 20;
 
-	protected SparseVectorExt[] w = null;
+	protected DenseVector[] w = null;
 	protected StepFunction[] stepfunctions;
 
 	protected double gamma = 0; // learning rate
@@ -86,11 +87,11 @@ public class MLLogisticRegression extends AbstractLearner {
 
 		System.out.print( "Allocate the learners..." );
 
-		this.w = new SparseVectorExt[this.m];
+		this.w = new DenseVector[this.m];
 		this.thresholds = new double[this.m];
 		this.stepfunctions = new StepFunction[this.m];
 		for (int i = 0; i < this.m; i++) {
-			this.w[i] = new SparseVectorExt(this.d + 1);
+			this.w[i] = new DenseVector(this.d + 1);
 			this.stepfunctions[i] = this.stepFunction.clone();
 
 			for (int j = 0; j <= d; j++)
@@ -243,7 +244,7 @@ public class MLLogisticRegression extends AbstractLearner {
 		    // process lines
 		    // allocate the model
 		    this.m = lines.size()-1;
-		    this.w = new SparseVectorExt[this.m];
+		    this.w = new DenseVector[this.m];
 
 		    double[][] weights = new double[this.m][];
 		    for( int i = 0; i < this.m; i++ ){
@@ -257,7 +258,7 @@ public class MLLogisticRegression extends AbstractLearner {
 
 		    this.d = weights[0].length - 1;
 		    for (int i = 0; i < this.m; i++) {
-		    	this.w[i] = new SparseVectorExt(this.d + 1);
+		    	this.w[i] = new DenseVector(this.d + 1);
 		    this.w[i].set(this.d, weights[i][this.d]);
 		    }
 

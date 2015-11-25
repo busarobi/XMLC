@@ -13,8 +13,8 @@ import java.util.Random;
 
 import Data.AVPair;
 import Data.AVTable;
-import Data.SparseVectorExt;
 import Learner.step.StepFunction;
+import jsat.linear.DenseVector;
 import util.MasterSeed;
 
 public class PLT extends MLLogisticRegression {
@@ -46,10 +46,10 @@ public class PLT extends MLLogisticRegression {
 
 		System.out.print( "Allocate the learners..." );
 
-		this.w = new SparseVectorExt[this.t];
+		this.w = new DenseVector[this.t];
 		this.stepfunctions = new StepFunction[this.t];
 		for (int i = 0; i < this.t; i++) {
-			this.w[i] = new SparseVectorExt(d + 1);
+			this.w[i] = new DenseVector(d + 1);
 			this.stepfunctions[i] = this.stepFunction.clone();
 
 			for (int j = 0; j <= d; j++)
