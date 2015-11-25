@@ -10,6 +10,7 @@ import Data.AVTable;
 import IO.DataReader;
 import IO.Evaluator;
 import Learner.step.AdamStep;
+import Learner.step.GradStep;
 import Learner.step.StepFunction;
 import preprocessing.FeatureHasher;
 import threshold.TTEum;
@@ -99,9 +100,11 @@ public class LearnerManager {
 		// Create step function:
 		StepFunction stepfunction;
 		String stepName = properties.getProperty("StepFunction");
-		if (stepName.compareTo("Adam") == 0)
+		if (stepName.compareTo("Adam") == 0) {
 			stepfunction = new AdamStep(properties);
-		else {
+		} else if (stepName.compareTo("Simple") == 0) {
+			stepfunction = new GradStep(properties);
+		} else {
 			stepfunction = new AdamStep(properties);
 		}
 		// create the classifier and set the configuration
