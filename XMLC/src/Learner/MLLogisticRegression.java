@@ -103,16 +103,24 @@ public class MLLogisticRegression extends AbstractLearner {
 	}
 
 	protected void updatedPosteriors( int currIdx, int label, double inc ) {
-		SparseVectorExt grad = new SparseVectorExt(this.d + 1);
+		int n = traindata.x[currIdx].length;
+		int[] indexes = new int[n + 1];
+		double[] values = new double[n + 1];
 		int indexx = 0;
 		for (int feat = 0; feat < this.d; feat++) {
 			if ((indexx < traindata.x[currIdx].length) &&
 				(traindata.x[currIdx][indexx].index == feat)) {
-				grad.set(feat, inc * traindata.x[currIdx][indexx].value);
+				indexes[indexx] = feat;
+				values[indexx] = inc * traindata.x[currIdx][indexx].value;
 				indexx++;
 			}
 		}
-		grad.set(this.d, inc);
+
+		// Include bias term in weight vector:
+		indexes[n] = this.d;
+		values[n] = inc;
+
+		SparseVectorExt grad = new SparseVectorExt(indexes, values, this.d + 1, n + 1);
 
 		grad.normalize();
 
