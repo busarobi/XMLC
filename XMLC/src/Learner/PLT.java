@@ -78,8 +78,6 @@ public class PLT extends MLLogisticRegression {
 			Collections.shuffle(indiriectIdx);
 
 			for (int i = 0; i < traindata.n; i++) {
-
-				double mult = 1.0 / (Math.ceil(this.T / ((double) this.step)));
 				int currIdx = indiriectIdx.get(i);
 
 				HashSet<Integer> positiveTreeIndices = new HashSet<Integer>();
@@ -159,7 +157,7 @@ public class PLT extends MLLogisticRegression {
 					double posterior = getPartialPosteriors(traindata.x[currIdx],j);
 					double inc = posterior - 1.0;
 
-					updatedPosteriors( currIdx, j, mult, inc );
+					updatedPosteriors( currIdx, j, inc );
 				}
 
 				for(int j:negativeTreeIndices) {
@@ -169,14 +167,13 @@ public class PLT extends MLLogisticRegression {
 					double posterior = getPartialPosteriors(traindata.x[currIdx],j);
 					double inc = posterior - 1.0;
 
-					updatedPosteriors( currIdx, j, mult, inc );
+					updatedPosteriors( currIdx, j, inc );
 				}
 
 				this.T++;
 
 				if ((i % 10000) == 0) {
 					System.out.println( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
-					System.out.println("  --> Mult: " + (this.gamma * mult));
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
 					System.out.println("\t\t" + dateFormat.format(date));

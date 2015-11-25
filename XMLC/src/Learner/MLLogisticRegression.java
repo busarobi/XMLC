@@ -101,7 +101,7 @@ public class MLLogisticRegression extends AbstractLearner {
 		System.out.println( "Done." );
 	}
 
-	protected void updatedPosteriors( int currIdx, int label, double mult, double inc ) {
+	protected void updatedPosteriors( int currIdx, int label, double inc ) {
 		SparseVectorExt grad = new SparseVectorExt(this.d + 1);
 		int indexx = 0;
 		for (int feat = 0; feat < this.d; feat++) {
@@ -112,6 +112,8 @@ public class MLLogisticRegression extends AbstractLearner {
 			}
 		}
 		grad.set(this.d, inc);
+
+		grad.normalize();
 
 		this.stepfunctions[label].step(this.w[label], grad);
 	}
@@ -136,7 +138,6 @@ public class MLLogisticRegression extends AbstractLearner {
 			ArrayList<Integer> indirectIdx = this.shuffleIndex();
 
 			for (int i = 0; i < traindata.n; i++) {
-				double mult = 1.0 / (Math.ceil(this.T / ((double) this.step)));
 				int currIdx = indirectIdx.get(i);
 
 				int indexy = 0;
@@ -152,7 +153,7 @@ public class MLLogisticRegression extends AbstractLearner {
 					// update the models
 					double inc = posterior - currLabel;
 
-					updatedPosteriors( currIdx, label, mult, inc );
+					updatedPosteriors( currIdx, label, inc );
 
 				}
 
@@ -160,7 +161,6 @@ public class MLLogisticRegression extends AbstractLearner {
 
 				if ((i % 10000) == 0) {
 					System.out.println( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
-					System.out.println("  --> Mult: " + (this.gamma * mult));
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
 					System.out.println("\t\t" + dateFormat.format(date));

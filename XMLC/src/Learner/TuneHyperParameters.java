@@ -19,6 +19,7 @@ import java.util.concurrent.Executors;
 import Data.AVTable;
 import IO.Evaluator;
 import Learner.step.AdamStep;
+import Learner.step.GradStep;
 import Learner.step.StepFunction;
 import threshold.TTEum;
 import threshold.ThresholdTuning;
@@ -52,9 +53,11 @@ public class TuneHyperParameters extends LearnerManager {
 			// Create step function:
 			StepFunction stepfunction;
 			String stepName = properties.getProperty("StepFunction");
-			if (stepName.compareTo("Adam") == 0)
+			if (stepName.compareTo("Adam") == 0) {
 				stepfunction = new AdamStep(properties);
-			else {
+			} else if (stepName.compareTo("Simple") == 0) {
+				stepfunction = new GradStep(properties);
+			} else {
 				stepfunction = new AdamStep(properties);
 			}
 			// create the classifier and set the configuration

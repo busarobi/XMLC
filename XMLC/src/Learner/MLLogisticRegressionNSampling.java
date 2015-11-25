@@ -88,7 +88,6 @@ public class MLLogisticRegressionNSampling extends MLLogisticRegression {
 
 
 			for (int i = 0; i < traindata.n; i++) {
-				double mult = 1.0 / (Math.ceil(this.T / ((double) this.step)));
 				int currIdx = indiriectIdx.get(i);
 
 
@@ -155,7 +154,7 @@ public class MLLogisticRegressionNSampling extends MLLogisticRegression {
 							currLabelPos);
 
 					double inc = posterior - currLabel;
-					updatedPosteriors( currIdx, currLabelPos, mult, inc );
+					updatedPosteriors( currIdx, currLabelPos, inc );
 //					if (currLabel>0.0)
 //						updatedPosteriors( currIdx, currLabelPos, mult, inc );
 //					else
@@ -166,7 +165,6 @@ public class MLLogisticRegressionNSampling extends MLLogisticRegression {
 
 				if ((i % 10000) == 0) {
 					System.out.println( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
-					System.out.println("  --> Mult: " + (this.gamma * mult));
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
 					System.out.println("\t\t" + dateFormat.format(date));
