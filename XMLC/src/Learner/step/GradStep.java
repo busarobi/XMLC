@@ -2,6 +2,7 @@ package Learner.step;
 
 import java.util.Properties;
 
+import jsat.linear.SparseVector;
 import jsat.linear.Vec;
 
 public class GradStep implements StepFunction {
@@ -21,12 +22,12 @@ public class GradStep implements StepFunction {
 	}
 
 	@Override
-	public void step(Vec w, Vec grad) {
+	public void step(Vec w, SparseVector grad) {
 		this.step(w, grad, 0.0, 0.0);
 	}
 
 	@Override
-	public double step(Vec w, Vec grad, double bias, double biasGrad) {
+	public double step(Vec w, SparseVector grad, double bias, double biasGrad) {
 		w.mutableSubtract(grad.multiply(learningRate));
 		return learningRate * biasGrad;
 	}

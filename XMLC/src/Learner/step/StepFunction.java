@@ -1,5 +1,6 @@
 package Learner.step;
 
+import jsat.linear.SparseVector;
 import jsat.linear.Vec;
 
 /**
@@ -14,7 +15,7 @@ public interface StepFunction extends Cloneable {
 	 * @return adjustment to bias:
 	 * {@code bias = bias - returnValue}
 	 */
-	public void step(Vec w, Vec grad);
+	public void step(Vec w, SparseVector grad);
 
 	/**
 	 * Applies a gradient descent step to the weight vector {@code w}.
@@ -26,6 +27,6 @@ public interface StepFunction extends Cloneable {
 	 * @return adjustment to bias:
 	 * {@code bias = bias - returnValue}
 	 */
-	public double step(Vec w, Vec grad, double bias, double biasGrad);
+	public double step(Vec w, SparseVector grad, double bias, double biasGrad);
 	public StepFunction clone();
 }

@@ -12,7 +12,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import Data.SparseVectorExt;
-import jsat.linear.SubVector;
+import jsat.linear.SparseVector;
 import jsat.linear.Vec;
 import jsat.math.FunctionVec;
 import jsat.math.optimization.RosenbrockFunction;
@@ -51,12 +51,9 @@ public class AdamStepTest {
 
 		StepFunction sf = new AdamStep(new Properties());
 		for (int i = 0; i < 100000; i++) {
-			Vec grad = fp.f(x0);
+			SparseVector grad = (SparseVector) fp.f(x0);
 			grad.normalize();
-			final double bias = x0.get(20);
-			final double biasGrad = grad.get(20);
-			final double biasAdj = sf.step(x0, new SubVector(0, 20, grad), bias, biasGrad);
-			x0.set(20, bias - biasAdj);
+			sf.step(x0, grad);
 		}
 		assertEquals(0.0, f.f(x0), 1e-1);
 	}

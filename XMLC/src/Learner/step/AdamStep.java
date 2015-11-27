@@ -3,7 +3,10 @@ package Learner.step;
 import java.util.Properties;
 
 import Data.SparseVectorExt;
+import jsat.linear.IndexValue;
+import jsat.linear.SparseVector;
 import jsat.linear.Vec;
+import jsat.math.Function;
 
 public class AdamStep implements StepFunction {
 
@@ -46,22 +49,37 @@ public class AdamStep implements StepFunction {
 	}
 
 	@Override
-	public void step(Vec w, Vec grad) {
+	public void step(Vec w, SparseVector grad) {
 		this.step(w, grad, 0.0, 0.0);
 	}
 
 	@Override
-	public double step(Vec w, Vec grad, double bias, double biasGrad) {
+	public double step(Vec w, SparseVector grad, double bias, double biasGrad) {
 		if (firstMoments == null) {
 			allocate(w.length());
 		}
 		final double learningRate =
 			gamma * Math.sqrt(1.0 - Math.pow(beta2, T)) / (1.0 - Math.pow(beta1, T));
 		firstMoments.mutableMultiply(beta1);
-		firstMoments.mutableAdd(grad.multiply(1.0 - beta1));
+		firstMoments.mutableAdd(1.0 - beta1, grad);
 		secondMoments.mutableMultiply(beta2);
-		secondMoments.mutableAdd(grad.pairwiseMultiply(grad).multiply(1.0 - beta2));
-		w.mutableSubtract(firstMoments.multiply(learningRate).pairwiseDivide(secondMoments.sqrt().add(eps)));
+		Function power2 = new Function() {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public double f(Vec x) { return 0; }
+
+			@Override
+			public double f(double... x) {
+				return x[0] * x[0];
+			}
+		};
+		grad.applyFunction(power2);
+		secondMoments.mutableAdd(1.0 - beta2, grad);
+		for (IndexValue iv : firstMoments) {
+			final int i = iv.getIndex();
+			w.increment(i, -iv.getValue() * learningRate / (Math.sqrt(secondMoments.get(i)) + eps));
+		}
 		bFirst = beta1 * bFirst + (1.0 - beta1) * biasGrad;
 		bSecond = beta2 * bSecond + (1.0 - beta2) * Math.pow(biasGrad, 2.0);
 		T++;
