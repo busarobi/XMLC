@@ -122,7 +122,7 @@ public class MLLogisticRegression extends AbstractLearner {
 
 		SparseVectorExt grad = new SparseVectorExt(indexes, values, this.d + 1, n + 1);
 
-		grad.normalize();
+		//grad.normalize();
 
 		this.stepfunctions[label].step(this.w[label], grad);
 	}
@@ -173,7 +173,9 @@ public class MLLogisticRegression extends AbstractLearner {
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
 					System.out.println("\t\t" + dateFormat.format(date));
-					System.out.println("Weight: " + this.w[0].get(0) );
+					System.out.println("\t\t" + this.stepfunctions[0].toString() );
+					System.out.println("\t\tWeight: " + this.w[0].get(0) );
+					
 				}
 
 			}

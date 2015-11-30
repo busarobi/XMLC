@@ -165,7 +165,7 @@ public class PLT extends MLLogisticRegression {
 					if(j >= this.t) System.out.println("ALARM");
 
 					double posterior = getPartialPosteriors(traindata.x[currIdx],j);
-					double inc = posterior - 1.0;
+					double inc = posterior - 0.0;
 
 					updatedPosteriors( currIdx, j, inc );
 				}
@@ -177,7 +177,8 @@ public class PLT extends MLLogisticRegression {
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
 					System.out.println("\t\t" + dateFormat.format(date));
-					System.out.println("Weight: " + this.w[0].get(0) );
+					System.out.println("\t\t" + this.stepfunctions[0].toString() );
+					System.out.println("\t\tWeight: " + this.w[0].get(0) );
 				}
 
 			}

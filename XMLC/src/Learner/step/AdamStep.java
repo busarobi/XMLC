@@ -92,5 +92,14 @@ public class AdamStep implements StepFunction {
 		StepFunction newstep = new AdamStep(gamma, beta1, beta2, eps);
 		return newstep;
 	}
+	
+	public String toString() {
+		String r = "";
+		final double learningRate =
+				gamma * Math.sqrt(1.0 - Math.pow(beta2, T)) / (1.0 - Math.pow(beta1, T));
+
+		r = "Multiplier: " + (learningRate );
+		return r;
+	}
 
 }

@@ -8,12 +8,19 @@ import jsat.linear.Vec;
 public class GradStep implements StepFunction {
 
 	private double learningRate;
-
+	private int T = 0;
+	private int step = 1000;
+	
 	public GradStep(Properties properties) {
 		System.out.println("#####################################################");
 		System.out.println("#### Optimizer: Simple gradient descent");
+		
 		this.learningRate = Double.parseDouble(properties.getProperty("gamma", "0.002"));
 		System.out.println("#### gamma: " + this.learningRate);
+
+		this.step = Integer.parseInt(properties.getProperty("step", "1000"));
+		System.out.println("#### step: " + this.step );		
+		
 		System.out.println("#####################################################");
 	}
 
@@ -28,8 +35,11 @@ public class GradStep implements StepFunction {
 
 	@Override
 	public double step(Vec w, SparseVector grad, double bias, double biasGrad) {
-		w.mutableSubtract(grad.multiply(learningRate));
-		return learningRate * biasGrad;
+		this.T++;
+		double mult = 1.0 / (Math.ceil(this.T / ((double) this.step)));
+		
+		w.mutableSubtract(grad.multiply(learningRate * mult));
+		return learningRate * mult * biasGrad;
 	}
 
 	@Override
@@ -38,4 +48,11 @@ public class GradStep implements StepFunction {
 		return newstep;
 	}
 
+	public String toString() {
+		String r = "";
+		double mult = 1.0 / (Math.ceil(this.T / ((double) this.step)));
+		r = "Multiplier: " + (learningRate * mult);
+		return r;
+	}
+	
 }

@@ -133,18 +133,21 @@ public class TuneHyperParameters extends LearnerManager {
 			this.readTestData();
 
 			// gamma
-			List<String> gammaArray = Arrays.asList("100.0","70.0","50.0","40.0","30.0","20.0","10.0","5.0","1.0","0.5","0.1","0.05","0.01","0.005","0.001");
+			List<String> gammaArray = Arrays.asList("100.0","70.0","50.0","40.0","30.0","20.0","10.0","5.0","1.0","0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001");
 			hyperparameters.put("gamma", gammaArray);
 			// step
 			List<String> stepArray = Arrays.asList("50000","30000","20000","10000","5000","2000","1000","500","200","100","50","10");
 			hyperparameters.put("step", stepArray);
-			// delta
-			//List<String> deltaArray = Arrays.asList("0.0","0.1","0.01");
-			List<String> deltaArray = Arrays.asList("0.0");
-			hyperparameters.put("delta", deltaArray);
+			
+			
+//			List<String> beta1Array = Arrays.asList("0.7", "0.8", "0.9");
+//			hyperparameters.put("beta1", beta1Array );
+//
+//			List<String> beta2Array = Arrays.asList("0.999", "0.9", "0.8");
+//			hyperparameters.put("beta2", beta2Array );
 
 			// epochs
-			List<String> epochArray = Arrays.asList("50","100","200","500");
+			List<String> epochArray = Arrays.asList("10","20","30","50");
 			//List<String> epochArray = Arrays.asList("2","3","4","5");
 			hyperparameters.put("epochs", epochArray);
 
@@ -186,7 +189,7 @@ public class TuneHyperParameters extends LearnerManager {
 
 	public void run (String fname) throws Exception{
 
-		int numWorkers = 12;
+		int numWorkers = 8;
 		int numOfTrial = 100;
 
 		ExecutorService executor = Executors.newFixedThreadPool(numWorkers);//creating a pool of 5 threads

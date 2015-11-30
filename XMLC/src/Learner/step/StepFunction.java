@@ -29,4 +29,6 @@ public interface StepFunction extends Cloneable {
 	 */
 	public double step(Vec w, SparseVector grad, double bias, double biasGrad);
 	public StepFunction clone();
+	
+	public String toString();
 }

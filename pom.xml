@@ -33,7 +33,7 @@
           </descriptorRefs>	    
 	      <archive>
 	        <manifest>
-	          <mainClass>LearnerManager</mainClass>
+	          <mainClass>Learner.TuneHyperParameters</mainClass>
 	        </manifest>
 	      </archive>
 	    </configuration>
