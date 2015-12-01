@@ -157,10 +157,10 @@ public class TuneHyperParameters extends LearnerManager {
 			List<String> etaArray = Arrays.asList("100.0","70.0","50.0","40.0","30.0","20.0","10.0","5.0","1.0","0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001");			
 			hyperparameters.put("eta", etaArray);
 
-			List<String> lambda0Array = Arrays.asList("1.0","0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001", "0.0");			
+			List<String> lambda0Array = Arrays.asList("0.1","0.01","0.005","0.001","0.0001","0.00001","0.000001","0.0000001","0.00000001", "0.0");			
 			hyperparameters.put("lambda0", lambda0Array);
 			
-			List<String> lambda1Array = Arrays.asList("1.0","0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001", "0.0");			
+			List<String> lambda1Array = Arrays.asList("0.1","0.01","0.005","0.001","0.0001","0.00001","0.000001","0.0000001","0.00000001", "0.0");			
 			hyperparameters.put("lambda1", lambda1Array);
 			
 			

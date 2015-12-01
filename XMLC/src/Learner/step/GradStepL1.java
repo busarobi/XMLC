@@ -1,15 +1,23 @@
+
+/**
+ * See:
+ * <ul>
+ * <li>Tsuruoka, Y., Tsujii, J.,&amp;Ananiadou, S. (2009). <i>Stochastic gradient 
+ * descent training for L1-regularized log-linear models with cumulative 
+ * penalty</i>. Proceedings of the Joint Conference of the 47th Annual Meeting 
+ * of the ACL and the 4th International Joint Conference on Natural Language 
+ * Processing of the AFNLP, 1, 477. doi:10.3115/1687878.1687946</li>
+ * </ul>
+ */
+
+
 package Learner.step;
 
 import java.util.Properties;
 
-import jsat.linear.DenseVector;
 import jsat.linear.IndexValue;
 import jsat.linear.SparseVector;
 import jsat.linear.Vec;
-import jsat.lossfunctions.LogisticLoss;
-import jsat.lossfunctions.LossC;
-import jsat.lossfunctions.LossFunc;
-import jsat.lossfunctions.LossMC;
 import jsat.math.decayrates.DecayRate;
 import jsat.math.decayrates.PowerDecay;
 
