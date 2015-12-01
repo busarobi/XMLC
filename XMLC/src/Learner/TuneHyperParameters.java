@@ -66,7 +66,7 @@ public class TuneHyperParameters extends LearnerManager {
 			if (learnerName.compareTo("MLLog")==0)
 				learner = new MLLogisticRegression(properties, stepfunction);
 			else if (learnerName.compareTo("MLLogNP") == 0)
-				learner = new MLLogisticRegressionNSampling(properties, stepfunction);
+				learner = new MLLogisticRegressionNSampling(properties, stepfunction);			
 			else if (learnerName.compareTo("PLT") == 0)
 				learner = new PLT(properties, stepfunction);
 			else {

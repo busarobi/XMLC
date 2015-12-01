@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Properties;
 import java.util.Random;
 
@@ -21,23 +22,25 @@ import org.apache.commons.math3.analysis.function.Sigmoid;
 
 import Data.AVPair;
 import Data.AVTable;
-import Data.DenseVectorExt;
 import Data.SparseVectorExt;
 import Learner.step.StepFunction;
 import jsat.linear.DenseVector;
+import jsat.linear.IndexValue;
+import preprocessing.FH;
+import util.HashFunction;
 import util.MasterSeed;
 
-public class MLLogisticRegression extends AbstractLearner {
-	protected int epochs = 20;
+public class MLLRFH extends AbstractLearner {
+	protected int epochs = 1;
 
-	protected DenseVectorExt[] w = null;
-	protected StepFunction[] stepfunctions;
+	//protected DenseVector w = null;
+	protected double[] w = null;
+	//protected StepFunction[] stepfunctions;
 
 	protected double gamma = 0; // learning rate
 	protected int step = 0;
 	protected double delta = 0;
-    //protected int OFOepochs = 1;
-
+    
 	protected boolean geomWeighting = true;
 
 	protected int T = 1;
@@ -48,7 +51,16 @@ public class MLLogisticRegression extends AbstractLearner {
 
 	Random shuffleRand;
 
-	public MLLogisticRegression(Properties properties, StepFunction stepfunction) {
+	
+	protected FH fh = null;
+	
+	protected int hd;
+
+	protected double learningRate;
+	
+	//private double[] bias;
+	
+	public MLLRFH(Properties properties, StepFunction stepfunction) {
 		super(properties, stepfunction);
 		shuffleRand = MasterSeed.nextRandom();
 
@@ -75,6 +87,9 @@ public class MLLogisticRegression extends AbstractLearner {
 		System.out.println("#### epochs: " + this.epochs );
 
 		System.out.println("#####################################################" );
+		
+		
+		
 	}
 
 	@Override
@@ -83,49 +98,77 @@ public class MLLogisticRegression extends AbstractLearner {
 		this.m = data.m;
 		this.d = data.d;
 
-		System.out.println( "Num. of labels: " + this.m + " Dim: " + this.d );
+		int seed = 1;
+		this.hd = 2000000;
+		
+		
+		this.fh = new FH(seed, this.hd, this.m);
+		
+		
+		System.out.println( "Num. of labels: " + this.m + " Dim: " + this.d + " Hash dim: " + this.hd );
 		Random allocationRand = MasterSeed.nextRandom();
 
 		System.out.print( "Allocate the learners..." );
 
-		this.w = new DenseVectorExt[this.m];
+		//this.w = new DenseVector(this.hd);
+		this.w = new double[this.hd];
 		this.thresholds = new double[this.m];
-		this.stepfunctions = new StepFunction[this.m];
+		//this.bias = new double[this.m];
+		//this.stepfunctions = new StepFunction[this.m];
+
 		for (int i = 0; i < this.m; i++) {
-			this.w[i] = new DenseVectorExt(this.d + 1);
-			this.stepfunctions[i] = this.stepFunction.clone();
-
-			for (int j = 0; j <= d; j++)
-				this.w[i].set(j, 2.0 * allocationRand.nextDouble() - 1.0);
-
-			this.thresholds[i] = 0.2;
+			//this.w[i] = new DenseVector(this.hd + 1);
+			//this.stepfunctions[i] = this.stepFunction.clone();
+			this.thresholds[i] = 0.5;
 		}
+		
+		//how to initialize w?
+		
 		System.out.println( "Done." );
 	}
+	
+	
+	protected double scalar = 1.0;
+	protected double lambda = 0.001;
 
-	protected void updatedPosteriors( int currIdx, int label, double inc ) {
+	protected void updatedPosteriors( int currIdx, int label, double inc, double y) {
+	
 		int n = traindata.x[currIdx].length;
-		int[] indexes = new int[n + 1];
-		double[] values = new double[n + 1];
-		int indexx = 0;
-		for (int feat = 0; feat < this.d; feat++) {
-			if ((indexx < traindata.x[currIdx].length) &&
-				(traindata.x[currIdx][indexx].index == feat)) {
-				indexes[indexx] = feat;
-				values[indexx] = inc * traindata.x[currIdx][indexx].value;
-				indexx++;
-			}
+		
+		
+		for(int i = 0; i < n; i++) {
+			int index = fh.getIndex(label, traindata.x[currIdx][i].index);
+			
+			//double update = inc * traindata.x[currIdx][i].value;
+			
+			double gradient = inc * traindata.x[currIdx][i].value; //this.scalar * inc * traindata.x[currIdx][i].value;
+						
+			double update = this.learningRate * gradient; //(this.learningRate * gradient * (y*2.0 - 1) * traindata.x[currIdx][i].value) / this.scalar;		
+					
+			//System.out.println("w -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
+			
+			this.w[index] -= update; 
+			//this.w.set(index, this.w.get(index) - update);
+			
+			
 		}
-
+		
 		// Include bias term in weight vector:
-		indexes[n] = this.d;
-		values[n] = inc;
+		int biasIndex = fh.getIndex(label, -1);
+		
+		//double bias = this.w[biasIndex]; //this.w.get(fh.getIndex(label, -1));
+		
+		double gradient = inc; //this.scalar * inc;
+		
+		double update = this.learningRate * gradient;//(this.learningRate * gradient * (y*2.0 - 1))  / this.scalar;		
+		
+		//this.w.set(biasIndex, bias - update);
+		
+		this.w[biasIndex] -= update;
+		
+		//System.out.println("bias -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
 
-		SparseVectorExt grad = new SparseVectorExt(indexes, values, this.d + 1, n + 1);
-
-		//grad.normalize();
-
-		this.stepfunctions[label].step(this.w[label], grad);
+		
 	}
 
 	protected ArrayList<Integer> shuffleIndex() {
@@ -140,7 +183,8 @@ public class MLLogisticRegression extends AbstractLearner {
 	@Override
 	public void train(AVTable data) {
 		this.T = 1;
-
+		this.scalar = 1;
+		
 		for (int ep = 0; ep < this.epochs; ep++) {
 
 			System.out.println("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
@@ -148,6 +192,12 @@ public class MLLogisticRegression extends AbstractLearner {
 			ArrayList<Integer> indirectIdx = this.shuffleIndex();
 
 			for (int i = 0; i < traindata.n; i++) {
+				
+				
+				this.learningRate = 1.0 / (Math.ceil(this.T / ((double) this.step)));
+				//this.scalar *= (1 - this.learningRate * this.lambda);
+				
+				
 				int currIdx = indirectIdx.get(i);
 
 				int indexy = 0;
@@ -163,7 +213,7 @@ public class MLLogisticRegression extends AbstractLearner {
 					// update the models
 					double inc = posterior - currLabel;
 
-					updatedPosteriors( currIdx, label, inc );
+					updatedPosteriors( currIdx, label, inc, currLabel);
 
 				}
 
@@ -174,9 +224,7 @@ public class MLLogisticRegression extends AbstractLearner {
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
 					System.out.println("\t\t" + dateFormat.format(date));
-					System.out.println("\t\t" + this.stepfunctions[0].toString() );
-					//System.out.println("\t\tWeight: " + this.w[0].get(0) );
-					
+					//System.out.println("Weight: " + this.w[0].get(0) );
 				}
 
 			}
@@ -188,6 +236,16 @@ public class MLLogisticRegression extends AbstractLearner {
 			//String modelFile = this.getProperties().getProperty("ModelFile");
 			//this.savemodel(modelFile);
 		}
+		
+		int zeroW = 0;
+		double sumW = 0;
+		for(double weight : w) {
+			if(weight == 0) zeroW++;
+			sumW += weight;
+		}
+		
+		System.out.println("Hash weights: " + w.length + ", " + zeroW + ", " + (w.length - zeroW) + ", " + sumW + ", ");
+		
 
 	}
 
@@ -196,10 +254,25 @@ public class MLLogisticRegression extends AbstractLearner {
 	Sigmoid s = new Sigmoid();
 	@Override
 	public double getPosteriors(AVPair[] x, int label) {
-		double posterior = this.w[label].dot(x);
+		double posterior = 0.0;
+		
+		
+		for (int i = 0; i < x.length; i++) {
+		
+			int hi = fh.getIndex(label,  x[i].index); 
+			posterior += x[i].value * this.w[hi];//this.w.get(hi);
+		}
 
-		posterior += this.w[label].get(this.d);
+		int hi = fh.getIndex(label,  -1); //this.taskhash[label].hash(-1); //-1 indicates w_0
+		
+		
+		posterior += this.w[hi];//this.w.get(hi);
+		
+		
 		posterior = s.value(posterior);
+		
+		//System.out.println("Posterior :" + posterior);
+		
 		return posterior;
 	}
 
@@ -212,12 +285,9 @@ public class MLLogisticRegression extends AbstractLearner {
 			          new FileOutputStream(fname)));
 
 			for(int i = 0; i< this.w.length; i++ ){
-				writer.write( ""+ this.w[i].get(this.d) );
-				for(int j = 0; j< this.d; j++ ){
-					writer.write( " "+ this.w[i].get(j) );
-				}
-				writer.write( "\n" );
+				writer.write( " "+ this.w[i]/*.get(i)*/ );
 			}
+			writer.write( "\n" );
 
 			writer.write( ""+ this.thresholds[0] );
 			for(int i = 1; i< this.thresholds.length; i++ ){
@@ -253,29 +323,23 @@ public class MLLogisticRegression extends AbstractLearner {
 		    // process lines
 		    // allocate the model
 		    this.m = lines.size()-1;
-		    this.w = new DenseVectorExt[this.m];
+		    this.w = new double[this.hd];//new DenseVector(this.hd);
 
-		    double[][] weights = new double[this.m][];
-		    for( int i = 0; i < this.m; i++ ){
-		    	String[] values =  lines.get(i).split( " " );
-		    	weights[i] = new double[values.length];
-		    	weights[i][values.length - 1] = Double.parseDouble(values[0]);
-		    	for( int j=1; j < values.length; j++ ){
-		    		weights[i][j - 1] = Double.parseDouble(values[j]);
-		    	}
+		    
+		    String[] values =  lines.get(0).split( " " );
+		    double[] weights = new double[values.length];
+		    for( int j=0; j < values.length; j++ ){
+		    	weights[j] = Double.parseDouble(values[j]);
 		    }
-
-		    this.d = weights[0].length - 1;
-		    for (int i = 0; i < this.m; i++) {
-		    	this.w[i] = new DenseVectorExt(this.d + 1);
-		    this.w[i].set(this.d, weights[i][this.d]);
-		    }
-
+		    
+		    this.d = weights.length;
+		    this.w = weights;
+		    
 		    // last line for thresholds
 		    this.thresholds = new double[this.m];
-		    String[] values =  lines.get(lines.size()-1).split( " " );
+		    String[] tValues =  lines.get(lines.size()-1).split( " " );
 	    	for( int j=0; j < values.length; j++ ){
-	    		this.thresholds[j] = Double.parseDouble(values[j]);
+	    		this.thresholds[j] = Double.parseDouble(tValues[j]);
 	    	}
 
 

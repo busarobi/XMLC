@@ -3,6 +3,7 @@ package Learner;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -13,16 +14,17 @@ import java.util.Random;
 
 import Data.AVPair;
 import Data.AVTable;
-import Data.DenseVectorExt;
 import Learner.step.StepFunction;
 import jsat.linear.DenseVector;
+import preprocessing.FH;
+import threshold.ThresholdTuning;
 import util.MasterSeed;
 
-public class PLT extends MLLogisticRegression {
+public class PLTFH extends MLLRFH {
 	protected int t = 0;
 	protected double innerThreshold = 0.15;
 
-	public PLT(Properties properties, StepFunction stepfunction) {
+	public PLTFH(Properties properties, StepFunction stepfunction) {
 		super(properties, stepfunction);
 
 		System.out.println("#####################################################" );
@@ -40,6 +42,11 @@ public class PLT extends MLLogisticRegression {
 		this.d = data.d;
 		this.t = 2 * this.m - 1;
 
+		int seed = 1;
+		this.hd = 50000000;//40000000;
+
+		this.fh = new FH(seed, this.hd, this.t);
+
 		System.out.println( "Num. of labels: " + this.m + " Dim: " + this.d );
 		System.out.println( "Num. of inner node of the trees: " + this.t  );
 
@@ -47,39 +54,43 @@ public class PLT extends MLLogisticRegression {
 
 		System.out.print( "Allocate the learners..." );
 
-		this.w = new DenseVectorExt[this.t];
-		this.stepfunctions = new StepFunction[this.t];
+		this.w = new double[this.hd]; //new DenseVector(this.hd);
+		this.thresholds = new double[this.t];
+		//this.bias = new double[this.m];
+		//this.stepfunctions = new StepFunction[this.m];
+
 		for (int i = 0; i < this.t; i++) {
-			this.w[i] = new DenseVectorExt(d + 1);
-			this.stepfunctions[i] = this.stepFunction.clone();
-
-			for (int j = 0; j <= d; j++)
-				this.w[i].set(j, 2.0 * allocationRand.nextDouble() - 1.0);
+			//this.w[i] = new DenseVector(this.hd + 1);
+			//this.stepfunctions[i] = this.stepFunction.clone();
+			this.thresholds[i] = 0.5;
 		}
-
-		this.thresholds = new double[this.m];
-		for (int i = 0; i < this.m; i++) {
-			this.thresholds[i] = 0.2;
-		}
+		
+		//how to initialize w?
+		
 		System.out.println( "Done." );
-
 	}
 
+		
 	@Override
 	public void train(AVTable data) {
+		this.T = 1;
+		
 		for (int ep = 0; ep < this.epochs; ep++) {
 
 			System.out.println("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 			// random permutation
-			ArrayList<Integer> indiriectIdx = new ArrayList<Integer>();
+			ArrayList<Integer> indirectIdx = new ArrayList<Integer>();
 			for (int i = 0; i < this.traindata.n; i++) {
-				indiriectIdx.add(new Integer(i));
+				indirectIdx.add(new Integer(i));
 			}
 
-			Collections.shuffle(indiriectIdx);
+			Collections.shuffle(indirectIdx);
 
 			for (int i = 0; i < traindata.n; i++) {
-				int currIdx = indiriectIdx.get(i);
+
+				this.learningRate = 1.0 / (Math.ceil(this.T / ((double) this.step)));
+				
+				int currIdx = indirectIdx.get(i);
 
 				HashSet<Integer> positiveTreeIndices = new HashSet<Integer>();
 				HashSet<Integer> negativeTreeIndices = new HashSet<Integer>();
@@ -156,9 +167,10 @@ public class PLT extends MLLogisticRegression {
 				for(int j:positiveTreeIndices) {
 
 					double posterior = getPartialPosteriors(traindata.x[currIdx],j);
-					double inc = posterior - 1.0;
+					double inc = -(1.0 - posterior); 
+					//double inc = posterior - 1.0;
 
-					updatedPosteriors( currIdx, j, inc );
+					updatedPosteriors( currIdx, j, inc, 1.0 );
 				}
 
 				for(int j:negativeTreeIndices) {
@@ -166,32 +178,49 @@ public class PLT extends MLLogisticRegression {
 					if(j >= this.t) System.out.println("ALARM");
 
 					double posterior = getPartialPosteriors(traindata.x[currIdx],j);
-					double inc = posterior - 0.0;
-
-					updatedPosteriors( currIdx, j, inc );
+					double inc = -(0.0 - posterior); //posterior - 1.0;
+					//double inc = posterior - 1.0;
+					
+					updatedPosteriors( currIdx, j, inc, 0.0);
 				}
 
 				this.T++;
 
-				if ((i % 10000) == 0) {
+				if ((i % 50000) == 0) {
 					System.out.println( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
 					System.out.println("\t\t" + dateFormat.format(date));
-					System.out.println("\t\t" + this.stepfunctions[0].toString() );
-					System.out.println("\t\tWeight: " + this.w[0].get(0) );
+					//System.out.println("Weight: " + this.w[0].get(0) );
 				}
 
 			}
 
 			System.out.println("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 		}
+		
+		int zeroW = 0;
+		double sumW = 0;
+		int maxNonZero = 0;
+		int index = 0;
+		for(double weight : w) {
+			if(weight == 0) zeroW++;
+			else maxNonZero = index;
+			sumW += weight;
+			index++;
+		}
+		
+		System.out.println("Hash weights (lenght, zeros, nonzeros, ratio, sumW, last nonzero): " + w.length + ", " + zeroW + ", " + (w.length - zeroW) + ", " + (double) (w.length - zeroW)/(double) w.length + ", " + sumW + ", " + maxNonZero);
+		//System.out.println(Arrays.toString(w));
 
 	}
 
 
 	public double getPartialPosteriors(AVPair[] x, int label) {
 		double posterior = super.getPosteriors(x, label);
+		
+		//System.out.println("Partial posterior: " + posterior + " Tree index: " + label);
+		
 		return posterior;
 	}
 
@@ -213,6 +242,8 @@ public class PLT extends MLLogisticRegression {
 
 		}
 
+		//if(posterior > 0.5) System.out.println("Posterior: " + posterior + "Label: " + label);
+		
 		return posterior;
 	}
 
@@ -257,7 +288,7 @@ public class PLT extends MLLogisticRegression {
 
 			double currentP = node.p * getPartialPosteriors(x, node.treeIndex);
 
-			if(currentP > innerThreshold) {
+			if(currentP > this.thresholds[node.treeIndex]) {
 
 				if(node.treeIndex < this.m - 1) {
 					int leftchild = 2 * node.treeIndex + 1;
@@ -279,11 +310,31 @@ public class PLT extends MLLogisticRegression {
 		return positiveLabels;
 	}
 
+	
+	public void setThresholds(double[] t) {
+		
+		for(int j = 0; j < t.length; j++) {
+			this.thresholds[j + this.m - 1] = t[j];
+		}
+		
+		for(int j = this.m - 2; j >= 0; j--) {
+			this.thresholds[j] = Math.min(this.thresholds[2*j+1], this.thresholds[2*j+2]);
+		}
+		
+	}
 
+	@Override
+	public void tuneThreshold( ThresholdTuning t, AVTable data ){
+		this.setThresholds(t.validate(data, this));
+	}
+
+	
 	@Override
 	public void loadmodel(String fname) {
 		super.loadmodel(fname);
-		this.t = (this.w.length-1)/2;
+		
+		//WRONG!!!
+		//this.t = (this.w.length-1)/2;
 	}
 
 

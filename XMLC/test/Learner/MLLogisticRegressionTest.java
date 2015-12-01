@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import Data.AVPair;
 import Data.AVTable;
+import Data.DenseVectorExt;
 import Learner.step.GradStep;
 import Learner.step.StepFunction;
 import jsat.linear.DenseVector;
@@ -44,8 +45,8 @@ public class MLLogisticRegressionTest {
 		MasterSeed.setSeed(123);
 		MLLogisticRegression learner = new MLLogisticRegression(new Properties(), stepFunction);
 		learner.allocateClassifiers(data);
-		learner.w = new DenseVector[] {
-			new DenseVector(3), new DenseVector(3)
+		learner.w = new DenseVectorExt[] {
+			new DenseVectorExt(3), new DenseVectorExt(3)
 		};
 		learner.updatedPosteriors(0, 0, -1.0);
 		double[] expected = {0.095, -0.286, 0.953};
