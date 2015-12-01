@@ -11,6 +11,7 @@ import IO.DataReader;
 import IO.Evaluator;
 import Learner.step.AdamStep;
 import Learner.step.GradStep;
+import Learner.step.GradStepL1;
 import Learner.step.StepFunction;
 import preprocessing.FeatureHasher;
 import threshold.TTEum;
@@ -104,6 +105,8 @@ public class LearnerManager {
 			stepfunction = new AdamStep(properties);
 		} else if (stepName.compareTo("Simple") == 0) {
 			stepfunction = new GradStep(properties);
+		} else if (stepName.compareTo("SimpleL1") == 0) {
+			stepfunction = new GradStepL1(properties);			
 		} else {
 			stepfunction = new AdamStep(properties);
 		}
@@ -114,6 +117,10 @@ public class LearnerManager {
 			learner = new MLLogisticRegression(properties, stepfunction);
 		else if (learnerName.compareTo("MLLogNP") == 0)
 			learner = new MLLogisticRegressionNSampling(properties, stepfunction);
+		else if (learnerName.compareTo("MLLRFH") == 0)
+			learner = new MLLRFH(properties, stepfunction);
+		else if (learnerName.compareTo("PLTFH") == 0)
+			learner = new PLTFH(properties, stepfunction);		
 		else if (learnerName.compareTo("PLT") == 0)
 			learner = new PLT(properties, stepfunction);
 		else {

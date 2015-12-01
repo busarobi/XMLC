@@ -63,13 +63,6 @@ public class MLLogisticRegression extends AbstractLearner {
 		this.step = Integer.parseInt(this.properties.getProperty("step", "2000") );
 		System.out.println("#### step: " + this.step );
 
-		// decay of gradient
-		this.delta = Double.parseDouble(this.properties.getProperty("delta", "0.0") );
-		System.out.println("#### delta: " + this.delta );
-		if (this.delta < Double.MIN_VALUE ){
-			this.geomWeighting = false;
-			System.out.println( "#### No geom. weighting!");
-		}
 
 		this.epochs = Integer.parseInt(this.properties.getProperty("epochs", "30"));
 		System.out.println("#### epochs: " + this.epochs );
