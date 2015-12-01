@@ -15,6 +15,7 @@ import Learner.step.StepFunction;
 import jsat.linear.DenseVector;
 import util.MasterSeed;
 
+
 public class MLLogisticRegressionTest {
 
 	AVTable data;

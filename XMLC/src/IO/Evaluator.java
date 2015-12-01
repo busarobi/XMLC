@@ -31,35 +31,26 @@ public class Evaluator {
 		
 		for(int i = 0; i < data.n; i++ ) {
 			
-			
-			
-			//if ((data.y[i] == null) || (data.y[i].length == 0) ) continue;
-			
-			
+
 			HashSet<Integer> predictedLabels = learner.getPositiveLabels(data.x[i]);
-			numOfPositives += predictedLabels.size();
-			
-			
+			int predpositloc = predictedLabels.size(); 
+			numOfPositives += predpositloc;
 			// Hamming
-			int tploc = 0, fn = 0;
-			int tmpsize = 0;
+			int tploc = 0, fnloc = 0, fploc = 0;
+						
 			if ((data.y[i] != null) || (data.y[i].length >= 0) ) {				
 				for(int trueLabel: data.y[i]) {
 					if (trueLabel < m ) { // this label was seen in the training
-						tmpsize++;
 						if(predictedLabels.contains(trueLabel)) {
 							tploc++;
 						} else {
-							fn++;
+							fnloc++;
 						}
 					}
-				}				
-			} else {
-				fn += predictedLabels.size();
+				}			
 			}
-			
-			HL += (fn + (tmpsize - tploc));
-
+			fploc = predpositloc - tploc;
+			HL += (fnloc + fploc);
 			
 			
 			// F-score
