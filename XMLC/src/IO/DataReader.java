@@ -5,9 +5,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -16,7 +14,8 @@ import Data.AVPair;
 import Data.AVTable;
 
 public class DataReader {
-
+	protected boolean additionalStat = false;
+		
 	protected String fileName = null;
 	
 	public DataReader( String fileName )
@@ -33,11 +32,11 @@ public class DataReader {
 		Vector<AVPair[]> vx = new Vector<AVPair[]>();
 		int max_feature_index = 0;
 		int max_label_index = 0;
-		
+
+		// for additional statistics
 		HashSet<Integer> hashsetFeatures = new HashSet<Integer>(); 
 		HashSet<Integer> hashsetLabels = new HashSet<Integer>(); 
-		
-		
+		//
 		
 		while(true)
 		{
@@ -71,16 +70,18 @@ public class DataReader {
 				if ( tokens.length == 1 ) {  // label
 					//System.out.println( tokens[0].replace(",", "") );					
 					y[indexy]= Integer.parseInt(tokens[0].replace(",", ""));
-					hashsetLabels.add(y[indexy]);
+					if (additionalStat)
+						hashsetLabels.add(y[indexy]);
 					indexy++;
 				} else {  // features
 					x[indexx] = new AVPair();
 					x[indexx].index = Integer.parseInt(tokens[0])-1;         // the indexing starts at 0
-					hashsetFeatures.add(x[indexx].index);
-					x[indexx++].value = Double.parseDouble(tokens[1]);		
-					
+					if (additionalStat) 
+						hashsetFeatures.add(x[indexx].index);
+					x[indexx++].value = Double.parseDouble(tokens[1]);							
 				}
 			}
+			
 			if(indexx>0) max_feature_index = Math.max(max_feature_index, x[indexx-1].index);
 			if(indexy>0) max_label_index = Math.max(max_label_index, y[indexy-1]);
 			
@@ -108,26 +109,28 @@ public class DataReader {
 		System.out.println( "    -->  num x dim: labels " 
 		           + data.n + " x "+ data.d + " : " + data.m );
 		
-		System.out.println("Number of distinct features: " + hashsetFeatures.size());
-		System.out.println("Number of distinct labels: " + hashsetLabels.size());
 		
-		
-		HashSet<Pair> hashsetPairs = new HashSet<Pair>();
-		
-		for( int i = 0; i<data.n; i++) 	{
-			for(int m=0; m<data.y[i].length; m++ ) {
-				for(int j=0; j<data.x[i].length; j++ ) {
-					Pair pair = new Pair(data.y[i][m], data.x[i][j].index);
-					hashsetPairs.add(pair);
-				}				
-			}
+		if ( additionalStat ) {
+			System.out.println("Number of distinct features: " + hashsetFeatures.size());
+			System.out.println("Number of distinct labels: " + hashsetLabels.size());
 			
+			
+			HashSet<Pair> hashsetPairs = new HashSet<Pair>();
+			
+			for( int i = 0; i<data.n; i++) 	{
+				for(int m=0; m<data.y[i].length; m++ ) {
+					for(int j=0; j<data.x[i].length; j++ ) {
+						Pair pair = new Pair(data.y[i][m], data.x[i][j].index);
+						hashsetPairs.add(pair);
+					}				
+				}
+				
+			}
+	
+			System.out.println("Number of distinct features: " + hashsetFeatures.size());
+			System.out.println("Number of distinct labels: " + hashsetLabels.size());
+			System.out.println("Number of distinct pairs: " + hashsetPairs.size());
 		}
-
-		System.out.println("Number of distinct features: " + hashsetFeatures.size());
-		System.out.println("Number of distinct labels: " + hashsetLabels.size());
-		System.out.println("Number of distinct pairs: " + hashsetPairs.size());
-
 		
 		return data;
 	}

@@ -69,7 +69,11 @@ public class TuneHyperParameters extends LearnerManager {
 			if (learnerName.compareTo("MLLog")==0)
 				learner = new MLLogisticRegression(properties, stepfunction);
 			else if (learnerName.compareTo("MLLogNP") == 0)
-				learner = new MLLogisticRegressionNSampling(properties, stepfunction);			
+				learner = new MLLogisticRegressionNSampling(properties, stepfunction);
+			else if (learnerName.compareTo("MLLRFH") == 0)
+				learner = new MLLRFH(properties, stepfunction);
+			else if (learnerName.compareTo("PLTFH") == 0)
+				learner = new PLTFH(properties, stepfunction);		
 			else if (learnerName.compareTo("PLT") == 0)
 				learner = new PLT(properties, stepfunction);
 			else {
@@ -85,15 +89,26 @@ public class TuneHyperParameters extends LearnerManager {
 			// train
 			learner.allocateClassifiers(traindata);
 			learner.train(traindata);
-			// test
-			ThresholdTuning th = new TTEum( learner.m, properties );
-			learner.tuneThreshold(th, validdata);
+			
+			// valid			
+			//ThresholdTuning th = new TTEum( learner.m, properties );
+			//learner.tuneThreshold(th, validdata);
+
+			Map<String,Double> perfv = Evaluator.computePerformanceMetrics(learner, validdata);
+
+			// generate result
+			for ( String perfName : perfv.keySet() ) {
+				System.out.println("##### Valid " + perfName + ": "  + perfv.get(perfName));
+				this.info += "##### Valid" + perfName + ": "  + perfv.get(perfName) + "\n";
+			}
+			
+			
 			Map<String,Double> perf = Evaluator.computePerformanceMetrics(learner, testdata);
 
 			// generate result
 			for ( String perfName : perf.keySet() ) {
-				System.out.println("##### " + perfName + ": "  + perf.get(perfName));
-				this.info += "##### " + perfName + ": "  + perf.get(perfName) + "\n";
+				System.out.println("##### Test " + perfName + ": "  + perf.get(perfName));
+				this.info += "##### Test" + perfName + ": "  + perf.get(perfName) + "\n";
 			}
 			ready = true;
 		}
@@ -135,16 +150,22 @@ public class TuneHyperParameters extends LearnerManager {
 			this.readValidData();
 			this.readTestData();
 
-//			// gamma
-//			List<String> gammaArray = Arrays.asList("100.0","70.0","50.0","40.0","30.0","20.0","10.0","5.0","1.0","0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001");
-//			hyperparameters.put("gamma", gammaArray);
+			// gamma
+			List<String> gammaArray = Arrays.asList("100.0","70.0","50.0","40.0","30.0","20.0","10.0","5.0","1.0","0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001");
+			hyperparameters.put("gamma", gammaArray);
 
+			// lambda
+			List<String> lambdaArray = Arrays.asList("0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001");
+			hyperparameters.put("lambda", lambdaArray);
+			
+			
 //			// step
 //			List<String> stepArray = Arrays.asList("50000","30000","20000","10000","5000","2000","1000","500","200","100","50","10");
 //			hyperparameters.put("step", stepArray);
 //
 //			// epochs
-			List<String> epochArray = Arrays.asList("10","20","30","50");
+			//List<String> epochArray = Arrays.asList("10","20","30","50","100");
+			List<String> epochArray = Arrays.asList("10","50","100");
 			hyperparameters.put("epochs", epochArray);			
 			
 			
@@ -154,14 +175,14 @@ public class TuneHyperParameters extends LearnerManager {
 //			List<String> beta2Array = Arrays.asList("0.999", "0.9", "0.8");
 //			hyperparameters.put("beta2", beta2Array );
 
-			List<String> etaArray = Arrays.asList("100.0","70.0","50.0","40.0","30.0","20.0","10.0","5.0","1.0","0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001");			
-			hyperparameters.put("eta", etaArray);
-
-			List<String> lambda0Array = Arrays.asList("0.1","0.01","0.005","0.001","0.0001","0.00001","0.000001","0.0000001","0.00000001", "0.0");			
-			hyperparameters.put("lambda0", lambda0Array);
-			
-			List<String> lambda1Array = Arrays.asList("0.1","0.01","0.005","0.001","0.0001","0.00001","0.000001","0.0000001","0.00000001", "0.0");			
-			hyperparameters.put("lambda1", lambda1Array);
+//			List<String> etaArray = Arrays.asList("100.0","70.0","50.0","40.0","30.0","20.0","10.0","5.0","1.0","0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001");			
+//			hyperparameters.put("eta", etaArray);
+//
+//			List<String> lambda0Array = Arrays.asList("0.1","0.01","0.005","0.001","0.0001","0.00001","0.000001","0.0000001","0.00000001", "0.0");			
+//			hyperparameters.put("lambda0", lambda0Array);
+//			
+//			List<String> lambda1Array = Arrays.asList("0.1","0.01","0.005","0.001","0.0001","0.00001","0.000001","0.0000001","0.00000001", "0.0");			
+//			hyperparameters.put("lambda1", lambda1Array);
 			
 			
 		} catch (Exception e ){

@@ -76,9 +76,7 @@ public class PLTFH extends MLLRFH {
 	public void train(AVTable data) {
 		
 		this.T = 1;
-		this.scalar = 1.0;
-		this.gamma = 0.5;
-		
+				
 		for (int ep = 0; ep < this.epochs; ep++) {
 
 			System.out.println("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );

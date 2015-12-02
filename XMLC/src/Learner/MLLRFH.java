@@ -61,26 +61,20 @@ public class MLLRFH extends AbstractLearner {
 	public MLLRFH(Properties properties, StepFunction stepfunction) {
 		super(properties, stepfunction);
 		shuffleRand = MasterSeed.nextRandom();
-
+		this.scalar = 1.0;
+		
 		System.out.println("#####################################################" );
 		System.out.println("#### Leraner: LogReg" );
 
 		// learning rate
-		this.gamma = Double.parseDouble(this.properties.getProperty("gamma", "10.0"));
+		this.gamma = Double.parseDouble(this.properties.getProperty("gamma", "1.0"));
 		System.out.println("#### gamma: " + this.gamma );
 
-		// step size for learning rate
-		this.step = Integer.parseInt(this.properties.getProperty("step", "2000") );
-		System.out.println("#### step: " + this.step );
+		// scalar
+		this.lambda = Double.parseDouble(this.properties.getProperty("lambda", "1.0"));
+		System.out.println("#### lambda: " + this.lambda );
 
-		// decay of gradient
-		this.delta = Double.parseDouble(this.properties.getProperty("delta", "0.0") );
-		System.out.println("#### delta: " + this.delta );
-		if (this.delta < Double.MIN_VALUE ){
-			this.geomWeighting = false;
-			System.out.println( "#### No geom. weighting!");
-		}
-
+		// epochs
 		this.epochs = Integer.parseInt(this.properties.getProperty("epochs", "30"));
 		System.out.println("#### epochs: " + this.epochs );
 
@@ -162,8 +156,8 @@ public class MLLRFH extends AbstractLearner {
 	@Override
 	public void train(AVTable data) {
 		this.T = 1;
-		this.scalar = 1.0;
-		this.gamma = 0.5;
+		//this.scalar = 1.0;
+		//this.gamma = 0.5;
 		
 		for (int ep = 0; ep < this.epochs; ep++) {
 

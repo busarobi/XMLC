@@ -160,15 +160,15 @@ public class LearnerManager {
 		learner.tuneThreshold(th, validdata);
 		Map<String,Double> perf = Evaluator.computePerformanceMetrics(learner, testdata);
 
-		// evaluate (OFO)
-		th = new TTOfo( learner.m, properties );
-		learner.tuneThreshold(th, validdata);
-		Map<String,Double> perfOFO = Evaluator.computePerformanceMetrics(learner, testdata);
-
-		// evaluate (EXU)
-		th = new TTExu( learner.m, properties );
-		learner.tuneThreshold(th, validdata);
-		Map<String,Double> perfEXU = Evaluator.computePerformanceMetrics(learner, testdata);
+//		// evaluate (OFO)
+//		th = new TTOfo( learner.m, properties );
+//		learner.tuneThreshold(th, validdata);
+//		Map<String,Double> perfOFO = Evaluator.computePerformanceMetrics(learner, testdata);
+//
+//		// evaluate (EXU)
+//		th = new TTExu( learner.m, properties );
+//		learner.tuneThreshold(th, validdata);
+//		Map<String,Double> perfEXU = Evaluator.computePerformanceMetrics(learner, testdata);
 
 
 		for ( String perfName : perf.keySet() ) {
@@ -176,14 +176,14 @@ public class LearnerManager {
 		}
 
 
-		for ( String perfName : perfOFO.keySet() ) {
-			System.out.println("##### OFO" + perfName + ": "  + perfOFO.get(perfName));
-		}
-
-
-		for ( String perfName : perfEXU.keySet() ) {
-			System.out.println("##### EXU " + perfName + ": "  + perfEXU.get(perfName));
-		}
+//		for ( String perfName : perfOFO.keySet() ) {
+//			System.out.println("##### OFO" + perfName + ": "  + perfOFO.get(perfName));
+//		}
+//
+//
+//		for ( String perfName : perfEXU.keySet() ) {
+//			System.out.println("##### EXU " + perfName + ": "  + perfEXU.get(perfName));
+//		}
 
 
 		//learner.outputPosteriors("/Users/busarobi/work/XMLC/MLLogReg/valid_post.txt", validdata);
