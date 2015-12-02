@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -32,7 +33,12 @@ public class DataReader {
 		Vector<AVPair[]> vx = new Vector<AVPair[]>();
 		int max_feature_index = 0;
 		int max_label_index = 0;
-
+		
+		HashSet<Integer> hashsetFeatures = new HashSet<Integer>(); 
+		HashSet<Integer> hashsetLabels = new HashSet<Integer>(); 
+		
+		
+		
 		while(true)
 		{
 			String line = fp.readLine();
@@ -64,11 +70,15 @@ public class DataReader {
 				//System.out.println( stArr[j] );
 				if ( tokens.length == 1 ) {  // label
 					//System.out.println( tokens[0].replace(",", "") );					
-					y[indexy++]= Integer.parseInt(tokens[0].replace(",", ""));
+					y[indexy]= Integer.parseInt(tokens[0].replace(",", ""));
+					hashsetLabels.add(y[indexy]);
+					indexy++;
 				} else {  // features
 					x[indexx] = new AVPair();
 					x[indexx].index = Integer.parseInt(tokens[0])-1;         // the indexing starts at 0
-					x[indexx++].value = Double.parseDouble(tokens[1]);					
+					hashsetFeatures.add(x[indexx].index);
+					x[indexx++].value = Double.parseDouble(tokens[1]);		
+					
 				}
 			}
 			if(indexx>0) max_feature_index = Math.max(max_feature_index, x[indexx-1].index);
@@ -98,10 +108,62 @@ public class DataReader {
 		System.out.println( "    -->  num x dim: labels " 
 		           + data.n + " x "+ data.d + " : " + data.m );
 		
+		System.out.println("Number of distinct features: " + hashsetFeatures.size());
+		System.out.println("Number of distinct labels: " + hashsetLabels.size());
+		
+		
+		HashSet<Pair> hashsetPairs = new HashSet<Pair>();
+		
+		for( int i = 0; i<data.n; i++) 	{
+			for(int m=0; m<data.y[i].length; m++ ) {
+				for(int j=0; j<data.x[i].length; j++ ) {
+					Pair pair = new Pair(data.y[i][m], data.x[i][j].index);
+					hashsetPairs.add(pair);
+				}				
+			}
+			
+		}
+
+		System.out.println("Number of distinct features: " + hashsetFeatures.size());
+		System.out.println("Number of distinct labels: " + hashsetLabels.size());
+		System.out.println("Number of distinct pairs: " + hashsetPairs.size());
+
 		
 		return data;
 	}
-	
+
+		
+	class Pair {
+			
+		int label = 0;
+		int feature = 0;
+			
+		public Pair(int label, int feature) {
+			this.label = label;
+			this.feature = feature;
+		}
+					
+		public boolean equals(Object obj) {
+		
+			if(obj != null && obj instanceof Pair) {
+		      	Pair pair = (Pair) obj;
+		        if(this.label != pair.label) return false;
+		        if(this.feature != pair.feature) return false;
+		        return true;
+	        }
+	        return false;
+	    }
+			
+		public int hashCode() {
+	        int hash = 1;
+	        hash = hash * 17 + label;
+	        hash = hash * 31 + feature;
+	        return hash;
+	    }
+			
+	}
+
+		
 	public void write( String outfname, AVTable data ) throws IOException
 	{
 		BufferedWriter bf = new BufferedWriter(new FileWriter(outfname) );

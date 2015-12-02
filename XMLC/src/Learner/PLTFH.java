@@ -21,22 +21,26 @@ import threshold.ThresholdTuning;
 import util.MasterSeed;
 
 public class PLTFH extends MLLRFH {
+	
 	protected int t = 0;
-	protected double innerThreshold = 0.15;
+	//protected double innerThreshold = 0.15;
 
+	//protected double[] scalars = null;
+	
 	public PLTFH(Properties properties, StepFunction stepfunction) {
 		super(properties, stepfunction);
 
 		System.out.println("#####################################################" );
-		System.out.println("#### Leraner: PLT" );
+		System.out.println("#### Leraner: PLTFT" );
 
-		this.innerThreshold = Double.parseDouble(this.properties.getProperty("IThreshold", "0.15") );
-		System.out.println("#### Inner node threshold : " + this.innerThreshold );
-		System.out.println("#####################################################" );
+		//this.innerThreshold = Double.parseDouble(this.properties.getProperty("IThreshold", "0.15") );
+		//System.out.println("#### Inner node threshold : " + this.innerThreshold );
+		//System.out.println("#####################################################" );
 	}
 
 	@Override
 	public void allocateClassifiers(AVTable data) {
+		
 		this.traindata = data;
 		this.m = data.m;
 		this.d = data.d;
@@ -50,18 +54,15 @@ public class PLTFH extends MLLRFH {
 		System.out.println( "Num. of labels: " + this.m + " Dim: " + this.d );
 		System.out.println( "Num. of inner node of the trees: " + this.t  );
 
-		Random allocationRand = MasterSeed.nextRandom();
-
 		System.out.print( "Allocate the learners..." );
 
-		this.w = new double[this.hd]; //new DenseVector(this.hd);
+		this.w = new double[this.hd];
 		this.thresholds = new double[this.t];
-		//this.bias = new double[this.m];
-		//this.stepfunctions = new StepFunction[this.m];
-
+		this.bias = new double[this.t];
+		
+		//this.scalars = new double[this.t];
+		
 		for (int i = 0; i < this.t; i++) {
-			//this.w[i] = new DenseVector(this.hd + 1);
-			//this.stepfunctions[i] = this.stepFunction.clone();
 			this.thresholds[i] = 0.5;
 		}
 		
@@ -73,7 +74,10 @@ public class PLTFH extends MLLRFH {
 		
 	@Override
 	public void train(AVTable data) {
+		
 		this.T = 1;
+		this.scalar = 1.0;
+		this.gamma = 0.5;
 		
 		for (int ep = 0; ep < this.epochs; ep++) {
 
@@ -88,21 +92,17 @@ public class PLTFH extends MLLRFH {
 
 			for (int i = 0; i < traindata.n; i++) {
 
-				this.learningRate = 1.0 / (Math.ceil(this.T / ((double) this.step)));
+				//this.learningRate = 0.5 / (Math.ceil(this.T / ((double) this.step)));
+				this.learningRate = this.gamma / (1 + this.gamma * this.lambda * this.T);
+				//this.scalar *= (1 - this.learningRate * this.lambda);
+				this.scalar *= (1 + this.learningRate * this.lambda);
 				
 				int currIdx = indirectIdx.get(i);
 
 				HashSet<Integer> positiveTreeIndices = new HashSet<Integer>();
 				HashSet<Integer> negativeTreeIndices = new HashSet<Integer>();
 
-				//System.out.print("Positive Labels: ");
-
 				for (int j = 0; j < traindata.y[currIdx].length; j++) {
-
-					//if(j == traindata.y[currIdx].length - 1)
-					//	System.out.println(traindata.y[currIdx][j]);
-					//else
-					//	System.out.print(traindata.y[currIdx][j] + ", ");
 
 					int treeIndex = traindata.y[currIdx][j] + traindata.m - 1;
 					positiveTreeIndices.add(treeIndex);
@@ -123,8 +123,6 @@ public class PLTFH extends MLLRFH {
 
 					PriorityQueue<Integer> queue = new PriorityQueue<Integer>();
 					queue.add(0);
-
-					//System.out.print("Positive tree indices: ");
 
 					while(!queue.isEmpty()) {
 
@@ -152,12 +150,6 @@ public class PLTFH extends MLLRFH {
 							negativeTreeIndices.add(leftchild);
 						}
 
-						if(queue.isEmpty()) {
-						//	System.out.println(node);
-						} else {
-						//	System.out.print(node + ", ");
-						}
-
 					}
 				}
 
@@ -168,9 +160,8 @@ public class PLTFH extends MLLRFH {
 
 					double posterior = getPartialPosteriors(traindata.x[currIdx],j);
 					double inc = -(1.0 - posterior); 
-					//double inc = posterior - 1.0;
 
-					updatedPosteriors( currIdx, j, inc, 1.0 );
+					updatedPosteriors(currIdx, j, inc);
 				}
 
 				for(int j:negativeTreeIndices) {
@@ -178,10 +169,9 @@ public class PLTFH extends MLLRFH {
 					if(j >= this.t) System.out.println("ALARM");
 
 					double posterior = getPartialPosteriors(traindata.x[currIdx],j);
-					double inc = -(0.0 - posterior); //posterior - 1.0;
-					//double inc = posterior - 1.0;
+					double inc = -(0.0 - posterior); 
 					
-					updatedPosteriors( currIdx, j, inc, 0.0);
+					updatedPosteriors(currIdx, j, inc);
 				}
 
 				this.T++;
@@ -192,8 +182,8 @@ public class PLTFH extends MLLRFH {
 					Date date = new Date();
 					System.out.println("\t\t" + dateFormat.format(date));
 					//System.out.println("Weight: " + this.w[0].get(0) );
+					System.out.println("Scalar: " + this.scalar);
 				}
-
 			}
 
 			System.out.println("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
@@ -209,18 +199,13 @@ public class PLTFH extends MLLRFH {
 			sumW += weight;
 			index++;
 		}
-		
 		System.out.println("Hash weights (lenght, zeros, nonzeros, ratio, sumW, last nonzero): " + w.length + ", " + zeroW + ", " + (w.length - zeroW) + ", " + (double) (w.length - zeroW)/(double) w.length + ", " + sumW + ", " + maxNonZero);
-		//System.out.println(Arrays.toString(w));
-
 	}
 
 
 	public double getPartialPosteriors(AVPair[] x, int label) {
 		double posterior = super.getPosteriors(x, label);
-		
 		//System.out.println("Partial posterior: " + posterior + " Tree index: " + label);
-		
 		return posterior;
 	}
 
@@ -229,7 +214,6 @@ public class PLTFH extends MLLRFH {
 	@Override
 	public double getPosteriors(AVPair[] x, int label) {
 		double posterior = 1.0;
-
 
 		int treeIndex = label + this.m - 1;
 
@@ -241,14 +225,13 @@ public class PLTFH extends MLLRFH {
 			posterior *= getPartialPosteriors(x, treeIndex);
 
 		}
-
 		//if(posterior > 0.5) System.out.println("Posterior: " + posterior + "Label: " + label);
-		
 		return posterior;
 	}
 
 	@Override
 	public HashSet<Integer> getPositiveLabels(AVPair[] x) {
+
 		HashSet<Integer> positiveLabels = new HashSet<Integer>();
 
 		class Node {
@@ -278,9 +261,7 @@ public class PLTFH extends MLLRFH {
 
 		PriorityQueue<Node> queue = new PriorityQueue<Node>(11, nodeComparator);
 
-
 		queue.add(new Node(0,1.0));
-
 
 		while(!queue.isEmpty()) {
 
@@ -320,7 +301,6 @@ public class PLTFH extends MLLRFH {
 		for(int j = this.m - 2; j >= 0; j--) {
 			this.thresholds[j] = Math.min(this.thresholds[2*j+1], this.thresholds[2*j+2]);
 		}
-		
 	}
 
 	@Override
