@@ -66,7 +66,7 @@ public class MLLRFH extends AbstractLearner {
 		this.scalar = 1.0;
 		
 		System.out.println("#####################################################" );
-		System.out.println("#### Leraner: LogReg" );
+		System.out.println("#### Leraner: MLLRFH" );
 
 		// learning rate
 		this.gamma = Double.parseDouble(this.properties.getProperty("gamma", "1.0"));

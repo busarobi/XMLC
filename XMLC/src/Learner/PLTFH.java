@@ -51,11 +51,12 @@ public class PLTFH extends MLLRFH {
 		int seed = 1;
 		//this.hd = 50000000;//40000000;
 
+		System.out.println( "#### Num. of labels: " + this.m + " Dim: " + this.d );
+		System.out.println( "#### Num. of inner node of the trees: " + this.t  );
+		System.out.println("#####################################################" );
+		
 		this.fh = new MurmurHasher(seed, this.hd, this.t);
-
-		System.out.println( "Num. of labels: " + this.m + " Dim: " + this.d );
-		System.out.println( "Num. of inner node of the trees: " + this.t  );
-
+		
 		System.out.print( "Allocate the learners..." );
 
 		this.w = new double[this.hd];

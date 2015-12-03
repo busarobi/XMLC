@@ -22,6 +22,14 @@ public class DataReader {
 	{
 		this.fileName = fileName;
 	}
+
+	public DataReader( String fileName, boolean additionalStatistics )
+	{
+		this.fileName = fileName;
+		this.additionalStat = additionalStatistics;
+	}
+
+	
 	
 	public AVTable read() throws Exception
 	{
@@ -111,8 +119,8 @@ public class DataReader {
 		
 		
 		if ( additionalStat ) {
-			System.out.println("Number of distinct features: " + hashsetFeatures.size());
-			System.out.println("Number of distinct labels: " + hashsetLabels.size());
+			System.out.println("    -->  Number of distinct features: " + hashsetFeatures.size());
+			System.out.println("    -->  Number of distinct labels: " + hashsetLabels.size());
 			
 			
 			HashSet<Pair> hashsetPairs = new HashSet<Pair>();
@@ -127,9 +135,7 @@ public class DataReader {
 				
 			}
 	
-			System.out.println("Number of distinct features: " + hashsetFeatures.size());
-			System.out.println("Number of distinct labels: " + hashsetLabels.size());
-			System.out.println("Number of distinct pairs: " + hashsetPairs.size());
+			System.out.println("    -->  Number of distinct pairs: " + hashsetPairs.size());
 		}
 		
 		return data;

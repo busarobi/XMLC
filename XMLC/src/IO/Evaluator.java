@@ -82,7 +82,7 @@ public class Evaluator {
 			
 		}
 		
-		HL = HL / ((double)(data.n * m));
+		HL = ((HL / (double)data.n)/ (double)m);
 		
 		int presentedlabels = 0;
 		for(int i = 0; i < m; i++) {
