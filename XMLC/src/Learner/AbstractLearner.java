@@ -103,7 +103,7 @@ public abstract class AbstractLearner {
 		for( int i = 0; i < this.m; i++ ) {
 			double post = getPosteriors(x, i);
 			if ( this.thresholds[i] <= post ){
-				positiveLabels.add(new ComparablePair(i, post ));
+				positiveLabels.add(new ComparablePair(post, i ));
 			}
 		}
 

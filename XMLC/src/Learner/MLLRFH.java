@@ -95,7 +95,8 @@ public class MLLRFH extends AbstractLearner {
 		int seed = 1;
 		//this.hd = 500000;
 		
-		this.fh = new MurmurHasher(seed, this.hd, this.m);
+		//this.fh = new MurmurHasher(seed, this.hd, this.m);
+		this.fh = new UniversalHasher(seed, this.hd, this.m);
 		
 		System.out.println( "Num. of labels: " + this.m + " Dim: " + this.d + " Hash dim: " + this.hd );
 		System.out.print( "Allocate the learners..." );

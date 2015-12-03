@@ -55,7 +55,8 @@ public class PLTFH extends MLLRFH {
 		System.out.println( "#### Num. of inner node of the trees: " + this.t  );
 		System.out.println("#####################################################" );
 		
-		this.fh = new MurmurHasher(seed, this.hd, this.t);
+		//this.fh = new MurmurHasher(seed, this.hd, this.t);
+		this.fh = new UniversalHasher(seed, this.hd, this.t);
 		
 		System.out.print( "Allocate the learners..." );
 
@@ -343,7 +344,7 @@ public class PLTFH extends MLLRFH {
 
 				} else {
 
-					positiveLabels.add(new ComparablePair( node.treeIndex - this.m + 1, currentP ) );
+					positiveLabels.add(new ComparablePair( currentP, node.treeIndex - this.m + 1 ) );
 
 				}
 			}

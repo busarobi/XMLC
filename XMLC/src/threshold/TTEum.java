@@ -24,13 +24,13 @@ public class TTEum extends ThresholdTuning {
 		for( int i = 0; i < data.n; i++ ) indices[i] = 0;
 		
 		for( int i = 0; i < learner.getNumberOfLabels(); i++ ) {
-			ArrayList<ComparablePairEUM> posteriors = new ArrayList<>();
+			ArrayList<ComparablePair> posteriors = new ArrayList<>();
 			int[] labels = new int[data.n];
 			
 			for( int j = 0; j < data.n; j++ ) {
 				double post = learner.getPosteriors(data.x[j], i);
 				//System.out.println ( post );
-				ComparablePairEUM entry = new ComparablePairEUM( post, j);
+				ComparablePair entry = new ComparablePair( post, j);
 				posteriors.add(entry);
 			}
 			

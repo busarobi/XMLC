@@ -5,9 +5,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Map;
+import java.util.PriorityQueue;
 
 import Data.AVTable;
+import Data.ComparablePair;
 import Learner.AbstractLearner;
 
 public class Evaluator {
@@ -103,11 +106,58 @@ public class Evaluator {
 		return arr;
 
     }
-	
-	public void updatePerformancesBasedOnInsatance( int labels, int[] forecast )
-	{
-		
-	}
+
+    public static double[] computePrecisionAtk(AbstractLearner learner, AVTable data, int k) {
+    	double[] precisionatK = new double[k];
+    	int[] iscorrectprediction = new int[k];
+    	int[] nunmofcorrectpredictionuptok = new int[k];
+    	
+    	for(int i = 0; i < data.n; i++ ) {
+    		PriorityQueue<ComparablePair> predictedLabels = learner.getPositiveLabelsAndPosteriors(data.x[i]);
+    		
+    		Hashtable<Integer,Integer> topklabel = new Hashtable<>();
+    		for( int j = 0; j < k; j++ ){
+    			if ( predictedLabels.isEmpty() ) break;
+    			ComparablePair p = predictedLabels.poll();
+    			topklabel.put(p.getValue(), k);
+    		}
+    		
+    		for( int j = 0; j < k; j++ ) iscorrectprediction[k] = 0;
+
+			if ((data.y[i] != null) || (data.y[i].length >= 0) ) {				
+				for(int trueLabel: data.y[i]) {
+					Integer pos = topklabel.get(trueLabel);
+					if (pos != null){
+						iscorrectprediction[pos] = 1;
+					}						
+				}			
+			}
+    		
+			nunmofcorrectpredictionuptok[0] = iscorrectprediction[0];
+			for( int j = 1; j < k; j++ ) {
+				nunmofcorrectpredictionuptok[j] = nunmofcorrectpredictionuptok[j-1] + iscorrectprediction[j];
+			}
+    		
+			for( int j = 0; j < k; j++ ) {
+				precisionatK[j] += (nunmofcorrectpredictionuptok[j] / ((double) (j+1)));
+			}			
+    	}
+    	
+    	
+		for( int j = 0; j < k; j++ ) {
+			precisionatK[j] /= ((double) data.n);
+		}
+    	
+    	
+    	return precisionatK;
+    }
+    
+    
+    
+//	public void updatePerformancesBasedOnInsatance( int labels, int[] forecast )
+//	{
+//		
+//	}
 	
 	
 	public static void main(String[] args) {

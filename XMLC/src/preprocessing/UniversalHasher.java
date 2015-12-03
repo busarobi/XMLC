@@ -42,7 +42,7 @@ public class UniversalHasher implements FeatureHasher {
 		this.b = random.nextInt() % this.prime;
 
 		System.out.println("#####################################################" );
-		System.out.println("#### Murmur hash" );
+		System.out.println("#### Universal hash" );
 		System.out.println("#### Num. of hashed features: " + this.nFeatures );
 		System.out.println("#####################################################" );
 		

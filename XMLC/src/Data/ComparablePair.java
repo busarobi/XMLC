@@ -1,19 +1,20 @@
 package Data;
 
-public class ComparablePair implements Comparable<ComparablePair> {
-    private int  key;
-    private double value;
 
-    public ComparablePair( int key, double value ){
+public class ComparablePair implements Comparable<ComparablePair> {
+    private double  key;
+    private int value;
+
+    public ComparablePair( double key, int value ){
     	this.key = key;
     	this.value = value;
     }
     
-    public int getKey() {
+    public double getKey() {
         return key;
     }
 
-    public double getValue() {
+    public int getValue() {
         return value;
     }
 
@@ -22,4 +23,4 @@ public class ComparablePair implements Comparable<ComparablePair> {
 	public int compareTo(ComparablePair o) {
 		return Double.compare(this.getKey(),o.getKey());
 	}
-}
+}	
