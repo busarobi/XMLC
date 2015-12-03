@@ -41,6 +41,11 @@ public class UniversalHasher implements FeatureHasher {
 		this.a = (2*random.nextInt()-1) % this.prime;
 		this.b = random.nextInt() % this.prime;
 
+		System.out.println("#####################################################" );
+		System.out.println("#### Murmur hash" );
+		System.out.println("#### Num. of hashed features: " + this.nFeatures );
+		System.out.println("#####################################################" );
+		
 	}
 
 	boolean is_prime(int perhapsprime) {

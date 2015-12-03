@@ -156,7 +156,7 @@ public class TuneHyperParameters extends LearnerManager {
 //			hyperparameters.put("lambda1", lambda1Array);
 			
 			System.out.println("#####################################################" );
-			System.out.println("#### hyperparameter tunning " );
+			System.out.println("#### Random hyperparameter tunning " );
 
 			// number of workers
 			this.numWorkers = Integer.parseInt(this.properties.getProperty("numWorkers", "4"));

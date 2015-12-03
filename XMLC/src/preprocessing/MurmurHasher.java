@@ -19,9 +19,15 @@ public class MurmurHasher implements FeatureHasher {
 	private int nTasks;
 
 	public MurmurHasher(int seed, int nFeatures) {
+		
 		this.nFeatures = nFeatures;
 		this.hash = new HashFunction(seed, nFeatures);
 		this.sign = new HashFunction(seed + 1);
+		
+		System.out.println("#####################################################" );
+		System.out.println("#### Murmur hash" );
+		System.out.println("#### Num. of hashed features: " + this.nFeatures );
+		System.out.println("#####################################################" );
 	}
 
 	public MurmurHasher(int seed, int nFeatures, int nTasks) {
