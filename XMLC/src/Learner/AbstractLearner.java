@@ -13,6 +13,7 @@ import Data.AVPair;
 import Data.AVTable;
 import Data.ComparablePair;
 import Learner.step.StepFunction;
+import Learner.step.StepFunctionFactory;
 import threshold.ThresholdTuning;
 
 
@@ -41,6 +42,35 @@ public abstract class AbstractLearner {
 		}
 	}
 
+	
+	public static AbstractLearner learnerFactory( Properties properties ) {
+		AbstractLearner learner = null;
+		
+		StepFunction stepfunction = StepFunctionFactory.factory(properties);
+		
+		String learnerName = properties.getProperty("Learner");
+		System.out.println("--> Learner: " + learnerName);
+		if (learnerName.compareTo("MLLog")==0)
+			learner = new MLLogisticRegression(properties, stepfunction);
+		else if (learnerName.compareTo( "Constant" ) == 0)
+			learner = new ConstantLearner(properties, stepfunction);
+		else if (learnerName.compareTo("MLLogNP") == 0)
+			learner = new MLLogisticRegressionNSampling(properties, stepfunction);
+		else if (learnerName.compareTo("MLLRFH") == 0)
+			learner = new MLLRFH(properties, stepfunction);
+		else if (learnerName.compareTo("PLTFH") == 0)
+			learner = new PLTFH(properties, stepfunction);		
+		else if (learnerName.compareTo("PLT") == 0)
+			learner = new PLT(properties, stepfunction);
+		else {
+			System.err.println("Unknown learner");
+			System.exit(-1);
+		}
+				
+		return learner;		
+				
+	}
+	
 	
 	public void tuneThreshold( ThresholdTuning t, AVTable data ){
 		this.thresholds = t.validate(data, this);

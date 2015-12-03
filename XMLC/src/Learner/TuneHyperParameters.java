@@ -53,36 +53,8 @@ public class TuneHyperParameters extends LearnerManager {
 
 		@Override
 		public void run() {
-			// Create step function:
-			StepFunction stepfunction;
-			String stepName = properties.getProperty("StepFunction");
-			if (stepName.compareTo("Adam") == 0) {
-				stepfunction = new AdamStep(properties);
-			} else if (stepName.compareTo("Simple") == 0) {
-				stepfunction = new GradStep(properties);
-			} else if (stepName.compareTo("SimpleL1") == 0) {
-				stepfunction = new GradStepL1(properties);							
-			} else {
-				stepfunction = new AdamStep(properties);
-			}
-			// create the classifier and set the configuration
-			String learnerName = properties.getProperty("Learner");
-
-			if (learnerName.compareTo("MLLog")==0)
-				learner = new MLLogisticRegression(properties, stepfunction);
-			else if (learnerName.compareTo("MLLogNP") == 0)
-				learner = new MLLogisticRegressionNSampling(properties, stepfunction);
-			else if (learnerName.compareTo("MLLRFH") == 0)
-				learner = new MLLRFH(properties, stepfunction);
-			else if (learnerName.compareTo("PLTFH") == 0)
-				learner = new PLTFH(properties, stepfunction);		
-			else if (learnerName.compareTo("PLT") == 0)
-				learner = new PLT(properties, stepfunction);
-			else {
-				System.err.println("Unknown learner");
-				System.exit(-1);
-			}
-
+			this.learner = AbstractLearner.learnerFactory(properties);
+			
 			if (properties.containsKey("seed")) {
 				long seed = Long.parseLong(properties.getProperty("seed"));
 				MasterSeed.setSeed(seed);
