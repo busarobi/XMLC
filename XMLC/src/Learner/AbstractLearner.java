@@ -6,10 +6,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.HashSet;
+import java.util.PriorityQueue;
 import java.util.Properties;
 
 import Data.AVPair;
 import Data.AVTable;
+import Data.ComparablePair;
 import Learner.step.StepFunction;
 import threshold.ThresholdTuning;
 
@@ -39,6 +41,7 @@ public abstract class AbstractLearner {
 		}
 	}
 
+	
 	public void tuneThreshold( ThresholdTuning t, AVTable data ){
 		this.thresholds = t.validate(data, this);
 	}
@@ -62,6 +65,22 @@ public abstract class AbstractLearner {
 
 		return positiveLabels;
 	}
+	
+	// naive implementation checking all labels
+	public PriorityQueue<ComparablePair> getPositiveLabelsAndPosteriors(AVPair[] x) {
+		PriorityQueue<ComparablePair> positiveLabels = new PriorityQueue<>();
+
+		for( int i = 0; i < this.m; i++ ) {
+			double post = getPosteriors(x, i);
+			if ( this.thresholds[i] <= post ){
+				positiveLabels.add(new ComparablePair(i, post ));
+			}
+		}
+
+		return positiveLabels;
+	}
+	
+
 	
 	
 	public void outputPosteriors( String fname, AVTable data )

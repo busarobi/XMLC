@@ -14,6 +14,7 @@ import Learner.step.GradStep;
 import Learner.step.GradStepL1;
 import Learner.step.StepFunction;
 import preprocessing.FeatureHasher;
+import preprocessing.MurmurHasher;
 import threshold.TTEum;
 import threshold.TTExu;
 import threshold.TTOfo;
@@ -39,7 +40,7 @@ public class LearnerManager {
 
 		if (featureNum>0){
 			System.out.print( "Feature hashing (dim: " + featureNum + ")...");
-			fh = new FeatureHasher(0, featureNum);
+			fh = new MurmurHasher(0, featureNum);
 			System.out.println( "Done.");
 		}
 	}
@@ -156,8 +157,8 @@ public class LearnerManager {
 	public void compositeEvaluation()
 	{
 		// evaluate (EUM)
-		ThresholdTuning th = new TTEum( learner.m, properties );
-		learner.tuneThreshold(th, validdata);
+		//ThresholdTuning th = new TTEum( learner.m, properties );
+		//learner.tuneThreshold(th, validdata);
 		Map<String,Double> perf = Evaluator.computePerformanceMetrics(learner, testdata);
 
 //		// evaluate (OFO)

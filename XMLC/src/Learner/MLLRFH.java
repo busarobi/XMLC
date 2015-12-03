@@ -26,7 +26,9 @@ import Data.SparseVectorExt;
 import Learner.step.StepFunction;
 import jsat.linear.DenseVector;
 import jsat.linear.IndexValue;
-import preprocessing.FH;
+import preprocessing.FeatureHasher;
+import preprocessing.MurmurHasher;
+import preprocessing.UniversalHasher;
 import util.HashFunction;
 import util.MasterSeed;
 
@@ -46,7 +48,7 @@ public class MLLRFH extends AbstractLearner {
 
 	Random shuffleRand;
 	
-	protected FH fh = null;
+	protected FeatureHasher fh = null;
 	
 	protected int hd;
 
@@ -78,6 +80,9 @@ public class MLLRFH extends AbstractLearner {
 		this.epochs = Integer.parseInt(this.properties.getProperty("epochs", "30"));
 		System.out.println("#### epochs: " + this.epochs );
 
+		this.hd = Integer.parseInt(this.properties.getProperty("MLFeatureHashing", "50000000")); 
+		System.out.println("#### Num of ML hashed features: " + this.hd );
+		
 		System.out.println("#####################################################" );
 	}
 
@@ -88,9 +93,9 @@ public class MLLRFH extends AbstractLearner {
 		this.d = data.d;
 
 		int seed = 1;
-		this.hd = 500000;
+		//this.hd = 500000;
 		
-		this.fh = new FH(seed, this.hd, this.m);
+		this.fh = new MurmurHasher(seed, this.hd, this.m);
 		
 		System.out.println( "Num. of labels: " + this.m + " Dim: " + this.d + " Hash dim: " + this.hd );
 		System.out.print( "Allocate the learners..." );

@@ -28,7 +28,7 @@ public class FeatureHasherTest {
 
 	@Test
 	public void testTransformRowSparseAVPairArray() {
-		FeatureHasher fh = new FeatureHasher(1, 2);
+		FeatureHasher fh = new MurmurHasher(1, 2);
 
 		AVPair[] test = new AVPair[3];
 		test[0] = new AVPair(); test[0].index = 0; test[0].value = 0.1;
@@ -41,7 +41,7 @@ public class FeatureHasherTest {
 
 	@Test
 	public void testTransformSparse() {
-		FeatureHasher fh = new FeatureHasher(1, 2);
+		FeatureHasher fh = new MurmurHasher(1, 2);
 		AVTable result = fh.transformSparse(input);
 		assertEquals(0, result.x[0][0].index);
 		assertEquals(0.4, result.x[0][0].value, 1e-5);
@@ -53,7 +53,7 @@ public class FeatureHasherTest {
 
 	@Test
 	public void testTransformSparseMT() {
-		FeatureHasher fh = new FeatureHasher(1, 2, 2);
+		FeatureHasher fh = new MurmurHasher(1, 2, 2);
 		AVTable result = fh.transformSparse(input);
 		assertEquals(0, result.x[0][0].index);
 		assertEquals(-0.7, result.x[0][0].value, 1e-5);

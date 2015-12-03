@@ -14,9 +14,11 @@ import java.util.Random;
 
 import Data.AVPair;
 import Data.AVTable;
+import Data.ComparablePair;
 import Learner.step.StepFunction;
 import jsat.linear.DenseVector;
-import preprocessing.FH;
+import preprocessing.MurmurHasher;
+import preprocessing.UniversalHasher;
 import threshold.ThresholdTuning;
 import util.MasterSeed;
 
@@ -47,9 +49,9 @@ public class PLTFH extends MLLRFH {
 		this.t = 2 * this.m - 1;
 
 		int seed = 1;
-		this.hd = 50000000;//40000000;
+		//this.hd = 50000000;//40000000;
 
-		this.fh = new FH(seed, this.hd, this.t);
+		this.fh = new MurmurHasher(seed, this.hd, this.t);
 
 		System.out.println( "Num. of labels: " + this.m + " Dim: " + this.d );
 		System.out.println( "Num. of inner node of the trees: " + this.t  );
@@ -289,6 +291,69 @@ public class PLTFH extends MLLRFH {
 		return positiveLabels;
 	}
 
+	
+	@Override
+	public PriorityQueue<ComparablePair> getPositiveLabelsAndPosteriors(AVPair[] x) {
+		PriorityQueue<ComparablePair> positiveLabels = new PriorityQueue<>();
+
+		class Node {
+
+			int treeIndex;
+			double p;
+
+			Node(int treeIndex, double p) {
+				this.treeIndex = treeIndex;
+				this.p = p;
+			}
+
+			@Override
+			public String toString() {
+				return new String("(" + this.treeIndex + ", " + this.p + ")");
+			}
+		};
+
+		class NodeComparator implements Comparator<Node> {
+	        @Override
+			public int compare(Node n1, Node n2) {
+	        	return (n1.p > n2.p) ? 1 : -1;
+	        }
+	    } ;
+
+	    NodeComparator nodeComparator = new NodeComparator();
+
+		PriorityQueue<Node> queue = new PriorityQueue<Node>(11, nodeComparator);
+
+		queue.add(new Node(0,1.0));
+
+		while(!queue.isEmpty()) {
+
+			Node node = queue.poll();
+
+			double currentP = node.p * getPartialPosteriors(x, node.treeIndex);
+
+			if(currentP > this.thresholds[node.treeIndex]) {
+
+				if(node.treeIndex < this.m - 1) {
+					int leftchild = 2 * node.treeIndex + 1;
+					int rightchild = 2 * node.treeIndex + 2;
+
+					queue.add(new Node(leftchild, currentP));
+					queue.add(new Node(rightchild, currentP));
+
+				} else {
+
+					positiveLabels.add(new ComparablePair( node.treeIndex - this.m + 1, currentP ) );
+
+				}
+			}
+		}
+
+		//System.out.println("Predicted labels: " + positiveLabels.toString());
+
+		return positiveLabels;
+	}
+	
+	
 	
 	public void setThresholds(double[] t) {
 		

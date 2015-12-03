@@ -9,7 +9,7 @@ import Data.ComparablePair;
 import Learner.AbstractLearner;
 
 public class TTEum extends ThresholdTuning {
-
+		
 	public TTEum(int m, Properties properties) {
 		super(m, properties );		
 	}
@@ -24,13 +24,13 @@ public class TTEum extends ThresholdTuning {
 		for( int i = 0; i < data.n; i++ ) indices[i] = 0;
 		
 		for( int i = 0; i < learner.getNumberOfLabels(); i++ ) {
-			ArrayList<ComparablePair> posteriors = new ArrayList<>();
+			ArrayList<ComparablePairEUM> posteriors = new ArrayList<>();
 			int[] labels = new int[data.n];
 			
 			for( int j = 0; j < data.n; j++ ) {
 				double post = learner.getPosteriors(data.x[j], i);
 				//System.out.println ( post );
-				ComparablePair entry = new ComparablePair( post, j);
+				ComparablePairEUM entry = new ComparablePairEUM( post, j);
 				posteriors.add(entry);
 			}
 			

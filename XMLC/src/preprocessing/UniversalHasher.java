@@ -2,9 +2,11 @@ package preprocessing;
 
 import java.util.Random;
 
+import Data.AVPair;
+import Data.AVTable;
 import util.HashFunction;
 
-public class FH {
+public class UniversalHasher implements FeatureHasher {
 
 
 	private int seed = 0;
@@ -17,7 +19,7 @@ public class FH {
 	private int b = 1;
 	private int a = 1;
 	
-	public FH(int seed, int nFeatures, int nTasks) {
+	public UniversalHasher(int seed, int nFeatures, int nTasks) {
 		
 		
 		this.seed = seed;
@@ -84,9 +86,29 @@ public class FH {
 	
 	
 	public int getIndex(int label, int feature) {
-		return (Math.abs((feature*this.nTasks + label) + this.b) % this.prime) % this.nFeatures;
+		//return (Math.abs((feature*this.nTasks + label) + this.b) % this.prime) % this.nFeatures;
+		return Math.abs(Math.abs((feature*this.nTasks + label) + this.b) % this.prime) % this.nFeatures;
+		
 		//return (Math.abs((feature*this.nTasks + label))) % this.nFeatures;
 		//return this.taskhash[label].hash(feature);
+	}
+
+	@Override
+	public AVPair[] transformRowSparse(AVPair[] row) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AVPair[] transformRowSparse(AVPair[] row, int taskid) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public AVTable transformSparse(AVTable data) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 

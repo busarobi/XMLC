@@ -29,6 +29,8 @@ import util.MasterSeed;
 public class TuneHyperParameters extends LearnerManager {
 	protected HashMap<String, List<String> > hyperparameters = new HashMap<String, List<String> >();
 	protected Random rand = new Random();
+	protected int numWorkers = 8;
+	protected int numOfTrials = 100;
 
 
 	class SimpleThread implements Runnable {
@@ -110,6 +112,7 @@ public class TuneHyperParameters extends LearnerManager {
 				System.out.println("##### Test " + perfName + ": "  + perf.get(perfName));
 				this.info += "##### Test" + perfName + ": "  + perf.get(perfName) + "\n";
 			}
+			learner = null;
 			ready = true;
 		}
 		public String getInfo() {
@@ -146,10 +149,6 @@ public class TuneHyperParameters extends LearnerManager {
 		super(pfname);
 		try{
 
-			this.readTrainData();
-			this.readValidData();
-			this.readTestData();
-
 			// gamma
 			List<String> gammaArray = Arrays.asList("100.0","70.0","50.0","40.0","30.0","20.0","10.0","5.0","1.0","0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001");
 			hyperparameters.put("gamma", gammaArray);
@@ -184,6 +183,18 @@ public class TuneHyperParameters extends LearnerManager {
 //			List<String> lambda1Array = Arrays.asList("0.1","0.01","0.005","0.001","0.0001","0.00001","0.000001","0.0000001","0.00000001", "0.0");			
 //			hyperparameters.put("lambda1", lambda1Array);
 			
+			System.out.println("#####################################################" );
+			System.out.println("#### hyperparameter tunning " );
+
+			// number of workers
+			this.numWorkers = Integer.parseInt(this.properties.getProperty("numWorkers", "4"));
+			System.out.println("#### num of workers: " + this.numWorkers );
+
+			// number of workers
+			this.numOfTrials = Integer.parseInt(this.properties.getProperty("numOfTrials", "100"));
+			System.out.println("#### num of trials: " + this.numOfTrials );
+
+			System.out.println("#####################################################" );
 			
 		} catch (Exception e ){
 			System.out.println(e.getMessage());
@@ -222,13 +233,16 @@ public class TuneHyperParameters extends LearnerManager {
 
 	public void run (String fname) throws Exception{
 
-		int numWorkers = 8;
-		int numOfTrial = 100;
+		
+		this.readTrainData();
+		this.readValidData();
+		this.readTestData();
 
-		ExecutorService executor = Executors.newFixedThreadPool(numWorkers);//creating a pool of 5 threads
-		SimpleThread[] workers = new SimpleThread[numOfTrial];
 
-		for( int hpi = 0; hpi < numOfTrial; hpi++ ){
+		ExecutorService executor = Executors.newFixedThreadPool(this.numWorkers);//creating a pool of 5 threads
+		SimpleThread[] workers = new SimpleThread[numOfTrials];
+
+		for( int hpi = 0; hpi < numOfTrials; hpi++ ){
 			Properties prop = getUpdatedProperties();
 			String info = getInfoString(prop);
 
