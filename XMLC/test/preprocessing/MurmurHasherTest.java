@@ -8,7 +8,7 @@ import org.junit.Test;
 import Data.AVPair;
 import Data.AVTable;
 
-public class FeatureHasherTest {
+public class MurmurHasherTest {
 
 	private AVTable input;
 
