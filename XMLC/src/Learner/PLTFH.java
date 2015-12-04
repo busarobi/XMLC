@@ -231,33 +231,35 @@ public class PLTFH extends MLLRFH {
 		return posterior;
 	}
 
+	class Node {
+
+		int treeIndex;
+		double p;
+
+		Node(int treeIndex, double p) {
+			this.treeIndex = treeIndex;
+			this.p = p;
+		}
+
+		@Override
+		public String toString() {
+			return new String("(" + this.treeIndex + ", " + this.p + ")");
+		}
+	};
+
+	class NodeComparator implements Comparator<Node> {
+        @Override
+		public int compare(Node n1, Node n2) {
+        	return (n1.p > n2.p) ? 1 : -1;
+        }
+    } ;
+	
+	
 	@Override
 	public HashSet<Integer> getPositiveLabels(AVPair[] x) {
 
 		HashSet<Integer> positiveLabels = new HashSet<Integer>();
 
-		class Node {
-
-			int treeIndex;
-			double p;
-
-			Node(int treeIndex, double p) {
-				this.treeIndex = treeIndex;
-				this.p = p;
-			}
-
-			@Override
-			public String toString() {
-				return new String("(" + this.treeIndex + ", " + this.p + ")");
-			}
-		};
-
-		class NodeComparator implements Comparator<Node> {
-	        @Override
-			public int compare(Node n1, Node n2) {
-	        	return (n1.p > n2.p) ? 1 : -1;
-	        }
-	    } ;
 
 	    NodeComparator nodeComparator = new NodeComparator();
 
@@ -298,29 +300,6 @@ public class PLTFH extends MLLRFH {
 	public PriorityQueue<ComparablePair> getPositiveLabelsAndPosteriors(AVPair[] x) {
 		PriorityQueue<ComparablePair> positiveLabels = new PriorityQueue<>();
 
-		class Node {
-
-			int treeIndex;
-			double p;
-
-			Node(int treeIndex, double p) {
-				this.treeIndex = treeIndex;
-				this.p = p;
-			}
-
-			@Override
-			public String toString() {
-				return new String("(" + this.treeIndex + ", " + this.p + ")");
-			}
-		};
-
-		class NodeComparator implements Comparator<Node> {
-	        @Override
-			public int compare(Node n1, Node n2) {
-	        	return (n1.p > n2.p) ? 1 : -1;
-	        }
-	    } ;
-
 	    NodeComparator nodeComparator = new NodeComparator();
 
 		PriorityQueue<Node> queue = new PriorityQueue<Node>(11, nodeComparator);
@@ -360,29 +339,6 @@ public class PLTFH extends MLLRFH {
 	public int[] getTopkLabels(AVPair[] x, int k) {
 		int[] positiveLabels = new int[k];
 		int indi =0;
-
-		class Node {
-
-			int treeIndex;
-			double p;
-
-			Node(int treeIndex, double p) {
-				this.treeIndex = treeIndex;
-				this.p = p;
-			}
-
-			@Override
-			public String toString() {
-				return new String("(" + this.treeIndex + ", " + this.p + ")");
-			}
-		};
-
-		class NodeComparator implements Comparator<Node> {
-	        @Override
-			public int compare(Node n1, Node n2) {
-	        	return (n1.p > n2.p) ? 1 : -1;
-	        }
-	    } ;
 
 	    NodeComparator nodeComparator = new NodeComparator();
 

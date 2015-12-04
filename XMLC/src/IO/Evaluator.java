@@ -86,7 +86,7 @@ public class Evaluator {
 		}
 				
 		HL = HL / ((double)data.n);
-		double normalizedHL = ((HL / (double)data.n)/ (double)m);
+		double normalizedHL = (HL / (double)m);
 		
 		
 		int presentedlabels = 0;
