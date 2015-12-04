@@ -123,16 +123,19 @@ public class MLLRFH extends AbstractLearner {
 		for(int i = 0; i < n; i++) {
 
 			int index = fh.getIndex(label, traindata.x[currIdx][i].index);
+			int sign = fh.getSign(label, traindata.x[currIdx][i].index);
+			//System.out.println(sign);
 			//double gradient = inc * traindata.x[currIdx][i].value; 
 			//double update = this.learningRate * gradient;
 			//this.w[index] -= update; 
 			
-			double gradient = this.scalar * inc * traindata.x[currIdx][i].value;
+			double gradient = this.scalar * inc * (traindata.x[currIdx][i].value * sign);
 			double update = (this.learningRate * gradient);// / this.scalar;		
 			this.w[index] -= update; 
 			//System.out.println("w -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
 			
 		}
+		
 		
 		// Include bias term in weight vector:
 		//int biasIndex = fh.getIndex(label, -1);
@@ -235,13 +238,14 @@ public class MLLRFH extends AbstractLearner {
 		
 		
 		for (int i = 0; i < x.length; i++) {
-		
+			
 			int hi = fh.getIndex(label,  x[i].index); 
+			int sign = fh.getSign(label, x[i].index);
 			//posterior += x[i].value * this.w[hi];
 			//posterior += x[i].value * this.scalar * this.w[hi];
-			posterior += x[i].value * (1/this.scalar) * this.w[hi];
+			posterior += (x[i].value *sign) * (1/this.scalar) * this.w[hi];
 		}
-
+		
 		//int hi = fh.getIndex(label,  -1);
 		//posterior += this.w[hi];
 		//posterior += (this.scalar) * this.bias[label]; //this.w[hi];

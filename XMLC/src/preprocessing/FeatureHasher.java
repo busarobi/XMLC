@@ -9,5 +9,6 @@ public interface FeatureHasher {
 	public AVPair[] transformRowSparse(AVPair[] row, int taskid);
 	public AVTable transformSparse(AVTable data);
 	public int getIndex(int task, int feature);
+	public int getSign( int task, int feature );
 	
 }

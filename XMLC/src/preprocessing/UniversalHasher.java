@@ -18,6 +18,8 @@ public class UniversalHasher implements FeatureHasher {
 	private int prime = 1;
 	private int b = 1;
 	private int a = 1;
+	private int c = 1;
+	private int d = 1;
 	
 	public UniversalHasher(int seed, int nFeatures, int nTasks) {
 		
@@ -41,6 +43,9 @@ public class UniversalHasher implements FeatureHasher {
 		this.a = (2*random.nextInt()-1) % this.prime;
 		this.b = random.nextInt() % this.prime;
 
+		this.c = (2*random.nextInt()-1) % this.prime;
+		this.d = random.nextInt() % this.prime;		
+		
 		System.out.println("#####################################################" );
 		System.out.println("#### Universal hash" );
 		System.out.println("#### Num. of hashed features: " + this.nFeatures );
@@ -98,6 +103,13 @@ public class UniversalHasher implements FeatureHasher {
 		//return this.taskhash[label].hash(feature);
 	}
 
+	
+	public int getSign(int label, int feature) {
+		int value = (Math.abs((feature*this.nTasks + label) + this.d) % this.prime) % this.nFeatures;
+		return (int) ((value % 2) * 2 - 1);
+	}	
+		
+	
 	@Override
 	public AVPair[] transformRowSparse(AVPair[] row) {
 		// TODO Auto-generated method stub

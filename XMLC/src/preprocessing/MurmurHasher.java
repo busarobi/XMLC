@@ -116,6 +116,10 @@ public class MurmurHasher implements FeatureHasher {
 		return result;
 	}
 
+	public int getSign( int task, int feature ) {
+		return this.tasksign[task].hash(feature);
+	}
+	
 	public int getIndex(int task, int feature) {
 		return this.taskhash[task].hash(feature);
 	}
