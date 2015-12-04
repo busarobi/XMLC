@@ -84,8 +84,10 @@ public class Evaluator {
 			}
 			
 		}
+				
+		HL = HL / ((double)data.n);
+		double normalizedHL = ((HL / (double)data.n)/ (double)m);
 		
-		HL = ((HL / (double)data.n)/ (double)m);
 		
 		int presentedlabels = 0;
 		for(int i = 0; i < m; i++) {
@@ -97,11 +99,15 @@ public class Evaluator {
 			}
 		}
 		
-		macroF = macroF/(double) presentedlabels;
+		double normalizedmacroF = macroF/(double) presentedlabels;
 		
 		Map<String,Double> arr = new HashMap<String,Double>();
-		arr.put("Hamming loss", HL);
-		arr.put("macro F-measure", macroF);
+		arr.put(" Hamming loss", HL);
+		arr.put(" macro F-measure", macroF);
+		arr.put(" Normalized macro F-measue (with presented labels)", normalizedmacroF);
+		arr.put(" Normalized Hamming loss (with learner.m)", normalizedHL );
+		arr.put( " learner.m", (double) m);
+		arr.put( " Num of presented labels", (double) presentedlabels);
 		
 		return arr;
 

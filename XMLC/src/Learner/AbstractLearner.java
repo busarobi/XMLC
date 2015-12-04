@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Properties;
@@ -110,7 +111,23 @@ public abstract class AbstractLearner {
 		return positiveLabels;
 	}
 	
-
+	public int[] getTopkLabels(AVPair[] x, int k) {
+		PriorityQueue<ComparablePair> pq = new PriorityQueue<ComparablePair>();
+		
+		for( int i = 0; i < this.m; i++ ) {
+			double post = this.getPosteriors(x, i);
+			pq.add(new ComparablePair(post, i));
+		}
+		
+		
+		int[] labels = new int[k];
+		for( int i=0; i<k; i++ ){
+			ComparablePair p = pq.poll();
+			labels[i] = p.getValue();
+		}
+		
+		return labels;
+	}
 	
 	
 	public void outputPosteriors( String fname, AVTable data )
