@@ -70,12 +70,13 @@ public class TuneHyperParameters extends LearnerManager {
 
 			Map<String,Double> perfv = Evaluator.computePerformanceMetrics(learner, validdata);
 
+			this.info += "#### Valid:\n";
 			// generate result
 			for ( String perfName : perfv.keySet() ) {
 				System.out.println("##### Valid " + perfName + ": "  + perfv.get(perfName));
 				this.info += "##### Valid" + perfName + ": "  + perfv.get(perfName) + "\n";
 			}
-			
+			this.info += "#### Test:\n";
 			
 			Map<String,Double> perf = Evaluator.computePerformanceMetrics(learner, testdata);
 

@@ -109,6 +109,13 @@ public class Evaluator {
 		arr.put( " learner.m", (double) m);
 		arr.put( " Num of presented labels", (double) presentedlabels);
 		
+		int pk = 5;
+		double[] precAt = computePrecisionAtk(learner, data, pk);
+		
+		for(int i=0; i < pk; i++){
+			arr.put( "PrecAtK["+(i+1)+"]", precAt[i] );
+		}
+		
 		return arr;
 
     }
@@ -125,10 +132,10 @@ public class Evaluator {
     		for( int j = 0; j < k; j++ ){
     			if ( predictedLabels.isEmpty() ) break;
     			ComparablePair p = predictedLabels.poll();
-    			topklabel.put(p.getValue(), k);
+    			topklabel.put(p.getValue(), j);
     		}
     		
-    		for( int j = 0; j < k; j++ ) iscorrectprediction[k] = 0;
+    		for( int j = 0; j < k; j++ ) iscorrectprediction[j] = 0;
 
 			if ((data.y[i] != null) || (data.y[i].length >= 0) ) {				
 				for(int trueLabel: data.y[i]) {
