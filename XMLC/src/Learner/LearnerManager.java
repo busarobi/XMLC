@@ -16,6 +16,7 @@ import Learner.step.StepFunction;
 import preprocessing.FeatureHasher;
 import preprocessing.MurmurHasher;
 import threshold.TTEum;
+import threshold.TTEumFast;
 import threshold.TTExu;
 import threshold.TTOfo;
 import threshold.ThresholdTuning;
@@ -127,15 +128,15 @@ public class LearnerManager {
 
 	public void compositeEvaluation()
 	{
-		Map<String,Double> perfv = Evaluator.computePerformanceMetrics(learner, validdata);
-		for ( String perfName : perfv.keySet() ) {
-			System.out.println("##### EUM" + perfName + ": "  + perfv.get(perfName));
-		}
+//		Map<String,Double> perfv = Evaluator.computePerformanceMetrics(learner, validdata);
+//		for ( String perfName : perfv.keySet() ) {
+//			System.out.println("##### EUM" + perfName + ": "  + perfv.get(perfName));
+//		}
 		
 		
 		// evaluate (EUM)
-		//ThresholdTuning th = new TTEum( learner.m, properties );
-		//learner.tuneThreshold(th, validdata);
+		ThresholdTuning th = new TTEumFast( learner.m, properties );
+		learner.tuneThreshold(th, validdata);
 		Map<String,Double> perf = Evaluator.computePerformanceMetrics(learner, testdata);
 
 //		// evaluate (OFO)

@@ -13,6 +13,7 @@ import java.util.Properties;
 import Data.AVPair;
 import Data.AVTable;
 import Data.ComparablePair;
+import Data.EstimatePair;
 import Learner.step.StepFunction;
 import Learner.step.StepFunctionFactory;
 import threshold.ThresholdTuning;
@@ -156,6 +157,17 @@ public abstract class AbstractLearner {
 		
 	}
 	
+	public HashSet<EstimatePair> getSparseProbabilityEstimates(AVPair[] x, double threshold) {
+		
+		HashSet<EstimatePair> positiveLabels = new HashSet<EstimatePair>();
+		
+		for(int i = 0; i < this.m; i++) {
+			double p = getPosteriors(x, i);
+			positiveLabels.add(new EstimatePair(i, p));
+		}
+		
+		return positiveLabels;
+	}
 	
 		
 	public Properties getProperties() {

@@ -1,11 +1,13 @@
 package Learner;
 
+import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Properties;
 
 import Data.AVPair;
 import Data.AVTable;
 import Data.ComparablePair;
+import Data.EstimatePair;
 import Learner.step.StepFunction;
 
 public class ConstantLearner extends AbstractLearner {
@@ -18,6 +20,11 @@ public class ConstantLearner extends AbstractLearner {
 	public int getPrediction(AVPair[] x, int label){
 		return 0;
 	}
+	
+	public HashSet<EstimatePair> getSparseProbabilityEstimates(AVPair[] x, double threshold){
+		return new HashSet<EstimatePair>();
+	}
+	
 	
 	// naive implementation checking all labels
 	public PriorityQueue<ComparablePair> getPositiveLabelsAndPosteriors(AVPair[] x) {

@@ -15,6 +15,7 @@ import java.util.Random;
 import Data.AVPair;
 import Data.AVTable;
 import Data.ComparablePair;
+import Data.EstimatePair;
 import Learner.step.StepFunction;
 import jsat.linear.DenseVector;
 import preprocessing.MurmurHasher;
@@ -75,6 +76,16 @@ public class PLTFH extends MLLRFH {
 		System.out.println( "Done." );
 	}
 
+	
+	protected ArrayList<Integer> shuffleIndex() {
+		ArrayList<Integer> indirectIdx = new ArrayList<Integer>(this.traindata.n);
+		for (int i = 0; i < this.traindata.n; i++) {
+			indirectIdx.add(new Integer(i));
+		}
+		Collections.shuffle(indirectIdx, shuffleRand);
+		return indirectIdx;
+	}
+	
 		
 	@Override
 	public void train(AVTable data) {
@@ -85,13 +96,9 @@ public class PLTFH extends MLLRFH {
 
 			System.out.println("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 			// random permutation
-			ArrayList<Integer> indirectIdx = new ArrayList<Integer>();
-			for (int i = 0; i < this.traindata.n; i++) {
-				indirectIdx.add(new Integer(i));
-			}
-
-			Collections.shuffle(indirectIdx);
-
+			ArrayList<Integer> indirectIdx = this.shuffleIndex();
+			
+			
 			for (int i = 0; i < traindata.n; i++) {
 
 				//this.learningRate = 0.5 / (Math.ceil(this.T / ((double) this.step)));
@@ -401,6 +408,46 @@ public class PLTFH extends MLLRFH {
 		//WRONG!!!
 		//this.t = (this.w.length-1)/2;
 	}
+	@Override
+	public HashSet<EstimatePair> getSparseProbabilityEstimates(AVPair[] x, double threshold) {
+
+		HashSet<EstimatePair> positiveLabels = new HashSet<EstimatePair>();
+
+	    NodeComparator nodeComparator = new NodeComparator();
+
+		PriorityQueue<Node> queue = new PriorityQueue<Node>(11, nodeComparator);
+
+		queue.add(new Node(0,1.0));
+
+		while(!queue.isEmpty()) {
+
+			Node node = queue.poll();
+
+			double currentP = node.p * getPartialPosteriors(x, node.treeIndex);
+
+			if(currentP > threshold) {
+
+				if(node.treeIndex < this.m - 1) {
+
+					int leftchild = 2 * node.treeIndex + 1;
+					int rightchild = 2 * node.treeIndex + 2;
+
+					queue.add(new Node(leftchild, currentP));
+					queue.add(new Node(rightchild, currentP));
+
+				} else {
+
+					positiveLabels.add(new EstimatePair(node.treeIndex - this.m + 1, currentP));
+
+				}
+			}
+		}
+
+		//System.out.println("Predicted labels: " + positiveLabels.toString());
+
+		return positiveLabels;
+	}
+
 
 
 }
