@@ -20,7 +20,7 @@ public class TTEumFast extends ThresholdTuning {
 	@Override
 	public double[] validate(AVTable data, AbstractLearner learner) {
 		
-		double minThreshold = 0.001;
+		double minThreshold = 0.0001;
 		
 		thresholds = new double[this.m];
 		
@@ -30,7 +30,7 @@ public class TTEumFast extends ThresholdTuning {
 		//int[] indices = new int[data.n];
 		//for( int i = 0; i < data.n; i++ ) indices[i] = 0;
 		
-		ArrayList<ComparableTriplet> []posteriors = new ArrayList[learner.getNumberOfLabels()];
+		ArrayList<ComparableTriplet>[] posteriors = new ArrayList[learner.getNumberOfLabels()];
 		int [] numPositives = new int[learner.getNumberOfLabels()];
 		
 		for( int j = 0; j < data.n; j++ ) {

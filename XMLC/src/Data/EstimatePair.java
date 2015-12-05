@@ -1,6 +1,6 @@
 package Data;
 
-public class EstimatePair {
+public class EstimatePair implements Comparable<ComparablePair> {
     private double  p;
     private int label;
 
@@ -37,4 +37,14 @@ public class EstimatePair {
 
 	}
 
+	public double getKey() {
+		return this.p;
+	}
+	
+	@Override
+	public int compareTo(ComparablePair o) {
+		return Double.compare(this.getKey(),o.getKey());
+	}
+	
+	
 }

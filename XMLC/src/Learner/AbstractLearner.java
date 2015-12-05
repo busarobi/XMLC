@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Properties;
+import java.util.TreeSet;
 
 import Data.AVPair;
 import Data.AVTable;
@@ -163,12 +164,28 @@ public abstract class AbstractLearner {
 		
 		for(int i = 0; i < this.m; i++) {
 			double p = getPosteriors(x, i);
-			positiveLabels.add(new EstimatePair(i, p));
+			if (p > threshold) 
+				positiveLabels.add(new EstimatePair(i, p));
 		}
 		
 		return positiveLabels;
 	}
 	
+	public TreeSet<EstimatePair> getTopKEstimates(AVPair[] x, int k) {
+		TreeSet<EstimatePair> positiveLabels = new TreeSet<EstimatePair>();
+		
+		for(int i = 0; i < this.m; i++) {
+			double p = getPosteriors(x, i);			 
+			positiveLabels.add(new EstimatePair(i, p));
+		}
+		
+		while( positiveLabels.size()>=k){			
+			positiveLabels.pollLast();
+		}
+					
+		return positiveLabels;
+		
+	}
 		
 	public Properties getProperties() {
 		return properties;

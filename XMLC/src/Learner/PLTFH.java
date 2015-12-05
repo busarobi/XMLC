@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Properties;
 import java.util.Random;
+import java.util.TreeSet;
 
 import Data.AVPair;
 import Data.AVTable;
@@ -450,4 +451,48 @@ public class PLTFH extends MLLRFH {
 
 
 
+	public TreeSet<EstimatePair> getTopKEstimates(AVPair[] x, int k) {
+
+		TreeSet<EstimatePair> positiveLabels = new TreeSet<EstimatePair>();
+
+	    int foundTop = 0;
+	    
+	    NodeComparator nodeComparator = new NodeComparator();
+
+		PriorityQueue<Node> queue = new PriorityQueue<Node>(11, nodeComparator);
+
+		queue.add(new Node(0,1.0));
+
+		while(!queue.isEmpty() || (foundTop < k)) {
+
+			Node node = queue.poll();
+
+			double currentP = node.p * getPartialPosteriors(x, node.treeIndex);
+
+			//if(currentP > threshold) {
+
+				if(node.treeIndex < this.m - 1) {
+
+					int leftchild = 2 * node.treeIndex + 1;
+					int rightchild = 2 * node.treeIndex + 2;
+
+					queue.add(new Node(leftchild, currentP));
+					queue.add(new Node(rightchild, currentP));
+
+				} else {
+
+					positiveLabels.add(new EstimatePair(node.treeIndex - this.m + 1, currentP));
+					foundTop++;
+				}
+			//}
+		}
+
+		//System.out.println("Predicted labels: " + positiveLabels.toString());
+
+		return positiveLabels;
+	}
+	
+		
+	
+	
 }
