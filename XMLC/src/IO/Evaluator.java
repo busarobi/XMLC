@@ -8,9 +8,12 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.PriorityQueue;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import Data.AVTable;
 import Data.ComparablePair;
+import Data.EstimatePair;
 import Learner.AbstractLearner;
 
 public class Evaluator {
@@ -36,6 +39,9 @@ public class Evaluator {
 			
 
 			HashSet<Integer> predictedLabels = learner.getPositiveLabels(data.x[i]);
+			
+			//System.out.println("Predicted labels: " + predictedLabels.toString());
+			
 			int predpositloc = predictedLabels.size(); 
 			numOfPositives += predpositloc;
 			// Hamming
@@ -101,11 +107,9 @@ public class Evaluator {
 		
 		double normalizedmacroF = macroF/(double) presentedlabels;
 		
-		Map<String,Double> arr = new HashMap<String,Double>();
+		TreeMap<String,Double> arr = new TreeMap<String,Double>();
 		arr.put(" Hamming loss", HL);
 		arr.put(" macro F-measure", macroF);
-		arr.put(" Normalized macro F-measue (with presented labels)", normalizedmacroF);
-		arr.put(" Normalized Hamming loss (with learner.m)", normalizedHL );
 		arr.put( " learner.m", (double) m);
 		arr.put( " Num of presented labels", (double) presentedlabels);
 		
@@ -115,11 +119,89 @@ public class Evaluator {
 		for(int i=0; i < pk; i++){
 			arr.put( "PrecAtK["+(i+1)+"]", precAt[i] );
 		}
+
+		arr.put(" Normalized macro F-measue (with presented labels)", normalizedmacroF);
+		arr.put(" Normalized Hamming loss (with learner.m)", normalizedHL );
+
 		
 		return arr;
 
     }
 
+    public static double[] computePrecisionAtk(AbstractLearner learner, AVTable data, int k) {
+    	double[] precisionatK = new double[k];
+    	
+    	int [] numLabels = new int [data.m];
+    	
+    	for(int i = 0; i < data.n; i++ ) {
+    		TreeSet<EstimatePair> predictedLabels = learner.getTopKEstimates(data.x[i], k); //.getPositiveLabelsAndPosteriors(data.x[i]);
+    		
+    		
+    		HashSet<Integer> trueLabels = new HashSet<Integer>();
+			
+			for(int m = 0; m < data.y[i].length; m++) {
+				trueLabels.add(data.y[i][m]);
+				numLabels[data.y[i][m]]++;
+			}
+			
+    		
+    		//Hashtable<Integer,Integer> topklabel = new Hashtable<>();
+    		//for( int j = 0; j < k; j++ ){
+    		//	if ( predictedLabels.isEmpty() ) break;
+    		//	ComparablePair p = predictedLabels.poll();
+    		//	topklabel.put(p.getValue(), j);
+    		//}
+    		
+    		//for( int j = 0; j < k; j++ ) iscorrectprediction[j] = 0;
+
+			int[] iscorrectprediction = new int[k];
+	    	int[] nunmofcorrectpredictionuptok = new int[k];
+	    	
+			int index = 0;
+			while(!predictedLabels.isEmpty()) {
+				
+				EstimatePair eP = predictedLabels.pollFirst();
+				
+				int label = eP.getLabel();
+				double p = eP.getP();
+				
+				//System.out.println(index + " label: " + label + " p: " + p);
+				
+				if(trueLabels.contains(label)) {
+					iscorrectprediction[index]++;
+				}
+				
+				index++;
+				
+			}
+			
+			nunmofcorrectpredictionuptok[0] = iscorrectprediction[0];
+			for( int j = 1; j < k; j++ ) {
+				nunmofcorrectpredictionuptok[j] = nunmofcorrectpredictionuptok[j-1] + iscorrectprediction[j];
+			}
+			
+			for( int j = 0; j < k; j++ ) {
+				precisionatK[j] += (nunmofcorrectpredictionuptok[j] / ((double) (j+1)));
+			}			
+
+    	}
+		
+		
+    	
+		for( int j = 0; j < k; j++ ) {
+			precisionatK[j] /= ((double) data.n);
+		}
+    	
+    	
+		//for(int i = 0; i < numLabels.length; i++) {
+		//	System.out.println("Label: " + i + " num: " + numLabels[i]);
+		//}
+		//System.out.println("Num instances: " + data.n);
+		
+    	return precisionatK;
+    }
+
+    /* 
     public static double[] computePrecisionAtk(AbstractLearner learner, AVTable data, int k) {
     	double[] precisionatK = new double[k];
     	int[] iscorrectprediction = new int[k];
@@ -164,7 +246,7 @@ public class Evaluator {
     	
     	return precisionatK;
     }
-    
+    */
     
     
 //	public void updatePerformancesBasedOnInsatance( int labels, int[] forecast )

@@ -20,7 +20,7 @@ public class TTEumFast extends ThresholdTuning {
 	@Override
 	public double[] validate(AVTable data, AbstractLearner learner) {
 		
-		double minThreshold = 0.0001;
+		double minThreshold = 0.001;
 		
 		thresholds = new double[this.m];
 		
