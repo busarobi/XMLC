@@ -258,7 +258,7 @@ public class PLTFH extends MLLRFH {
 	class NodeComparator implements Comparator<Node> {
         @Override
 		public int compare(Node n1, Node n2) {
-        	return (n1.p > n2.p) ? 1 : -1;
+        	return (n1.p < n2.p) ? 1 : -1;
         }
     } ;
 	
@@ -342,7 +342,7 @@ public class PLTFH extends MLLRFH {
 		return positiveLabels;
 	}
 	
-
+	
 	@Override
 	public int[] getTopkLabels(AVPair[] x, int k) {
 		int[] positiveLabels = new int[k];
@@ -382,7 +382,7 @@ public class PLTFH extends MLLRFH {
 
 		return positiveLabels;
 	}
-	
+		
 	
 	
 	public void setThresholds(double[] t) {
@@ -463,7 +463,7 @@ public class PLTFH extends MLLRFH {
 
 		queue.add(new Node(0,1.0));
 
-		while(!queue.isEmpty() || (foundTop < k)) {
+		while(!queue.isEmpty() && (foundTop < k)) {
 
 			Node node = queue.poll();
 
