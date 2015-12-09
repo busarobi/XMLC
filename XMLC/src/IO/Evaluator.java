@@ -80,8 +80,8 @@ public class Evaluator {
 			}
 			
 			
-			if ((i % 10000) == 0) {
-				System.out.println( "----->\tSample: "+ i +" (" + data.n + ")" );
+			if ((i % 100000) == 0) {
+				System.out.println( "----->\t Evaluation Sample: "+ i +" (" + data.n + ")" );
 				
 				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 				Date date = new Date();
@@ -113,12 +113,6 @@ public class Evaluator {
 		arr.put( " learner.m", (double) m);
 		arr.put( " Num of presented labels", (double) presentedlabels);
 		
-		int pk = 5;
-		double[] precAt = computePrecisionAtk(learner, data, pk);
-		
-		for(int i=0; i < pk; i++){
-			arr.put( "PrecAtK["+(i+1)+"]", precAt[i] );
-		}
 
 		arr.put(" Normalized macro F-measue (with presented labels)", normalizedmacroF);
 		arr.put(" Normalized Hamming loss (with learner.m)", normalizedHL );
@@ -128,10 +122,10 @@ public class Evaluator {
 
     }
 
-    public static double[] computePrecisionAtk(AbstractLearner learner, AVTable data, int k) {
+    public static TreeMap<String,Double> computePrecisionAtk(AbstractLearner learner, AVTable data, int k) {
     	double[] precisionatK = new double[k];
     	
-    	int [] numLabels = new int [data.m];
+    	//int [] numLabels = new int [data.m];
     	
     	for(int i = 0; i < data.n; i++ ) {
     		TreeSet<EstimatePair> predictedLabels = learner.getTopKEstimates(data.x[i], k); //.getPositiveLabelsAndPosteriors(data.x[i]);
@@ -141,7 +135,7 @@ public class Evaluator {
 			
 			for(int m = 0; m < data.y[i].length; m++) {
 				trueLabels.add(data.y[i][m]);
-				numLabels[data.y[i][m]]++;
+				//numLabels[data.y[i][m]]++;
 			}
 			
     		
@@ -184,6 +178,15 @@ public class Evaluator {
 				precisionatK[j] += (nunmofcorrectpredictionuptok[j] / ((double) (j+1)));
 			}			
 
+			if ((i % 100000) == 0) {
+				System.out.println( "----->\t Prec@ computation: "+ i +" (" + data.n + ")" );
+				
+				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+				Date date = new Date();
+				System.out.println("\t\t" + dateFormat.format(date));								
+			}
+			
+			
     	}
 		
 		
@@ -198,7 +201,12 @@ public class Evaluator {
 		//}
 		//System.out.println("Num instances: " + data.n);
 		
-    	return precisionatK;
+		TreeMap<String,Double> arr = new TreeMap<String,Double>();
+		for(int i=0; i < k; i++){
+			arr.put( "PrecAtK["+(i+1)+"]", precisionatK[i] );
+		}
+		
+    	return arr;
     }
 
     /* 

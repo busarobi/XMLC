@@ -186,7 +186,7 @@ public class PLTFH extends MLLRFH {
 
 				this.T++;
 
-				if ((i % 50000) == 0) {
+				if ((i % 100000) == 0) {
 					System.out.println( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();

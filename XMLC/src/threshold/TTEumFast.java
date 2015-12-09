@@ -1,7 +1,10 @@
 package threshold;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Properties;
 
@@ -19,7 +22,7 @@ public class TTEumFast extends ThresholdTuning {
 
 	@Override
 	public double[] validate(AVTable data, AbstractLearner learner) {
-		
+		System.out.println("Tuning threshold (TTeumFast)...");
 		double minThreshold = 0.001;
 		
 		thresholds = new double[this.m];
@@ -57,6 +60,14 @@ public class TTEumFast extends ThresholdTuning {
 				}
 				posteriors[pred.getLabel()].add(new ComparableTriplet(pred.getP(), j, y));				
 			}
+
+			if ((j % 100000) == 0) {
+				System.out.println( "\t --> Label: " + j +" (" + data.n + ")" );
+				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+				Date date = new Date();
+				System.out.println("\t\t" + dateFormat.format(date));
+			}
+			
 		}
 	
 		for(int i = 0; i < posteriors.length; i++) {
@@ -113,7 +124,7 @@ public class TTEumFast extends ThresholdTuning {
 			thresholds[i] = Math.min(0.5, maxthreshold);
 			avgFmeasure += maxFmeasure;
 		
-			System.out.println("Label: " + i + " threshold: " + thresholds[i] + " F: " + maxFmeasure);
+			//System.out.println("Label: " + i + " threshold: " + thresholds[i] + " F: " + maxFmeasure);
 		}
 
 		System.out.printf( "Validated macro F-measure: %.5f\n", (avgFmeasure / (double) learner.getNumberOfLabels()) ) ;

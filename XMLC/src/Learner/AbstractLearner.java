@@ -79,7 +79,19 @@ public abstract class AbstractLearner {
 		this.thresholds = t.validate(data, this);
 	}
 
+	public void setThresholds(double[] t) {		
+		for(int j = 0; j < t.length; j++) {
+			this.thresholds[j] = t[j];
+		}		
+	}
 
+	public void setThresholds(double t) {		
+		for(int j = 0; j < this.thresholds.length; j++) {
+			this.thresholds[j] = t;
+		}		
+	}
+	
+	
 	public AbstractLearner(Properties properties, StepFunction stepfunction){
 		this.properties = properties;
 		this.stepFunction = stepfunction;

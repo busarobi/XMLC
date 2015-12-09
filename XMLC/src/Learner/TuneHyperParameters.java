@@ -18,11 +18,7 @@ import java.util.concurrent.Executors;
 
 import Data.AVTable;
 import IO.Evaluator;
-import Learner.step.AdamStep;
-import Learner.step.GradStep;
-import Learner.step.GradStepL1;
-import Learner.step.StepFunction;
-import threshold.TTEum;
+import threshold.TTEumFast;
 import threshold.ThresholdTuning;
 import util.MasterSeed;
 
@@ -65,8 +61,8 @@ public class TuneHyperParameters extends LearnerManager {
 			learner.train(traindata);
 			
 			// valid			
-			//ThresholdTuning th = new TTEum( learner.m, properties );
-			//learner.tuneThreshold(th, validdata);
+			ThresholdTuning th = new TTEumFast( learner.m, properties );
+			learner.tuneThreshold(th, validdata);
 
 			Map<String,Double> perfv = Evaluator.computePerformanceMetrics(learner, validdata);
 
@@ -123,11 +119,13 @@ public class TuneHyperParameters extends LearnerManager {
 		try{
 
 			// gamma
-			List<String> gammaArray = Arrays.asList("100.0","70.0","50.0","40.0","30.0","20.0","10.0","5.0","1.0","0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001");
+			//List<String> gammaArray = Arrays.asList("100.0","70.0","50.0","40.0","30.0","20.0","10.0","5.0","1.0","0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001");
+			List<String> gammaArray = Arrays.asList("100.0","70.0","50.0","40.0","30.0","20.0"); //"10.0","5.0","1.0","0.5","0.1","0.01","0.001");
 			hyperparameters.put("gamma", gammaArray);
 
 			// lambda
-			List<String> lambdaArray = Arrays.asList("0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001");
+			//List<String> lambdaArray = Arrays.asList("0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001","0.0000001");
+			List<String> lambdaArray = Arrays.asList("0.0001","0.00001","0.000001","0.0000001");
 			hyperparameters.put("lambda", lambdaArray);
 			
 			
@@ -136,9 +134,10 @@ public class TuneHyperParameters extends LearnerManager {
 //			hyperparameters.put("step", stepArray);
 //
 //			// epochs
-			//List<String> epochArray = Arrays.asList("10","20","30","50","100");
+			List<String> epochArray = Arrays.asList("10","20","30","50","100");
 			//List<String> epochArray = Arrays.asList("10","50","100");
-			List<String> epochArray = Arrays.asList("5","10","15","20");
+			//List<String> epochArray = Arrays.asList("5","10","15");//,"20");
+			//List<String> epochArray = Arrays.asList("1");
 			hyperparameters.put("epochs", epochArray);			
 			
 			

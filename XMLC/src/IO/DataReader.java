@@ -190,7 +190,8 @@ public class DataReader {
 			}		
 			// features
 			for(int j=0; j<data.x[i].length; j++ ) {
-				bf.write(  (data.x[i][j].index + 1) + ":" + String.format( "%g", data.x[i][j].value) );
+				//bf.write(  (data.x[i][j].index + 1) + ":" + String.format( "%g", data.x[i][j].value) );
+				bf.write(  (data.x[i][j].index + 1) + ":" + fmt(data.x[i][j].value) );
 				if ( j < data.x[i].length - 1 )
 					bf.write( " " );
 			}				
@@ -201,6 +202,15 @@ public class DataReader {
 		bf.close();
 	}
 	
+	
+	public String fmt(double d)
+	{
+	    if(d == (long) d)
+	        return String.format("%d",(long)d);
+	    else
+	        return String.format("%s",d);
+	}
+
 	
 	
 	public static void main(String[] args) throws Exception {
