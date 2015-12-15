@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="create_run_jar" name="Create Runnable Jar for Project XMLC">
+    <!--this file was created by Eclipse Runnable JAR Export Wizard-->
+    <!--ANT 1.7 is required                                        -->
+    <!--define folder properties-->
+    <property name="dir.buildfile" value="."/>
+    <property name="dir.workspace" value="/Users/busarobi/work/javaprojects"/>
+    <property name="dir.jarfile" value="/Users/busarobi/work/XMLC"/>
+    <target name="create_run_jar">
+        <jar destfile="${dir.jarfile}/convert_svm.jar" filesetmanifest="mergewithoutmain">
+            <manifest>
+                <attribute name="Main-Class" value="IO.ReindexLabels"/>
+                <attribute name="Class-Path" value="."/>
+            </manifest>
+            <fileset dir="${dir.buildfile}/target/classes"/>
+            <zipfileset excludes="META-INF/*.SF" src="/Users/busarobi/.m2/repository/com/edwardraff/JSAT/0.0.2/JSAT-0.0.2.jar"/>
+            <zipfileset excludes="META-INF/*.SF" src="/Users/busarobi/.m2/repository/org/apache/commons/commons-math3/3.5/commons-math3-3.5.jar"/>
+        </jar>
+    </target>
+</project>
