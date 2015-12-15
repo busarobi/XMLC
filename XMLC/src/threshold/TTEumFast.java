@@ -23,6 +23,12 @@ public class TTEumFast extends ThresholdTuning {
 	@Override
 	public double[] validate(AVTable data, AbstractLearner learner) {
 		System.out.println("Tuning threshold (TTeumFast)...");
+	
+		System.out.println( "\t --> EUM fast starts" );
+		DateFormat dateFormat1 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		Date date1 = new Date();
+		System.out.println("\t\t" + dateFormat1.format(date1));
+		
 		double minThreshold = 0.001;
 		
 		thresholds = new double[this.m];
@@ -62,7 +68,7 @@ public class TTEumFast extends ThresholdTuning {
 			}
 
 			if ((j % 100000) == 0) {
-				System.out.println( "\t --> Label: " + j +" (" + data.n + ")" );
+				System.out.println( "\t --> Instance: " + j +" (" + data.n + ")" );
 				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 				Date date = new Date();
 				System.out.println("\t\t" + dateFormat.format(date));
@@ -129,6 +135,12 @@ public class TTEumFast extends ThresholdTuning {
 
 		System.out.printf( "Validated macro F-measure: %.5f\n", (avgFmeasure / (double) learner.getNumberOfLabels()) ) ;
 		
+
+		
+		System.out.println( "\t --> EUM fast end" );
+		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+		Date date = new Date();
+		System.out.println("\t\t" + dateFormat.format(date));
 		
 		
 		return thresholds;

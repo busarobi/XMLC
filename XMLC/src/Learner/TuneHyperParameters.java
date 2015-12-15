@@ -60,6 +60,10 @@ public class TuneHyperParameters extends LearnerManager {
 			learner.allocateClassifiers(traindata);
 			learner.train(traindata);
 			
+			
+			Map<String,Double> perfvalidpreck = Evaluator.computePrecisionAtk(learner, validdata, 5);
+			Map<String,Double> perftestpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);
+			
 			// valid			
 			ThresholdTuning th = new TTEumFast( learner.m, properties );
 			learner.tuneThreshold(th, validdata);
@@ -72,6 +76,14 @@ public class TuneHyperParameters extends LearnerManager {
 				System.out.println("##### Valid " + perfName + ": "  + perfv.get(perfName));
 				this.info += "##### Valid" + perfName + ": "  + perfv.get(perfName) + "\n";
 			}
+			
+			
+			for ( String perfName : perfvalidpreck.keySet() ) {
+				System.out.println("##### Valid " + perfName + ": "  + perfvalidpreck.get(perfName) );
+				this.info += "##### Valid " + perfName + ": "  + perfvalidpreck.get(perfName) + "\n";
+			}
+			
+			
 			this.info += "#### Test:\n";
 			
 			Map<String,Double> perf = Evaluator.computePerformanceMetrics(learner, testdata);
@@ -81,6 +93,15 @@ public class TuneHyperParameters extends LearnerManager {
 				System.out.println("##### Test " + perfName + ": "  + perf.get(perfName));
 				this.info += "##### Test" + perfName + ": "  + perf.get(perfName) + "\n";
 			}
+			
+			
+			
+			for ( String perfName : perftestpreck.keySet() ) {
+				System.out.println("##### Test " + perfName + ": "  + perftestpreck.get(perfName));
+				this.info += "##### Test " + perfName + ": "  + perftestpreck.get(perfName) + "\n";
+			}
+			
+			
 			learner = null;
 			ready = true;
 		}
@@ -119,13 +140,13 @@ public class TuneHyperParameters extends LearnerManager {
 		try{
 
 			// gamma
-			//List<String> gammaArray = Arrays.asList("100.0","70.0","50.0","40.0","30.0","20.0","10.0","5.0","1.0","0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001");
-			List<String> gammaArray = Arrays.asList("100.0","70.0","50.0","40.0","30.0","20.0"); //"10.0","5.0","1.0","0.5","0.1","0.01","0.001");
+			List<String> gammaArray = Arrays.asList("100.0","70.0","50.0","40.0","30.0","20.0","10.0","5.0","1.0","0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001");
+			//List<String> gammaArray = Arrays.asList("100.0","70.0","50.0","40.0","30.0","20.0"); //"10.0","5.0","1.0","0.5","0.1","0.01","0.001");
 			hyperparameters.put("gamma", gammaArray);
 
 			// lambda
-			//List<String> lambdaArray = Arrays.asList("0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001","0.0000001");
-			List<String> lambdaArray = Arrays.asList("0.0001","0.00001","0.000001","0.0000001");
+			List<String> lambdaArray = Arrays.asList("0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001","0.0000001");
+			//List<String> lambdaArray = Arrays.asList("0.0001","0.00001","0.000001","0.0000001");
 			hyperparameters.put("lambda", lambdaArray);
 			
 			
@@ -134,9 +155,9 @@ public class TuneHyperParameters extends LearnerManager {
 //			hyperparameters.put("step", stepArray);
 //
 //			// epochs
-			List<String> epochArray = Arrays.asList("10","20","30","50","100");
+			//List<String> epochArray = Arrays.asList("10","20","30","50","100");
 			//List<String> epochArray = Arrays.asList("10","50","100");
-			//List<String> epochArray = Arrays.asList("5","10","15");//,"20");
+			List<String> epochArray = Arrays.asList("5","10","15","20");
 			//List<String> epochArray = Arrays.asList("1");
 			hyperparameters.put("epochs", epochArray);			
 			

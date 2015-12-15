@@ -61,8 +61,12 @@ public abstract class AbstractLearner {
 			learner = new MLLogisticRegressionNSampling(properties, stepfunction);
 		else if (learnerName.compareTo("MLLRFH") == 0)
 			learner = new MLLRFH(properties, stepfunction);
+		else if (learnerName.compareTo("MLLRFHR") == 0)
+			learner = new MLLRFHR(properties, stepfunction);
 		else if (learnerName.compareTo("PLTFH") == 0)
 			learner = new PLTFH(properties, stepfunction);		
+		else if (learnerName.compareTo("PLTFHR") == 0)
+			learner = new PLTFHR(properties, stepfunction);		
 		else if (learnerName.compareTo("PLT") == 0)
 			learner = new PLT(properties, stepfunction);
 		else {
@@ -206,4 +210,9 @@ public abstract class AbstractLearner {
 	public int getNumberOfLabels() {
 		return this.m;
 	}
+	
+	public void setThreshold(int label, double t) {
+		this.thresholds[label] = t;
+	}	
+	
 }

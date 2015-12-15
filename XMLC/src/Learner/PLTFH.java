@@ -35,7 +35,7 @@ public class PLTFH extends MLLRFH {
 		super(properties, stepfunction);
 
 		System.out.println("#####################################################" );
-		System.out.println("#### Leraner: PLTFT" );
+		System.out.println("#### Leraner: PLTFTH" );
 
 		//this.innerThreshold = Double.parseDouble(this.properties.getProperty("IThreshold", "0.15") );
 		//System.out.println("#### Inner node threshold : " + this.innerThreshold );
