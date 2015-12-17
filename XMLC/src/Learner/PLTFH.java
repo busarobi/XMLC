@@ -51,8 +51,7 @@ public class PLTFH extends MLLRFH {
 		this.m = data.m;
 		this.d = data.d;
 		this.t = 2 * this.m - 1;
-
-		int seed = 1;
+		
 		//this.hd = 50000000;//40000000;
 
 		System.out.println( "#### Num. of labels: " + this.m + " Dim: " + this.d );
@@ -60,7 +59,7 @@ public class PLTFH extends MLLRFH {
 		System.out.println("#####################################################" );
 		
 		//this.fh = new MurmurHasher(seed, this.hd, this.t);
-		this.fh = new UniversalHasher(seed, this.hd, this.t);
+		this.fh = new UniversalHasher(fhseed, this.hd, this.t);
 		
 		System.out.print( "Allocate the learners..." );
 
@@ -468,9 +467,8 @@ public class PLTFH extends MLLRFH {
 	@Override
 	public void loadmodel(String fname) {
 		super.loadmodel(fname);
-		
-		//WRONG!!!
-		//this.t = (this.w.length-1)/2;
+		this.t = 2 * this.m - 1;
+		this.fh = new UniversalHasher(this.fhseed, this.hd, this.t);
 	}
 	
 	

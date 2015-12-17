@@ -249,11 +249,21 @@ public class MLLRFH extends AbstractLearner {
 			writer.write( "hd = "+ this.hd + "\n" );
 			writer.write( "m = "+ this.m + "\n" );
 			
-			for(int i = 0; i< this.w.length; i++ ){
-				writer.write( " "+ this.w[i]/*.get(i)*/ );
+			// write out weights
+			writer.write( ""+ (1/this.scalar) * this.w[0]/*.get(i)*/ );
+			for(int i = 1; i< this.w.length; i++ ){
+				writer.write( " "+ (1/this.scalar) * this.w[i]/*.get(i)*/ );
 			}
 			writer.write( "\n" );
 
+			// bias
+			writer.write( ""+ (1/this.scalar) * this.bias[0]/*.get(i)*/ );
+			for(int i = 1; i< this.bias.length; i++ ){
+				writer.write( " "+ (1/this.scalar) * this.bias[i]/*.get(i)*/ );
+			}
+			writer.write( "\n" );
+						
+			// write out threshold
 			writer.write( ""+ this.thresholds[0] );
 			for(int i = 1; i< this.thresholds.length; i++ ){
 				writer.write( " "+ this.thresholds[i] );
@@ -261,6 +271,7 @@ public class MLLRFH extends AbstractLearner {
 			writer.write( "\n" );
 
 			writer.close();
+			
 			System.out.println( "Done." );
 		} catch (IOException e) {
 			System.out.println(e.getMessage());
@@ -285,31 +296,59 @@ public class MLLRFH extends AbstractLearner {
 
 		    reader.close();
 		    
+		    // d		    
+		    String[] tokens = lines.get(0).split(" ");
+		    this.d = Integer.parseInt(tokens[tokens.length-1]);
+		    // hd 
+		    tokens = lines.get(1).split(" ");
+		    this.hd = Integer.parseInt(tokens[tokens.length-1]);
+		    		    
+		    // m
+		    tokens = lines.get(2).split(" ");
+		    this.m = Integer.parseInt(tokens[tokens.length-1]);
+
 		    
 		    // process lines
 		    // allocate the model
-		    this.m = lines.size()-1;
+		    //this.m = lines.size()-1;
 		    this.w = new double[this.hd];//new DenseVector(this.hd);
 
 		    
-		    String[] values =  lines.get(0).split( " " );
-		    double[] weights = new double[values.length];
+		    String[] values =  lines.get(3).split( " " );
+		    this.w = new double[values.length];
 		    for( int j=0; j < values.length; j++ ){
-		    	weights[j] = Double.parseDouble(values[j]);
+		    	this.w[j] = Double.parseDouble(values[j]);
 		    }
 		    
-		    this.d = weights.length;
-		    this.w = weights;
+		    if (this.w.length != this.hd ) {
+		    	System.err.println( "Num. of weights is not appropriate!");
+		    	System.exit(-1);
+		    }
+
 		    
-		    // last line for thresholds
-		    this.thresholds = new double[this.m];
+		    values =  lines.get(4).split( " " );
+		    this.bias = new double[values.length];
+		    for( int j=0; j < values.length; j++ ){
+		    	this.bias[j] = Double.parseDouble(values[j]);
+		    }
+		    
+//		    if (this.bias.length != this.m ) {
+//		    	System.err.println( "Num. of bias weights is not appropriate!");
+//		    	System.exit(-1);
+//		    }
+
+		    
+		    
+		    // last line for thresholds		    
 		    String[] tValues =  lines.get(lines.size()-1).split( " " );
-	    	for( int j=0; j < values.length; j++ ){
+		    this.thresholds = new double[tValues.length];
+	    	for( int j=0; j < tValues.length; j++ ){
 	    		this.thresholds[j] = Double.parseDouble(tValues[j]);
 	    	}
 
+	    	this.fh = new UniversalHasher(fhseed, this.hd, this.m);
 
-
+	    	this.scalar=1.0;
 		    System.out.println( "Done." );
 		} catch (IOException x) {
 		    System.err.format("IOException: %s%n", x);

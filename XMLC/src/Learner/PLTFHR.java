@@ -1,5 +1,14 @@
 package Learner;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -241,5 +250,147 @@ public class PLTFHR extends PLTFH {
 		
 		return posterior;
 	}
+	
+	
+	@Override
+	public void savemodel(String fname) {
+		// TODO Auto-generated method stub
+		try{
+			System.out.print( "Saving model (" + fname + ")..." );						
+			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+			          new FileOutputStream(fname)));
+
+			writer.write( "d = "+ this.d + "\n" );
+			writer.write( "hd = "+ this.hd + "\n" );
+			writer.write( "m = "+ this.m + "\n" );
+			
+			// write out weights
+			writer.write( ""+ this.w[0]/*.get(i)*/ );
+			for(int i = 1; i< this.w.length; i++ ){
+				writer.write( " "+ this.w[i]/*.get(i)*/ );
+			}
+			writer.write( "\n" );
+
+			// bias
+			writer.write( ""+ this.bias[0]/*.get(i)*/ );
+			for(int i = 1; i< this.bias.length; i++ ){
+				writer.write( " "+ this.bias[i]/*.get(i)*/ );
+			}
+			writer.write( "\n" );
+						
+			// write out threshold
+			writer.write( ""+ this.thresholds[0] );
+			for(int i = 1; i< this.thresholds.length; i++ ){
+				writer.write( " "+ this.thresholds[i] );
+			}
+			writer.write( "\n" );
+
+			
+			// scalar
+			writer.write( ""+ this.scalararray[0]/*.get(i)*/ );
+			for(int i = 1; i< this.scalararray.length; i++ ){
+				writer.write( " "+ this.scalararray[i]/*.get(i)*/ );
+			}
+			writer.write( "\n" );
+			
+			
+			writer.close();
+			
+			System.out.println( "Done." );
+		} catch (IOException e) {
+			System.out.println(e.getMessage());
+		}
+
+	}
+
+	@Override
+	public void loadmodel(String fname) {
+		try {
+			System.out.println( "Loading model (" + fname + ")..." );
+			Path p = Paths.get(fname);
+
+			BufferedReader reader = Files.newBufferedReader(p, Charset.forName("UTF-8"));
+		    String line = null;
+
+		    // read file
+		    ArrayList<String> lines = new ArrayList<String>();
+		    while ((line = reader.readLine()) != null) {
+		        lines.add(line);
+		    }
+
+		    reader.close();
+		    
+		    // d		    
+		    String[] tokens = lines.get(0).split(" ");
+		    this.d = Integer.parseInt(tokens[tokens.length-1]);
+		    // hd 
+		    tokens = lines.get(1).split(" ");
+		    this.hd = Integer.parseInt(tokens[tokens.length-1]);
+		    		    
+		    // m
+		    tokens = lines.get(2).split(" ");
+		    this.m = Integer.parseInt(tokens[tokens.length-1]);
+
+		    
+		    // process lines
+		    // allocate the model
+		    //this.m = lines.size()-1;
+		    this.w = new double[this.hd];//new DenseVector(this.hd);
+
+		    
+		    String[] values =  lines.get(3).split( " " );
+		    this.w = new double[values.length];
+		    for( int j=0; j < values.length; j++ ){
+		    	this.w[j] = Double.parseDouble(values[j]);
+		    }
+		    
+		    if (this.w.length != this.hd ) {
+		    	System.err.println( "Num. of weights is not appropriate!");
+		    	System.exit(-1);
+		    }
+
+		    
+		    values =  lines.get(4).split( " " );
+		    this.bias = new double[values.length];
+		    for( int j=0; j < values.length; j++ ){
+		    	this.bias[j] = Double.parseDouble(values[j]);
+		    }
+		    
+//		    if (this.bias.length != this.m ) {
+//		    	System.err.println( "Num. of bias weights is not appropriate!");
+//		    	System.exit(-1);
+//		    }
+
+		    
+		    
+		    // last line for thresholds		    
+		    values =  lines.get(5).split( " " );
+		    this.thresholds = new double[values.length];
+	    	for( int j=0; j < values.length; j++ ){
+	    		this.thresholds[j] = Double.parseDouble(values[j]);
+	    	}
+
+
+	    	// scalar values
+		    values =  lines.get(6).split( " " );
+		    this.scalararray = new double[values.length];
+	    	for( int j=0; j < values.length; j++ ){
+	    		this.scalararray[j] = Double.parseDouble(values[j]);
+	    	}
+	    	
+	    	
+	    	this.t = 2 * this.m - 1;
+			this.fh = new UniversalHasher(this.fhseed, this.hd, this.t);
+
+
+	    	this.scalar=1.0;
+		    System.out.println( "Done." );
+		} catch (IOException x) {
+		    System.err.format("IOException: %s%n", x);
+		}
+		
+	}
+	
+	
 	
 }
