@@ -34,15 +34,13 @@ import util.MasterSeed;
 
 public class MLLRFH extends AbstractLearner {
 	protected int epochs = 1;
-
+	protected int fhseed = 1;
 	protected double[] w = null;
 
 	protected double gamma = 0; // learning rate
 	protected int step = 0;
-	protected double delta = 0;
-    
-	protected boolean geomWeighting = true;
 
+ 
 	protected int T = 1;
 	protected AVTable traindata = null;
 
@@ -92,11 +90,11 @@ public class MLLRFH extends AbstractLearner {
 		this.m = data.m;
 		this.d = data.d;
 
-		int seed = 1;
+		
 		//this.hd = 500000;
 		
 		//this.fh = new MurmurHasher(seed, this.hd, this.m);
-		this.fh = new UniversalHasher(seed, this.hd, this.m);
+		this.fh = new UniversalHasher(fhseed, this.hd, this.m);
 		
 		System.out.println( "Num. of labels: " + this.m + " Dim: " + this.d + " Hash dim: " + this.hd );
 		System.out.print( "Allocate the learners..." );
@@ -124,25 +122,13 @@ public class MLLRFH extends AbstractLearner {
 
 			int index = fh.getIndex(label, traindata.x[currIdx][i].index);
 			int sign = fh.getSign(label, traindata.x[currIdx][i].index);
-			//System.out.println(sign);
-			//double gradient = inc * traindata.x[currIdx][i].value; 
-			//double update = this.learningRate * gradient;
-			//this.w[index] -= update; 
 			
 			double gradient = this.scalar * inc * (traindata.x[currIdx][i].value * sign);
 			double update = (this.learningRate * gradient);// / this.scalar;		
 			this.w[index] -= update; 
-			//System.out.println("w -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
-			
 		}
 		
 		
-		// Include bias term in weight vector:
-		//int biasIndex = fh.getIndex(label, -1);
-		//double gradient = inc;
-		//double update = this.learningRate * gradient;	
-		//this.w[biasIndex] -= update;
-		//System.out.println("bias -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
 
 		
 		double gradient = this.scalar * inc;
@@ -241,18 +227,11 @@ public class MLLRFH extends AbstractLearner {
 			
 			int hi = fh.getIndex(label,  x[i].index); 
 			int sign = fh.getSign(label, x[i].index);
-			//posterior += x[i].value * this.w[hi];
-			//posterior += x[i].value * this.scalar * this.w[hi];
 			posterior += (x[i].value *sign) * (1/this.scalar) * this.w[hi];
 		}
 		
-		//int hi = fh.getIndex(label,  -1);
-		//posterior += this.w[hi];
-		//posterior += (this.scalar) * this.bias[label]; //this.w[hi];
-		posterior += (1/this.scalar) * this.bias[label]; //this.w[hi];
-		posterior = s.value(posterior);
-		
-		//System.out.println("Posterior :" + posterior);
+		posterior += (1/this.scalar) * this.bias[label]; 
+		posterior = s.value(posterior);		
 		
 		return posterior;
 
@@ -262,10 +241,14 @@ public class MLLRFH extends AbstractLearner {
 	public void savemodel(String fname) {
 		// TODO Auto-generated method stub
 		try{
-			System.out.print( "Saving model (" + fname + ")..." );
+			System.out.print( "Saving model (" + fname + ")..." );						
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
 			          new FileOutputStream(fname)));
 
+			writer.write( "d = "+ this.d + "\n" );
+			writer.write( "hd = "+ this.hd + "\n" );
+			writer.write( "m = "+ this.m + "\n" );
+			
 			for(int i = 0; i< this.w.length; i++ ){
 				writer.write( " "+ this.w[i]/*.get(i)*/ );
 			}
@@ -301,7 +284,8 @@ public class MLLRFH extends AbstractLearner {
 		    }
 
 		    reader.close();
-
+		    
+		    
 		    // process lines
 		    // allocate the model
 		    this.m = lines.size()-1;

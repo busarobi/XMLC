@@ -14,6 +14,8 @@ import java.util.Random;
 import java.util.TreeSet;
 
 import Data.AVPair;
+import Data.NodePLT;
+import Data.NodeComparatorPLT;
 import Data.AVTable;
 import Data.ComparablePair;
 import Data.EstimatePair;
@@ -239,45 +241,21 @@ public class PLTFH extends MLLRFH {
 		return posterior;
 	}
 
-	class Node {
-
-		int treeIndex;
-		double p;
-
-		Node(int treeIndex, double p) {
-			this.treeIndex = treeIndex;
-			this.p = p;
-		}
-
-		@Override
-		public String toString() {
-			return new String("(" + this.treeIndex + ", " + this.p + ")");
-		}
-	};
-
-	class NodeComparator implements Comparator<Node> {
-        @Override
-		public int compare(Node n1, Node n2) {
-        	return (n1.p < n2.p) ? 1 : -1;
-        }
-    } ;
-	
-	
 	@Override
 	public HashSet<Integer> getPositiveLabels(AVPair[] x) {
 
 		HashSet<Integer> positiveLabels = new HashSet<Integer>();
 
 
-	    NodeComparator nodeComparator = new NodeComparator();
+	    NodeComparatorPLT nodeComparator = new NodeComparatorPLT();
 
-		PriorityQueue<Node> queue = new PriorityQueue<Node>(11, nodeComparator);
+		PriorityQueue<NodePLT> queue = new PriorityQueue<NodePLT>(11,nodeComparator);
 
-		queue.add(new Node(0,1.0));
+		queue.add(new NodePLT(0,1.0));
 
 		while(!queue.isEmpty()) {
 
-			Node node = queue.poll();
+			NodePLT node = queue.poll();
 
 			double currentP = node.p * getPartialPosteriors(x, node.treeIndex);
 
@@ -287,8 +265,8 @@ public class PLTFH extends MLLRFH {
 					int leftchild = 2 * node.treeIndex + 1;
 					int rightchild = 2 * node.treeIndex + 2;
 
-					queue.add(new Node(leftchild, currentP));
-					queue.add(new Node(rightchild, currentP));
+					queue.add(new NodePLT(leftchild, currentP));
+					queue.add(new NodePLT(rightchild, currentP));
 
 				} else {
 
@@ -308,15 +286,15 @@ public class PLTFH extends MLLRFH {
 	public PriorityQueue<ComparablePair> getPositiveLabelsAndPosteriors(AVPair[] x) {
 		PriorityQueue<ComparablePair> positiveLabels = new PriorityQueue<>();
 
-	    NodeComparator nodeComparator = new NodeComparator();
+	    NodeComparatorPLT nodeComparator = new NodeComparatorPLT();
 
-		PriorityQueue<Node> queue = new PriorityQueue<Node>(11, nodeComparator);
+		PriorityQueue<NodePLT> queue = new PriorityQueue<NodePLT>(11, nodeComparator);
 
-		queue.add(new Node(0,1.0));
+		queue.add(new NodePLT(0,1.0));
 
 		while(!queue.isEmpty()) {
 
-			Node node = queue.poll();
+			NodePLT node = queue.poll();
 
 			double currentP = node.p * getPartialPosteriors(x, node.treeIndex);
 
@@ -326,8 +304,8 @@ public class PLTFH extends MLLRFH {
 					int leftchild = 2 * node.treeIndex + 1;
 					int rightchild = 2 * node.treeIndex + 2;
 
-					queue.add(new Node(leftchild, currentP));
-					queue.add(new Node(rightchild, currentP));
+					queue.add(new NodePLT(leftchild, currentP));
+					queue.add(new NodePLT(rightchild, currentP));
 
 				} else {
 
@@ -348,15 +326,15 @@ public class PLTFH extends MLLRFH {
 		int[] positiveLabels = new int[k];
 		int indi =0;
 
-	    NodeComparator nodeComparator = new NodeComparator();
+	    NodeComparatorPLT nodeComparator = new NodeComparatorPLT();
 
-		PriorityQueue<Node> queue = new PriorityQueue<Node>(11, nodeComparator);
+		PriorityQueue<NodePLT> queue = new PriorityQueue<>(11, nodeComparator);
 
-		queue.add(new Node(0,1.0));
+		queue.add(new NodePLT(0,1.0));
 
 		while(!queue.isEmpty()) {
 
-			Node node = queue.poll();
+			NodePLT node = queue.poll();
 
 			double currentP = node.p * getPartialPosteriors(x, node.treeIndex);
 
@@ -366,8 +344,8 @@ public class PLTFH extends MLLRFH {
 				int leftchild = 2 * node.treeIndex + 1;
 				int rightchild = 2 * node.treeIndex + 2;
 
-				queue.add(new Node(leftchild, currentP));
-				queue.add(new Node(rightchild, currentP));
+				queue.add(new NodePLT(leftchild, currentP));
+				queue.add(new NodePLT(rightchild, currentP));
 
 			} else {
 				positiveLabels[indi++] = node.treeIndex - this.m + 1;
@@ -403,26 +381,19 @@ public class PLTFH extends MLLRFH {
 
 	
 	@Override
-	public void loadmodel(String fname) {
-		super.loadmodel(fname);
-		
-		//WRONG!!!
-		//this.t = (this.w.length-1)/2;
-	}
-	@Override
 	public HashSet<EstimatePair> getSparseProbabilityEstimates(AVPair[] x, double threshold) {
 
 		HashSet<EstimatePair> positiveLabels = new HashSet<EstimatePair>();
 
-	    NodeComparator nodeComparator = new NodeComparator();
+	    NodeComparatorPLT nodeComparator = new NodeComparatorPLT();
 
-		PriorityQueue<Node> queue = new PriorityQueue<Node>(11, nodeComparator);
+		PriorityQueue<NodePLT> queue = new PriorityQueue<NodePLT>(11, nodeComparator);
 
-		queue.add(new Node(0,1.0));
+		queue.add(new NodePLT(0,1.0));
 
 		while(!queue.isEmpty()) {
 
-			Node node = queue.poll();
+			NodePLT node = queue.poll();
 
 			double currentP = node.p * getPartialPosteriors(x, node.treeIndex);
 
@@ -433,8 +404,8 @@ public class PLTFH extends MLLRFH {
 					int leftchild = 2 * node.treeIndex + 1;
 					int rightchild = 2 * node.treeIndex + 2;
 
-					queue.add(new Node(leftchild, currentP));
-					queue.add(new Node(rightchild, currentP));
+					queue.add(new NodePLT(leftchild, currentP));
+					queue.add(new NodePLT(rightchild, currentP));
 
 				} else {
 
@@ -457,15 +428,15 @@ public class PLTFH extends MLLRFH {
 
 	    int foundTop = 0;
 	    
-	    NodeComparator nodeComparator = new NodeComparator();
+	    NodeComparatorPLT nodeComparator = new NodeComparatorPLT();
 
-		PriorityQueue<Node> queue = new PriorityQueue<Node>(11, nodeComparator);
+		PriorityQueue<NodePLT> queue = new PriorityQueue<NodePLT>(11, nodeComparator);
 
-		queue.add(new Node(0,1.0));
+		queue.add(new NodePLT(0,1.0));
 
 		while(!queue.isEmpty() && (foundTop < k)) {
 
-			Node node = queue.poll();
+			NodePLT node = queue.poll();
 
 			double currentP = node.p * getPartialPosteriors(x, node.treeIndex);
 
@@ -476,8 +447,8 @@ public class PLTFH extends MLLRFH {
 					int leftchild = 2 * node.treeIndex + 1;
 					int rightchild = 2 * node.treeIndex + 2;
 
-					queue.add(new Node(leftchild, currentP));
-					queue.add(new Node(rightchild, currentP));
+					queue.add(new NodePLT(leftchild, currentP));
+					queue.add(new NodePLT(rightchild, currentP));
 
 				} else {
 
@@ -493,6 +464,15 @@ public class PLTFH extends MLLRFH {
 	}
 	
 		
+	
+	@Override
+	public void loadmodel(String fname) {
+		super.loadmodel(fname);
+		
+		//WRONG!!!
+		//this.t = (this.w.length-1)/2;
+	}
+	
 	
 	
 }

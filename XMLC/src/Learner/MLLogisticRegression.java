@@ -35,7 +35,7 @@ public class MLLogisticRegression extends AbstractLearner {
 
 	protected double gamma = 0; // learning rate
 	protected int step = 0;
-	protected double delta = 0;
+	
     //protected int OFOepochs = 1;
 
 	protected boolean geomWeighting = true;

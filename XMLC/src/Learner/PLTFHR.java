@@ -13,10 +13,14 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.TreeSet;
 
+import org.apache.commons.math3.analysis.function.Sigmoid;
+
 import Data.AVPair;
 import Data.AVTable;
 import Data.ComparablePair;
 import Data.EstimatePair;
+import Data.NodeComparatorPLT;
+import Data.NodePLT;
 import Learner.step.StepFunction;
 import jsat.linear.DenseVector;
 import preprocessing.MurmurHasher;
@@ -24,9 +28,11 @@ import preprocessing.UniversalHasher;
 import threshold.ThresholdTuning;
 import util.MasterSeed;
 
-public class PLTFHR extends MLLRFHR {
+public class PLTFHR extends PLTFH {
+	protected int[] Tarray = null;	
+	protected double[] scalararray = null;
 	
-	protected int t = 0;
+	//protected int t = 0;
 	//protected double innerThreshold = 0.15;
 
 	//protected double[] scalars = null;
@@ -39,59 +45,19 @@ public class PLTFHR extends MLLRFHR {
 
 		//this.innerThreshold = Double.parseDouble(this.properties.getProperty("IThreshold", "0.15") );
 		//System.out.println("#### Inner node threshold : " + this.innerThreshold );
-		//System.out.println("#####################################################" );
+		System.out.println("#####################################################" );
 	}
 
 	@Override
 	public void allocateClassifiers(AVTable data) {
-		
-		this.traindata = data;
-		this.m = data.m;
-		this.d = data.d;
-		this.t = 2 * this.m - 1;
+		super.allocateClassifiers(data);
 
-		int seed = 1;
-		//this.hd = 50000000;//40000000;
-
-		System.out.println( "#### Num. of labels: " + this.m + " Dim: " + this.d );
-		System.out.println( "#### Num. of inner node of the trees: " + this.t  );
-		System.out.println("#####################################################" );
+		this.Tarray = new int[this.t];
+		this.scalararray = new double[this.t];
+		Arrays.fill(this.Tarray, 1);
+		Arrays.fill(this.scalararray, 1.0);
 		
-		//this.fh = new MurmurHasher(seed, this.hd, this.t);
-		this.fh = new UniversalHasher(seed, this.hd, this.t);
-		
-		System.out.print( "Allocate the learners..." );
-
-		this.w = new double[this.hd];
-		this.thresholds = new double[this.t];
-		this.bias = new double[this.t];
-		
-		//this.scalars = new double[this.t];
-		
-		for (int i = 0; i < this.t; i++) {
-			this.thresholds[i] = 0.5;
-		}
-		
-		
-		this.T = new int[this.t];
-		this.scalar = new double[this.t];
-		Arrays.fill(this.T, 1);
-		Arrays.fill(this.scalar, 1.0);
-		
-		
-		
-		
-		System.out.println( "Done." );
-	}
-
-	
-	protected ArrayList<Integer> shuffleIndex() {
-		ArrayList<Integer> indirectIdx = new ArrayList<Integer>(this.traindata.n);
-		for (int i = 0; i < this.traindata.n; i++) {
-			indirectIdx.add(new Integer(i));
-		}
-		Collections.shuffle(indirectIdx, shuffleRand);
-		return indirectIdx;
+		//System.out.println( "Done." );
 	}
 	
 		
@@ -193,7 +159,7 @@ public class PLTFHR extends MLLRFHR {
 					Date date = new Date();
 					System.out.println("\t\t" + dateFormat.format(date));
 					//System.out.println("Weight: " + this.w[0].get(0) );
-					System.out.println("Scalar: " + this.scalar[0]);
+					System.out.println("Scalar: " + this.scalararray[0]);
 				}
 			}
 
@@ -214,299 +180,66 @@ public class PLTFHR extends MLLRFHR {
 	}
 
 
+	protected void updatedPosteriors( int currIdx, int label, double inc) {
+	
+		
+		this.learningRate = this.gamma / (1 + this.gamma * this.lambda * this.Tarray[label]);
+		this.Tarray[label]++;
+		this.scalararray[label] *= (1 + this.learningRate * this.lambda);
+		
+		//System.out.println(this.learningRate + "\t" + this.scalar[label]);
+		
+		int n = traindata.x[currIdx].length;
+		
+		for(int i = 0; i < n; i++) {
+
+			int index = fh.getIndex(label, traindata.x[currIdx][i].index);
+			int sign = fh.getSign(label, traindata.x[currIdx][i].index);
+			//System.out.println(sign);
+			//double gradient = inc * traindata.x[currIdx][i].value; 
+			//double update = this.learningRate * gradient;
+			//this.w[index] -= update; 
+			
+			double gradient = this.scalararray[label] * inc * (traindata.x[currIdx][i].value * sign);
+			double update = (this.learningRate * gradient);// / this.scalar;		
+			this.w[index] -= update; 
+			//System.out.println("w -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
+			
+		}
+		
+		
+		// Include bias term in weight vector:
+		//int biasIndex = fh.getIndex(label, -1);
+		//double gradient = inc;
+		//double update = this.learningRate * gradient;	
+		//this.w[biasIndex] -= update;
+		//System.out.println("bias -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
+
+		
+		double gradient = this.scalararray[label] * inc;
+		double update = (this.learningRate * gradient);//  / this.scalar;		
+		this.bias[label] -= update;
+		//System.out.println("bias -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
+	}
+
+
+	Sigmoid s = new Sigmoid();
+	@Override
 	public double getPartialPosteriors(AVPair[] x, int label) {
-		double posterior = super.getPosteriors(x, label);
-		//System.out.println("Partial posterior: " + posterior + " Tree index: " + label);
+		double posterior = 0.0;
+		
+		
+		for (int i = 0; i < x.length; i++) {
+			
+			int hi = fh.getIndex(label,  x[i].index); 
+			int sign = fh.getSign(label, x[i].index);
+			posterior += (x[i].value *sign) * (1/this.scalararray[label]) * this.w[hi];
+		}
+		
+		posterior += (1/this.scalararray[label]) * this.bias[label]; 
+		posterior = s.value(posterior);		
+		
 		return posterior;
 	}
-
-
-
-	@Override
-	public double getPosteriors(AVPair[] x, int label) {
-		double posterior = 1.0;
-
-		int treeIndex = label + this.m - 1;
-
-		posterior *= getPartialPosteriors(x, treeIndex);
-
-		while(treeIndex > 0) {
-
-			treeIndex = (int) Math.floor((treeIndex - 1)/2);
-			posterior *= getPartialPosteriors(x, treeIndex);
-
-		}
-		//if(posterior > 0.5) System.out.println("Posterior: " + posterior + "Label: " + label);
-		return posterior;
-	}
-
-	class Node {
-
-		int treeIndex;
-		double p;
-
-		Node(int treeIndex, double p) {
-			this.treeIndex = treeIndex;
-			this.p = p;
-		}
-
-		@Override
-		public String toString() {
-			return new String("(" + this.treeIndex + ", " + this.p + ")");
-		}
-	};
-
-	class NodeComparator implements Comparator<Node> {
-        @Override
-		public int compare(Node n1, Node n2) {
-        	return (n1.p < n2.p) ? 1 : -1;
-        }
-    } ;
-	
-	
-	@Override
-	public HashSet<Integer> getPositiveLabels(AVPair[] x) {
-
-		HashSet<Integer> positiveLabels = new HashSet<Integer>();
-
-
-	    NodeComparator nodeComparator = new NodeComparator();
-
-		PriorityQueue<Node> queue = new PriorityQueue<Node>(11, nodeComparator);
-
-		queue.add(new Node(0,1.0));
-
-		while(!queue.isEmpty()) {
-
-			Node node = queue.poll();
-
-			double currentP = node.p * getPartialPosteriors(x, node.treeIndex);
-
-			if(currentP > this.thresholds[node.treeIndex]) {
-
-				if(node.treeIndex < this.m - 1) {
-					int leftchild = 2 * node.treeIndex + 1;
-					int rightchild = 2 * node.treeIndex + 2;
-
-					queue.add(new Node(leftchild, currentP));
-					queue.add(new Node(rightchild, currentP));
-
-				} else {
-
-					positiveLabels.add(node.treeIndex - this.m + 1);
-
-				}
-			}
-		}
-
-		//System.out.println("Predicted labels: " + positiveLabels.toString());
-
-		return positiveLabels;
-	}
-
-	
-	@Override
-	public PriorityQueue<ComparablePair> getPositiveLabelsAndPosteriors(AVPair[] x) {
-		PriorityQueue<ComparablePair> positiveLabels = new PriorityQueue<>();
-
-	    NodeComparator nodeComparator = new NodeComparator();
-
-		PriorityQueue<Node> queue = new PriorityQueue<Node>(11, nodeComparator);
-
-		queue.add(new Node(0,1.0));
-
-		while(!queue.isEmpty()) {
-
-			Node node = queue.poll();
-
-			double currentP = node.p * getPartialPosteriors(x, node.treeIndex);
-
-			if(currentP > this.thresholds[node.treeIndex]) {
-
-				if(node.treeIndex < this.m - 1) {
-					int leftchild = 2 * node.treeIndex + 1;
-					int rightchild = 2 * node.treeIndex + 2;
-
-					queue.add(new Node(leftchild, currentP));
-					queue.add(new Node(rightchild, currentP));
-
-				} else {
-
-					positiveLabels.add(new ComparablePair( currentP, node.treeIndex - this.m + 1 ) );
-
-				}
-			}
-		}
-
-		//System.out.println("Predicted labels: " + positiveLabels.toString());
-
-		return positiveLabels;
-	}
-	
-	
-	@Override
-	public int[] getTopkLabels(AVPair[] x, int k) {
-		int[] positiveLabels = new int[k];
-		int indi =0;
-
-	    NodeComparator nodeComparator = new NodeComparator();
-
-		PriorityQueue<Node> queue = new PriorityQueue<Node>(11, nodeComparator);
-
-		queue.add(new Node(0,1.0));
-
-		while(!queue.isEmpty()) {
-
-			Node node = queue.poll();
-
-			double currentP = node.p * getPartialPosteriors(x, node.treeIndex);
-
-			
-
-			if(node.treeIndex < this.m - 1) {
-				int leftchild = 2 * node.treeIndex + 1;
-				int rightchild = 2 * node.treeIndex + 2;
-
-				queue.add(new Node(leftchild, currentP));
-				queue.add(new Node(rightchild, currentP));
-
-			} else {
-				positiveLabels[indi++] = node.treeIndex - this.m + 1;
-			}
-			
-			if (indi>=k) { 
-				break;
-			}
-		}
-	
-		//System.out.println("Predicted labels: " + positiveLabels.toString());
-
-		return positiveLabels;
-	}
-		
-	
-	
-	public void setThresholds(double[] t) {
-		
-		for(int j = 0; j < t.length; j++) {
-			this.thresholds[j + this.m - 1] = t[j];
-		}
-		
-		for(int j = this.m - 2; j >= 0; j--) {
-			this.thresholds[j] = Math.min(this.thresholds[2*j+1], this.thresholds[2*j+2]);
-		}
-	}
-
-	@Override
-	public void tuneThreshold( ThresholdTuning t, AVTable data ){
-		this.setThresholds(t.validate(data, this));
-	}
-
-	
-	@Override
-	public void loadmodel(String fname) {
-		super.loadmodel(fname);
-		
-		//WRONG!!!
-		//this.t = (this.w.length-1)/2;
-	}
-	@Override
-	public HashSet<EstimatePair> getSparseProbabilityEstimates(AVPair[] x, double threshold) {
-
-		HashSet<EstimatePair> positiveLabels = new HashSet<EstimatePair>();
-
-	    NodeComparator nodeComparator = new NodeComparator();
-
-		PriorityQueue<Node> queue = new PriorityQueue<Node>(11, nodeComparator);
-
-		queue.add(new Node(0,1.0));
-
-		while(!queue.isEmpty()) {
-
-			Node node = queue.poll();
-
-			double currentP = node.p * getPartialPosteriors(x, node.treeIndex);
-
-			if(currentP > threshold) {
-
-				if(node.treeIndex < this.m - 1) {
-
-					int leftchild = 2 * node.treeIndex + 1;
-					int rightchild = 2 * node.treeIndex + 2;
-
-					queue.add(new Node(leftchild, currentP));
-					queue.add(new Node(rightchild, currentP));
-
-				} else {
-
-					positiveLabels.add(new EstimatePair(node.treeIndex - this.m + 1, currentP));
-
-				}
-			}
-		}
-
-		//System.out.println("Predicted labels: " + positiveLabels.toString());
-
-		return positiveLabels;
-	}
-
-
-
-	public TreeSet<EstimatePair> getTopKEstimates(AVPair[] x, int k) {
-
-		TreeSet<EstimatePair> positiveLabels = new TreeSet<EstimatePair>();
-
-	    int foundTop = 0;
-	    
-	    NodeComparator nodeComparator = new NodeComparator();
-
-		PriorityQueue<Node> queue = new PriorityQueue<Node>(11, nodeComparator);
-
-		queue.add(new Node(0,1.0));
-
-		while(!queue.isEmpty() && (foundTop < k)) {
-
-			Node node = queue.poll();
-
-			double currentP = node.p * getPartialPosteriors(x, node.treeIndex);
-
-			//if(currentP > threshold) {
-
-				if(node.treeIndex < this.m - 1) {
-
-					int leftchild = 2 * node.treeIndex + 1;
-					int rightchild = 2 * node.treeIndex + 2;
-
-					queue.add(new Node(leftchild, currentP));
-					queue.add(new Node(rightchild, currentP));
-
-				} else {
-
-					positiveLabels.add(new EstimatePair(node.treeIndex - this.m + 1, currentP));
-					foundTop++;
-				}
-			//}
-		}
-
-		//System.out.println("Predicted labels: " + positiveLabels.toString());
-
-		return positiveLabels;
-	}
-
-	@Override
-	public void setThreshold(int label, double t) {
-		this.thresholds[label] = t;
-		int treeIndex = label + this.m - 1;
-		while(treeIndex > 0) {
-
-			treeIndex = (int) Math.floor((treeIndex - 1)/2);
-			this.thresholds[treeIndex] = Math.min(this.thresholds[2*treeIndex+1], this.thresholds[2*treeIndex+2]);;
-
-		}
-	
-		
-	}
-		
-	
 	
 }
