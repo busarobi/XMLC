@@ -57,6 +57,8 @@ public class MLLRFH extends AbstractLearner {
 	protected double scalar = 1.0;
 	protected double lambda = 0.00001;
 
+	protected String hasher = "Universal";
+	
 	
 	public MLLRFH(Properties properties, StepFunction stepfunction) {
 		super(properties, stepfunction);
@@ -78,6 +80,11 @@ public class MLLRFH extends AbstractLearner {
 		this.epochs = Integer.parseInt(this.properties.getProperty("epochs", "30"));
 		System.out.println("#### epochs: " + this.epochs );
 
+		// epochs
+		this.hasher = this.properties.getProperty("hasher", "Universal");
+		System.out.println("#### Hasher : " + this.hasher );
+		
+		
 		this.hd = Integer.parseInt(this.properties.getProperty("MLFeatureHashing", "50000000")); 
 		System.out.println("#### Num of ML hashed features: " + this.hd );
 		
@@ -91,10 +98,14 @@ public class MLLRFH extends AbstractLearner {
 		this.d = data.d;
 
 		
-		//this.hd = 500000;
-		
-		//this.fh = new MurmurHasher(seed, this.hd, this.m);
-		this.fh = new UniversalHasher(fhseed, this.hd, this.m);
+		if ( this.hasher.compareTo("Universal") == 0 ) {			
+			this.fh = new UniversalHasher(fhseed, this.hd, this.m);
+		} else if ( this.hasher.compareTo("Murmur") == 0 ) {
+			this.fh = new MurmurHasher(fhseed, this.hd, this.m);
+		} else {
+			System.out.println("Unknown hasher");
+			System.exit(-1);
+		}
 		
 		System.out.println( "Num. of labels: " + this.m + " Dim: " + this.d + " Hash dim: " + this.hd );
 		System.out.print( "Allocate the learners..." );

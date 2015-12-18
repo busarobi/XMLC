@@ -20,9 +20,16 @@ public class TTOfo2 extends ThresholdTuning {
 	public TTOfo2(int m, Properties properties) {
 		super(m, properties);
 		
-		this.OFOepochs = Integer.parseInt(properties.getProperty("ThresholdEpochs", "2") );
+		this.OFOepochs = Integer.parseInt(properties.getProperty("ThresholdEpochs", "1") );
 		this.a = Integer.parseInt(properties.getProperty("a", "50") );
 		this.b = Integer.parseInt(properties.getProperty("b", "1000") );
+		
+		System.out.println("#####################################################" );
+		System.out.println("#### OFO2" );
+		System.out.println("#### iter: " + this.OFOepochs );
+		System.out.println("#### a: " + this.a );
+		System.out.println("#### OFO2: " + this.b );
+		System.out.println("#####################################################" );		
 	}
 
 	@Override

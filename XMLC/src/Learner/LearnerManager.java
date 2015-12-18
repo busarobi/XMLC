@@ -38,13 +38,13 @@ public class LearnerManager {
 	public LearnerManager( String fname ){
 		properties = readProperty(fname);
 
-		featureNum = Integer.parseInt(properties.getProperty("FeatureHashing", "0"));
+//		featureNum = Integer.parseInt(properties.getProperty("FeatureHashing", "0"));
 
-		if (featureNum>0){
-			System.out.print( "Feature hashing (dim: " + featureNum + ")...");
-			fh = new MurmurHasher(0, featureNum);
-			System.out.println( "Done.");
-		}
+//		if (featureNum>0){
+//			System.out.print( "Feature hashing (dim: " + featureNum + ")...");
+//			fh = new MurmurHasher(0, featureNum);
+//			System.out.println( "Done.");
+//		}
 	}
 
 
@@ -145,19 +145,20 @@ public class LearnerManager {
 		// evaluate (EUM)
 		ThresholdTuning theum = new TTEumFast( learner.m, properties );
 		learner.tuneThreshold(theum, validdata);
-			
 		Map<String,Double> perfTTEUMFast = Evaluator.computePerformanceMetrics(learner, testdata);
+							
+		// evaluate (OFO)
+		ThresholdTuning th = new TTOfo2( learner.m, properties );
+		learner.tuneThreshold(th, validdata);			
+		Map<String,Double> perfTTOFOFast = Evaluator.computePerformanceMetrics(learner, testdata);
+		
+		
+		
+		
 		for ( String perfName : perfTTEUMFast.keySet() ) {
 			System.out.println("##### EUM " + perfName + ": "  + perfTTEUMFast.get(perfName));
 		}
-
 		
-		
-		// evaluate (OFO)
-		ThresholdTuning th = new TTOfo2( learner.m, properties );
-		learner.tuneThreshold(th, validdata);
-			
-		Map<String,Double> perfTTOFOFast = Evaluator.computePerformanceMetrics(learner, testdata);
 		
 		for ( String perfName : perfTTOFOFast.keySet() ) {
 			System.out.println("##### OFO " + perfName + ": "  + perfTTOFOFast.get(perfName));
