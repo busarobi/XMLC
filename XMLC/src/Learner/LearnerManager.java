@@ -71,18 +71,18 @@ public class LearnerManager {
 		// reading train data
 		DataReader datareader = new DataReader(properties.getProperty("TrainFile"));
 		traindata = datareader.read();
-		if (fh != null ) {
-			traindata = fh.transformSparse(traindata);
-		}
+//		if (fh != null ) {
+//			traindata = fh.transformSparse(traindata);
+//		}
 	}
 
 	public void readTestData() throws Exception {
 		// test
 		DataReader testdatareader = new DataReader(properties.getProperty("TestFile"));
 		testdata = testdatareader.read();
-		if (fh != null ) {
-			testdata = fh.transformSparse(testdata);
-		}
+//		if (fh != null ) {
+//			testdata = fh.transformSparse(testdata);
+//		}
 	}
 
 
@@ -94,9 +94,9 @@ public class LearnerManager {
 		} else {
 			DataReader validdatareader = new DataReader(properties.getProperty("ValidFile"));
 			validdata = validdatareader.read();
-			if (fh != null ) {
-				validdata = fh.transformSparse(validdata);
-			}
+//			if (fh != null ) {
+//				validdata = fh.transformSparse(validdata);
+//			}
 		}
 	}
 
