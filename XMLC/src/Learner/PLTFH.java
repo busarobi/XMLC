@@ -265,7 +265,7 @@ public class PLTFH extends MLLRFH {
 
 			double currentP = node.p * getPartialPosteriors(x, node.treeIndex);
 
-			if(currentP > this.thresholds[node.treeIndex]) {
+			if(currentP >= this.thresholds[node.treeIndex]) {
 
 				if(node.treeIndex < this.m - 1) {
 					int leftchild = 2 * node.treeIndex + 1;
@@ -368,6 +368,21 @@ public class PLTFH extends MLLRFH {
 	}
 		
 	
+	@Override
+	public void setThreshold(int label, double t) {
+		
+		int treeIndex = label + this.m - 1;
+		this.thresholds[treeIndex] = t;
+		
+		while(treeIndex > 0) {
+
+			treeIndex =  (treeIndex-1) >> 1; //(int) Math.floor((treeIndex - 1)/2); //
+			this.thresholds[treeIndex] = Math.min(this.thresholds[(treeIndex<<1)+1], this.thresholds[(treeIndex<<1)+2]);
+		}
+		
+	}
+
+	
 	
 	public void setThresholds(double[] t) {
 		
@@ -378,12 +393,13 @@ public class PLTFH extends MLLRFH {
 		for(int j = this.m - 2; j >= 0; j--) {
 			this.thresholds[j] = Math.min(this.thresholds[2*j+1], this.thresholds[2*j+2]);
 		}
+		
+		//for( int i=0; i < this.thresholds.length; i++ )
+		//	System.out.println( "Threshold: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
+	
+		
 	}
 
-	@Override
-	public void tuneThreshold( ThresholdTuning t, AVTable data ){
-		this.setThresholds(t.validate(data, this));
-	}
 
 	
 	@Override
@@ -403,7 +419,7 @@ public class PLTFH extends MLLRFH {
 
 			double currentP = node.p * getPartialPosteriors(x, node.treeIndex);
 
-			if(currentP > threshold) {
+			if(currentP >= threshold) {
 
 				if(node.treeIndex < this.m - 1) {
 

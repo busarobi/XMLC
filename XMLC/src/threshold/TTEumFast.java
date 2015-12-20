@@ -102,7 +102,6 @@ public class TTEumFast extends ThresholdTuning {
 				
 				if(triplet.gety() == 1) {
 					tp++;
-					
 				}
 				
 				predictedPositives++;
@@ -115,24 +114,25 @@ public class TTEumFast extends ThresholdTuning {
 				}
 			}
 			
-			
 			tp = numPositives[i];
 			predictedPositives = data.n;
 			Fmeasure = ((2.0*tp)) / ((double) ( numPositives[i] + predictedPositives )); 
 			
 			if (maxFmeasure < Fmeasure ) {
-				maxthreshold = 0.0;
+				maxthreshold = minThreshold; //0.0;
 				maxFmeasure = Fmeasure;
 			}
-		
 				
 			//System.out.println(maxthreshold + " " + maxFmeasure);
-			thresholds[i] = Math.min(0.5, maxthreshold);
+			thresholds[i] = Math.min(1.0, maxthreshold);
 			avgFmeasure += maxFmeasure;
 		
 			//System.out.println("Label: " + i + " threshold: " + thresholds[i] + " F: " + maxFmeasure);
 		}
 
+		for( int i=0; i < this.m; i++ )
+			System.out.println( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
+		
 		System.out.printf( "Validated macro F-measure: %.5f\n", (avgFmeasure / (double) learner.getNumberOfLabels()) ) ;
 		
 

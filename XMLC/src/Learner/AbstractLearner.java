@@ -78,9 +78,12 @@ public abstract class AbstractLearner {
 				
 	}
 	
+	//public void tuneThreshold( ThresholdTuning t, AVTable data ){
+	//	this.thresholds = t.validate(data, this);
+	//}
 	
 	public void tuneThreshold( ThresholdTuning t, AVTable data ){
-		this.thresholds = t.validate(data, this);
+		this.setThresholds(t.validate(data, this));
 	}
 
 	public void setThresholds(double[] t) {		
@@ -95,6 +98,9 @@ public abstract class AbstractLearner {
 		}		
 	}
 	
+	public void setThreshold(int label, double t) {
+		this.thresholds[label] = t;
+	}	
 	
 	public AbstractLearner(Properties properties, StepFunction stepfunction){
 		this.properties = properties;
@@ -107,7 +113,7 @@ public abstract class AbstractLearner {
 		HashSet<Integer> positiveLabels = new HashSet<Integer>();
 
 		for( int i = 0; i < this.m; i++ ) {
-			if ( 0 < this.getPrediction(x, i) ){
+			if (this.getPosteriors(x, i) >= this.thresholds[i]) {
 				positiveLabels.add(i);
 			}
 		}
@@ -180,7 +186,7 @@ public abstract class AbstractLearner {
 		
 		for(int i = 0; i < this.m; i++) {
 			double p = getPosteriors(x, i);
-			if (p > threshold) 
+			if (p >= threshold) 
 				positiveLabels.add(new EstimatePair(i, p));
 		}
 		
@@ -210,9 +216,5 @@ public abstract class AbstractLearner {
 	public int getNumberOfLabels() {
 		return this.m;
 	}
-	
-	public void setThreshold(int label, double t) {
-		this.thresholds[label] = t;
-	}	
 	
 }

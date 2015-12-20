@@ -129,17 +129,17 @@ public class LearnerManager {
 
 	public void compositeEvaluation()
 	{
-//		int steps = 10;
-//		Map<String,Double> [] perf = new Map[steps+1];//Evaluator.computePerformanceMetrics(learner, testdata);
-//
-//		for(int t = 1; t <= steps ; t++){
-//			this.learner.setThresholds(0.5 * (t / (double) steps));
-//			
-//			perf[t-1] = Evaluator.computePerformanceMetrics(learner, testdata);
-//
-//	
-//		}
-//		
+		int steps = 10;
+		Map<String,Double> [] perf = new Map[steps+1];//Evaluator.computePerformanceMetrics(learner, testdata);
+
+		for(int t = 1; t <= steps ; t++){
+			this.learner.setThresholds(0.5 * (t / (double) steps));
+			
+			perf[t-1] = Evaluator.computePerformanceMetrics(learner, testdata);
+
+	
+		}
+		
 		
 		
 		// evaluate (EUM)
@@ -176,12 +176,12 @@ public class LearnerManager {
 		
 		
 		
-//		for(int t = 1; t <= steps ; t++){
-//			System.out.println("##########-----  Threshold: " + 0.5 * (t / (double) steps) );
-//			for ( String perfName : perf[t-1].keySet() ) {
-//				System.out.println("##### EUM" + perfName + ": "  + perf[t-1].get(perfName));
-//			}
-//		}
+		for(int t = 1; t <= steps ; t++){
+			System.out.println("##########-----  Threshold: " + 0.5 * (t / (double) steps) );
+			for ( String perfName : perf[t-1].keySet() ) {
+				System.out.println("##### EUM" + perfName + ": "  + perf[t-1].get(perfName));
+			}
+		}
 	
 		
 		Map<String,Double> perfpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);

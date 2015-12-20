@@ -93,8 +93,8 @@ public class TTOfo2 extends ThresholdTuning {
 
 		}
 		
-		//for( int i=0; i < this.m; i++ )
-		//	System.out.println( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
+		for( int i=0; i < this.m; i++ )
+			System.out.println( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
 	
 		{
 			System.out.println( "############## End of TTOfo2" );
