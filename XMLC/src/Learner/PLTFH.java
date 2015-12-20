@@ -368,19 +368,6 @@ public class PLTFH extends MLLRFH {
 	}
 	
 	
-	@Override
-	public void setThreshold(int label, double t) {
-		
-		int treeIndex = label + this.m - 1;
-		this.thresholds[treeIndex] = t;
-		
-		while(treeIndex > 0) {
-
-			treeIndex =  (treeIndex-1) >> 1; //(int) Math.floor((treeIndex - 1)/2); //
-			this.thresholds[treeIndex] = Math.min(this.thresholds[(treeIndex<<1)+1], this.thresholds[(treeIndex<<1)+2]);
-		}
-		
-	}
 	
 	@Override
 	public void setThreshold(int label, double t) {
