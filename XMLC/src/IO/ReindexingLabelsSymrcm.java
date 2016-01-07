@@ -17,7 +17,7 @@ public class ReindexingLabelsSymrcm {
 		//read permutation
 		System.out.print("Reading permuation...");
 		//String inputPermFileName = "/Users/busarobi/work/Fmeasure/LSHTC/dataraw/permutation.txt";
-		String inputPermFileName = "./permutation.txt";
+		String inputPermFileName = "./permutation_sym_tree.txt";
 		BufferedReader fperm = new BufferedReader(new FileReader(inputPermFileName));
 		HashMap<Integer,Integer> mapping = new HashMap<>();
 		
