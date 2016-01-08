@@ -10,16 +10,18 @@ public class HashFunction {
 		this.period = period;
 		this.isSign = false;
 	}
-	
+
 	public HashFunction(int seed) {
 		this.murmur = new Murmur3A(seed);
 		this.isSign = true;
 	}
-	
+
 	public int hash(int index) {
 		this.murmur.reset();
-		this.murmur.update(index);
+		this.murmur.updateInt(index);
 		if (this.isSign) return (int) (this.murmur.getValue() % 2 * 2 - 1);
 		return (int) (this.murmur.getValue() % this.period);
 	}
+
 }
+
