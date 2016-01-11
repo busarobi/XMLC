@@ -129,19 +129,16 @@ public class LearnerManager {
 
 	public void compositeEvaluation()
 	{
+
 		double [] thresholds = {/*0.0, 0.01,*/ 0.05, 0.1, 0.25, 0.5};
-		
 		Map<String,Double> [] perf = new Map[thresholds.length];
 		
 		for(int t = 0; t < thresholds.length ; t++){
+
 			this.learner.setThresholds(thresholds[t]);
-			
 			perf[t] = Evaluator.computePerformanceMetrics(learner, testdata);
 
-	
 		}
-		
-		
 		
 		// evaluate (EUM)
 		ThresholdTuning theum = new TTEumFast( learner.m, properties );
@@ -172,7 +169,6 @@ public class LearnerManager {
 //		for ( String perfName : perfTTExu.keySet() ) {
 //			System.out.println("##### EXU " + perfName + ": "  + perfTTExu.get(perfName));
 //		}
-		
 		
 		
 		for(int t = 0; t < thresholds.length; t++){

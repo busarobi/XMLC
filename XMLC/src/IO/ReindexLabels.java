@@ -9,25 +9,18 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.List;
-import java.util.Map;
-import jsat.linear.SparseVector;
-
-
-import org.apache.commons.math3.util.Pair;
 
 import Data.AVTable;
-import Data.ComparablePair;
 
 
 public class ReindexLabels {
 
 	public static void main(String[] args) throws Exception {
-		class ComparableIntegerPair implements Comparable<ComparableIntegerPair> {
+		
+		class ComparableIntegerPair implements Comparable<ComparableIntegerPair>  {
 		    private int  first;
 		    private int second;
 
@@ -36,7 +29,7 @@ public class ReindexLabels {
 		    	this.second = value;
 		    }
 		    
-		    public double getFirst() {
+		    public int getFirst() {
 		        return this.first;
 		    }
 
@@ -44,8 +37,7 @@ public class ReindexLabels {
 		        return this.second;
 		    }
 
-
-			@Override
+		    @Override
 			public int compareTo(ComparableIntegerPair o) {
 				if (this.first == o.first) {
 					if (this.second == o.second) return 0;
@@ -57,17 +49,33 @@ public class ReindexLabels {
 					return -1;
 				} else return 1;
 			}
+			
+			@Override
+		    public boolean equals(Object o) {
+		        //if (this == o) return true;
+		        //if (!(o instanceof ComparableIntegerPair)) return false;
+		        ComparableIntegerPair key = (ComparableIntegerPair) o;
+		        return first == key.first && second == key.second;
+		    }
+
+		    @Override
+		    public int hashCode() {
+		    	return new Integer(first).hashCode() * 31 + new Integer(second).hashCode();
+		    }
+
+			
+			
 		}	
 		
 		
 		
 		String inputFileName = "/Users/busarobi/work/Fmeasure/LSHTC/dataraw/train-remapped.csv";
-		String outputFileName = "/Users/busarobi/work/Fmeasure/LSHTC/dataraw/train-remapped_reindex.csv";
+		
 		
 		DataReader datareader = new DataReader(inputFileName);
 		AVTable data = datareader.read();
 
-		BufferedWriter statbf = new BufferedWriter(new FileWriter("/Users/busarobi/work/Fmeasure/LSHTC/dataraw/train-remapped_stats.txt") );		
+				
 		
 		HashMap<Integer,Integer> labeltoindex = new HashMap<>();
 		ArrayList<Integer> indextolabel = new ArrayList<>();
@@ -84,75 +92,103 @@ public class ReindexLabels {
 		System.out.println("Number of different labels: " + labeltoindex.size() );
 
 		
-//		System.out.println("Allocating...");
-//		
-//		SparseVector cooccurence = new SparseVector(indextolabel.size()*indextolabel.size(), 10000000);
-//		System.out.println("Done.");
-//		
-//		for(int i=0; i < data.n; i++) {
-//			for( int j = 0; j < data.y[i].length; j++ ){
-//				for( int k = j; k < data.y[i].length; k++ ){
-//					int label1 = data.y[i][j];
-//					int label2 = data.y[i][k];
-//					
-//					label1 = labeltoindex.get(label1);
-//					label2 = labeltoindex.get(label2);
-//					
-//					if(label2 > label1 ) {
-//						int tmp = label2;
-//						label2 = label1;
-//						label1 = tmp;
-//					}
-//					
-//					int ind = (label1 * indextolabel.size()) + label2;
-//					
-//					Double itmp = cooccurence.get(ind);
-//					if (itmp == 0.0) {
-//						cooccurence.set(ind,1.0);
-//					} else {
-//						cooccurence.set(ind,itmp+1.0);
-//					}
-//					
-//				}
-//			}	
-//
-//			if ((i % 10000) == 0) {
-//				System.out.println( "\t --> Instance: " + i + " (" + data.n + ")" );
-//				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-//				Date date = new Date();
-//				System.out.println("\t\t" + dateFormat.format(date));
-//				
-//			}
-//			
-//		}
-//		
-//		
+		System.out.print("Allocating...");
+		
+		Map<ComparableIntegerPair, Integer> cooccurence = new TreeMap<ComparableIntegerPair, Integer>();
+		
+		System.out.println("Done.");
+		
+		for(int i=0; i < data.n; i++) {
+			for( int j = 0; j < data.y[i].length; j++ ){
+				for( int k = j; k < data.y[i].length; k++ ){
+					int label1 = data.y[i][j];
+					int label2 = data.y[i][k];
+					
+					//label1 = labeltoindex.get(label1);
+					//label2 = labeltoindex.get(label2);
+					
+					ComparableIntegerPair cp = null;
+					if(label2 > label1 ) 
+						cp = new ComparableIntegerPair(label1, label2);
+					else
+						cp = new ComparableIntegerPair(label2, label1);
+					
+					
+					Integer itmp = cooccurence.get(cp);
+					if (itmp == null) {
+						cooccurence.put(cp,1);
+					} else {
+						cooccurence.remove(cp);
+						itmp++;
+						cooccurence.put(cp,itmp);
+					}
+					
+				}
+			}	
+
+			if ((i % 10000) == 0) {
+				System.out.println( "\t --> Instance: " + i + " (" + data.n + ")" );
+				System.out.println("\t\t Size: " + cooccurence.size() );
+				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+				Date date = new Date();
+				System.out.println("\t\t" + dateFormat.format(date));
+				
+			}
+			
+		}
+		
+		System.out.print("Writing the stat...");
+		
+		
+		BufferedWriter statbf = new BufferedWriter(new FileWriter("/Users/busarobi/work/Fmeasure/LSHTC/dataraw/train-remapped_stats.txt") );
+		
+		for( ComparableIntegerPair cp : cooccurence.keySet() ) {
+			statbf.write( "" + cp.getFirst() + "," + cp.getSecond() + "," + cooccurence.get(cp) +"\n" );
+		}
+		
+		
 //		for( int i = 0; i < indextolabel.size(); i++ ){
 //			int label1 = indextolabel.get(i); 
-//			statbf.write( label1 );
+//			statbf.write( "" + label1 );
 //			
-//			for( int j = 0; j < indextolabel.size(); j++ ){
-//				int ind = (i * indextolabel.size()) + j;
-//				double val = cooccurence.get(ind); 
-//				if (val > 0.0){
-//					statbf.write( "," + indextolabel.get(j) + "," + val  );
+//			for( int j = 0; j < indextolabel.size(); j++ ){				
+//				int label2 = indextolabel.get(j);
+//				
+//				ComparableIntegerPair cp = null;
+//				if(label2 > label1 ) 
+//					cp = new ComparableIntegerPair(label1, label2);
+//				else
+//					cp = new ComparableIntegerPair(label2, label1);
+//				
+//				
+//				Integer val = cooccurence.get(cp); 
+//				if (val != null){
+//					statbf.write( "," + label2 + "," + val  );
 //				}
 //			}
 //			statbf.write( "\n");
+//			statbf.flush();
 //		}
-//		
-//		statbf.close();
-//
-//		
-//		// re-indexing				
-//		for(int i=0; i < data.n; i++) {
-//			for( int j = 0; j < data.y[i].length; j++ ){				
-//				int newlabel = labeltoindex.get(data.y[i][j]);
-//				data.y[i][j] = newlabel;
-//			}
-//		}
-//		
+		
+		statbf.close();
+
+		System.out.println("Done.");
+		
+		
+		// re-indexing				
+		for(int i=0; i < data.n; i++) {
+			for( int j = 0; j < data.y[i].length; j++ ){				
+				int newlabel = labeltoindex.get(data.y[i][j]);
+				data.y[i][j] = newlabel;
+			}
+		}
+		
+		
+		System.out.println("Writing out the dataset...");
+		
 		BufferedReader fp = new BufferedReader(new FileReader(inputFileName));
+		
+		String outputFileName = "/Users/busarobi/work/Fmeasure/LSHTC/dataraw/train-remapped_reindex.csv";
 		BufferedWriter bf = new BufferedWriter(new FileWriter(outputFileName) );
 		
 		for( int i = 0; i<data.n; i++)
@@ -178,6 +214,11 @@ public class ReindexLabels {
 			
 			
 			bf.write( "\n" );
+			
+			if ((i % 10000) == 0) {
+				System.out.println("Line: " + i + "(" + data.n + ")" );
+			}
+			
 		}
 		
 		bf.close();

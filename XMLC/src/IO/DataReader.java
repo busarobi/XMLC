@@ -90,11 +90,11 @@ public class DataReader {
 				}
 			}
 			
-			if(indexx>0) max_feature_index = Math.max(max_feature_index, x[indexx-1].index);
-			if(indexy>0) max_label_index = Math.max(max_label_index, y[indexy-1]);
-			
 			Arrays.sort(y);
 			
+			if(indexx>0) max_feature_index = Math.max(max_feature_index, x[indexx-1].index);
+			if(indexy>0) max_label_index = Math.max(max_label_index, y[indexy-1]);
+									
 			vy.addElement(y);
 			vx.addElement(x);
 		}
