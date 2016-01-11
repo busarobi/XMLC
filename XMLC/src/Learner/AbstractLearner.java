@@ -63,12 +63,18 @@ public abstract class AbstractLearner {
 			learner = new MLLRFH(properties, stepfunction);
 		else if (learnerName.compareTo("MLLRFHR") == 0)
 			learner = new MLLRFHR(properties, stepfunction);
+		else if (learnerName.compareTo("PLTFHKary") == 0)
+			learner = new PLTFHKary(properties, stepfunction);
+		else if (learnerName.compareTo("PLTFHRKary") == 0)
+			learner = new PLTFHRKary(properties, stepfunction);
 		else if (learnerName.compareTo("PLTFH") == 0)
 			learner = new PLTFH(properties, stepfunction);		
 		else if (learnerName.compareTo("PLTFHR") == 0)
 			learner = new PLTFHR(properties, stepfunction);		
 		else if (learnerName.compareTo("PLT") == 0)
 			learner = new PLT(properties, stepfunction);
+		else if (learnerName.compareTo("BRTFHR") == 0)
+			learner = new BRTFHR(properties, stepfunction);
 		else {
 			System.err.println("Unknown learner");
 			System.exit(-1);

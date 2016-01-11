@@ -43,5 +43,8 @@ public class EstimatePair implements Comparable<EstimatePair> {
 		return Double.compare(-this.getP(),-o.getP());
 	}
 	
+	public String toString() {
+		return "[" + this.label + ", " + this.p + "]";
+	}
 	
 }
