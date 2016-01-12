@@ -130,8 +130,8 @@ public class TTEumFast extends ThresholdTuning {
 			//System.out.println("Label: " + i + " threshold: " + thresholds[i] + " F: " + maxFmeasure);
 		}
 
-		for( int i=0; i < this.m; i++ )
-			System.out.println( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
+//		for( int i=0; i < this.m; i++ )
+//			System.out.println( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
 		
 		System.out.printf( "Validated macro F-measure: %.5f\n", (avgFmeasure / (double) learner.getNumberOfLabels()) ) ;
 		

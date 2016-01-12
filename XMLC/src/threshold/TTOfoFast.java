@@ -10,25 +10,25 @@ import Data.AVTable;
 import Data.EstimatePair;
 import Learner.AbstractLearner;
 
-public class TTOfo2 extends ThresholdTuning {
+public class TTOfoFast extends ThresholdTuning {
 	protected int OFOepochs = 1;
 	//protected int initValueDenum = 1;
 	
 	protected int a = 0;
 	protected int b = 1;
 	
-	public TTOfo2(int m, Properties properties) {
+	public TTOfoFast(int m, Properties properties) {
 		super(m, properties);
 		
 		this.OFOepochs = Integer.parseInt(properties.getProperty("ThresholdEpochs", "1") );
-		this.a = Integer.parseInt(properties.getProperty("a", "50") );
-		this.b = Integer.parseInt(properties.getProperty("b", "1000") );
+		this.a = Integer.parseInt(properties.getProperty("a", "1") );
+		this.b = Integer.parseInt(properties.getProperty("b", "100") );
 		
 		System.out.println("#####################################################" );
 		System.out.println("#### OFO2" );
 		System.out.println("#### iter: " + this.OFOepochs );
 		System.out.println("#### a: " + this.a );
-		System.out.println("#### OFO2: " + this.b );
+		System.out.println("#### b: " + this.b );
 		System.out.println("#####################################################" );		
 	}
 
@@ -41,6 +41,7 @@ public class TTOfo2 extends ThresholdTuning {
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			Date date = new Date();
 			System.out.println("\t\t" + dateFormat.format(date));
+			System.out.println( "############################################################" );
 		}
 
 		
@@ -93,15 +94,24 @@ public class TTOfo2 extends ThresholdTuning {
 
 		}
 		
-		for( int i=0; i < this.m; i++ )
-			System.out.println( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
+//		for( int i=0; i < this.m; i++ )
+//			System.out.println( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
 	
 		{
 			System.out.println( "############## End of TTOfo2" );
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			Date date = new Date();
 			System.out.println("\t\t" + dateFormat.format(date));
-			//System.out.printf( "Validated macro F-measure: %.5f\n", (avgFmeasure / (double) learner.getNumberOfLabels()) ) ;
+			
+			double avgFmeasure = 0.0;
+			for( int i = 0; i < this.thresholds.length; i++ ){
+				avgFmeasure += this.thresholds[i];
+			}
+			
+			avgFmeasure = (2.0 * avgFmeasure) / (double)this.thresholds.length;			
+			
+			System.out.printf( "Validated macro F-measure: %.5f\n", avgFmeasure ) ;			
+			System.out.println( "############################################################" );			
 		}
 
 		

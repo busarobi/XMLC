@@ -18,8 +18,9 @@ import preprocessing.MurmurHasher;
 import threshold.TTEum;
 import threshold.TTEumFast;
 import threshold.TTExu;
+import threshold.TTExuFast;
 import threshold.TTOfo;
-import threshold.TTOfo2;
+import threshold.TTOfoFast;
 import threshold.ThresholdTuning;
 import util.MasterSeed;
 
@@ -146,9 +147,14 @@ public class LearnerManager {
 		Map<String,Double> perfTTEUMFast = Evaluator.computePerformanceMetrics(learner, testdata);
 							
 		// evaluate (OFO)
-		ThresholdTuning th = new TTOfo2( learner.m, properties );
+		ThresholdTuning th = new TTOfoFast( learner.m, properties );
 		learner.tuneThreshold(th, validdata);			
 		Map<String,Double> perfTTOFOFast = Evaluator.computePerformanceMetrics(learner, testdata);
+		
+		// evaluate (EXU)
+		ThresholdTuning thexu = new TTExuFast( learner.m, properties );
+		learner.tuneThreshold(thexu, validdata);
+		Map<String,Double> perfTTExu = Evaluator.computePerformanceMetrics(learner, testdata);		
 		
 		
 		for ( String perfName : perfTTEUMFast.keySet() ) {
@@ -161,14 +167,9 @@ public class LearnerManager {
 		}
 
 
-		// evaluate (EXU)
-//		ThresholdTuning thexu = new TTExu( learner.m, properties );
-//		learner.tuneThreshold(thexu, validdata);
-//			
-//		Map<String,Double> perfTTExu = Evaluator.computePerformanceMetrics(learner, testdata);
-//		for ( String perfName : perfTTExu.keySet() ) {
-//			System.out.println("##### EXU " + perfName + ": "  + perfTTExu.get(perfName));
-//		}
+		for ( String perfName : perfTTExu.keySet() ) {
+			System.out.println("##### EXU " + perfName + ": "  + perfTTExu.get(perfName));
+		}
 		
 		
 		for(int t = 0; t < thresholds.length; t++){
