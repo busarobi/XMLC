@@ -5,8 +5,11 @@ public class HashFunction {
 	private int period;
 	private boolean isSign;
 
-	public HashFunction(int seed, int period) {
+	public HashFunction(int seed, int period) throws IllegalArgumentException {
 		this.murmur = new Murmur3A(seed);
+		if ((period & 1) != 0) {
+			throw new IllegalArgumentException("Period needs to be power of 2.");
+		}
 		this.period = period;
 		this.isSign = false;
 	}
@@ -19,9 +22,8 @@ public class HashFunction {
 	public int hash(int index) {
 		this.murmur.reset();
 		this.murmur.updateInt(index);
-		if (this.isSign) return (int) (this.murmur.getValue() % 2 * 2 - 1);
-		return (int) (this.murmur.getValue() % this.period);
+		if (this.isSign) return (int) ((this.murmur.getValue() & 1) * 2 - 1);
+		return (int) (this.murmur.getValue() & (this.period - 1));
 	}
-
 }
 
