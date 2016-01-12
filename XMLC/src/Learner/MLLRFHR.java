@@ -107,6 +107,7 @@ public class MLLRFHR extends MLLRFH {
 					double posterior = getPosteriors(traindata.x[currIdx], label);
 
 					double currLabel = 0.0;
+					
 					if ((indexy < traindata.y[currIdx].length) && (traindata.y[currIdx][indexy] == label)) {
 						currLabel = 1.0;
 						indexy++;
