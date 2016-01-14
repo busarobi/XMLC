@@ -97,7 +97,7 @@ public class TTOfoFast extends ThresholdTuning {
 				
 				
 				if ((j % 100000) == 0) {
-					System.out.println( "\t --> Instance: " + j +" (" + data.n + "), epoch: " + e  + "(" + this.OFOepochs + ")"  );
+					System.out.println( "\t --> Instance: " + j +" (" + data.n + "), epoch: " + (e+1)  + "(" + this.OFOepochs + ")"  );
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
 					System.out.println("\t\t" + dateFormat.format(date));
