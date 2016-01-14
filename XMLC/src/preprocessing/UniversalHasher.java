@@ -103,11 +103,17 @@ public class UniversalHasher implements FeatureHasher {
 		//return this.taskhash[label].hash(feature);
 	}
 
+
+	public int getSign( int label, int feature ) {
+		int value = (label<<1-1)*feature; 
+		return ((value & 1) == 0) ? -1 : 1;
+	}
 	
-	public int getSign(int label, int feature) {
-		int value = (Math.abs((feature*this.nTasks + label) + this.d) % this.prime) % this.nFeatures;
-		return (int) ((value % 2) * 2 - 1);
-	}	
+	
+//	public int getSign(int label, int feature) {
+//		int value = (Math.abs((feature*this.nTasks + label) + this.d) % this.prime) % this.nFeatures;
+//		return (int) ((value % 2) * 2 - 1);
+//	}	
 		
 	
 	@Override
