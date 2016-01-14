@@ -68,10 +68,13 @@ public class TTExuFast extends ThresholdTuning {
 		
 		for( int e = 0; e < this.epochs; e++ ) { 
 
+			int numOfPositives = 0;
 			for( int j = 0; j < data.n; j++ ) {
 
 				HashSet<Integer> predictedPositives = learner.getPositiveLabels(data.x[j]); //.getSparseProbabilityEstimates();
-
+				
+				numOfPositives += predictedPositives.size();
+				
 				HashSet<Integer> thresholdsToChange = new HashSet<Integer>();
 
 				for(int predictedLabel : predictedPositives) {
@@ -104,6 +107,16 @@ public class TTExuFast extends ThresholdTuning {
 					learner.setThreshold(label, t);
 					
 				}
+				
+				if ((j % 100000) == 0) {
+					System.out.println( "\t --> Instance: " + j +" (" + data.n + "), epoch: " + e  + "(" + this.epochs + ")"  );
+					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+					Date date = new Date();
+					System.out.println("\t\t" + dateFormat.format(date));
+					System.out.println( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double) (j+1) );
+				}
+
+				
 			}
 
 		}

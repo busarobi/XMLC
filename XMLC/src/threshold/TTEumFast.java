@@ -42,6 +42,8 @@ public class TTEumFast extends ThresholdTuning {
 		ArrayList<ComparableTriplet>[] posteriors = new ArrayList[learner.getNumberOfLabels()];
 		int [] numPositives = new int[learner.getNumberOfLabels()];
 		
+		int numOfPositives = 0;
+		
 		for( int j = 0; j < data.n; j++ ) {
 			
 			HashSet<Integer> trueLabels = new HashSet<Integer>();
@@ -51,6 +53,8 @@ public class TTEumFast extends ThresholdTuning {
 			}
 			
 			HashSet<EstimatePair> sPE = learner.getSparseProbabilityEstimates(data.x[j], minThreshold);
+			
+			numOfPositives += sPE.size();
 			
 			for(EstimatePair pred : sPE) {
 				
@@ -72,6 +76,7 @@ public class TTEumFast extends ThresholdTuning {
 				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 				Date date = new Date();
 				System.out.println("\t\t" + dateFormat.format(date));
+				System.out.println( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double) (j+1) );
 			}
 			
 		}
