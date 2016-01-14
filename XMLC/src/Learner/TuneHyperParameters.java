@@ -65,19 +65,21 @@ public class TuneHyperParameters extends LearnerManager {
 			Map<String,Double> perftestpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);
 			
 			// valid			
-			ThresholdTuning th = new TTEumFast( learner.m, properties );
-			learner.tuneThreshold(th, validdata);
-
-			Map<String,Double> perfv = Evaluator.computePerformanceMetrics(learner, validdata);
-
-			this.info += "#### Valid:\n";
+//			ThresholdTuning th = new TTEumFast( learner.m, properties );
+//			learner.tuneThreshold(th, validdata);
+//
+//			Map<String,Double> perfv = Evaluator.computePerformanceMetrics(learner, validdata);
+//
+			
 			// generate result
-			for ( String perfName : perfv.keySet() ) {
-				System.out.println("##### Valid " + perfName + ": "  + perfv.get(perfName));
-				this.info += "##### Valid" + perfName + ": "  + perfv.get(perfName) + "\n";
-			}
+			this.info += "#### Valid:\n";
 			
-			
+//			for ( String perfName : perfv.keySet() ) {
+//				System.out.println("##### Valid " + perfName + ": "  + perfv.get(perfName));
+//				this.info += "##### Valid" + perfName + ": "  + perfv.get(perfName) + "\n";
+//			}
+//			
+//			
 			for ( String perfName : perfvalidpreck.keySet() ) {
 				System.out.println("##### Valid " + perfName + ": "  + perfvalidpreck.get(perfName) );
 				this.info += "##### Valid " + perfName + ": "  + perfvalidpreck.get(perfName) + "\n";
@@ -86,13 +88,13 @@ public class TuneHyperParameters extends LearnerManager {
 			
 			this.info += "#### Test:\n";
 			
-			Map<String,Double> perf = Evaluator.computePerformanceMetrics(learner, testdata);
-
-			// generate result
-			for ( String perfName : perf.keySet() ) {
-				System.out.println("##### Test " + perfName + ": "  + perf.get(perfName));
-				this.info += "##### Test" + perfName + ": "  + perf.get(perfName) + "\n";
-			}
+//			Map<String,Double> perf = Evaluator.computePerformanceMetrics(learner, testdata);
+//
+//			// generate result
+//			for ( String perfName : perf.keySet() ) {
+//				System.out.println("##### Test " + perfName + ": "  + perf.get(perfName));
+//				this.info += "##### Test" + perfName + ": "  + perf.get(perfName) + "\n";
+//			}
 			
 			
 			
@@ -148,6 +150,12 @@ public class TuneHyperParameters extends LearnerManager {
 			List<String> lambdaArray = Arrays.asList("0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001","0.0000001");
 			//List<String> lambdaArray = Arrays.asList("0.0001","0.00001","0.000001","0.0000001");
 			hyperparameters.put("lambda", lambdaArray);
+			
+
+			// number of leaves
+			List<String> kArray = Arrays.asList("2","4","8","16","32","64","128","256");
+			//List<String> lambdaArray = Arrays.asList("0.0001","0.00001","0.000001","0.0000001");
+			hyperparameters.put("k", kArray);
 			
 			
 //			// step

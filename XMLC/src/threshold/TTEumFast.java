@@ -15,21 +15,29 @@ import Data.EstimatePair;
 import Learner.AbstractLearner;
 
 public class TTEumFast extends ThresholdTuning {
-
+	
+	protected double minThreshold = 0.001;
+	
 	public TTEumFast(int m, Properties properties) {
-		super(m, properties );		
+		super(m, properties );	
+		
+		this.minThreshold = Double.parseDouble(properties.getProperty("minThreshold", "0.001") );
+		
+		System.out.println("#####################################################" );
+		System.out.println("#### EUM fast" );
+		System.out.println("#### Min threshold: " + this.minThreshold );
+		System.out.println("#####################################################" );		
+		
 	}
 
 	@Override
 	public double[] validate(AVTable data, AbstractLearner learner) {
 		System.out.println("Tuning threshold (TTeumFast)...");
 	
-		System.out.println( "\t --> EUM fast starts" );
+		System.out.println( "\t --> @@@@@@@@@@@@@@@@@@@ EUM fast starts" );
 		DateFormat dateFormat1 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date1 = new Date();
 		System.out.println("\t\t" + dateFormat1.format(date1));
-		
-		double minThreshold = 0.001;
 		
 		thresholds = new double[this.m];
 		
@@ -42,6 +50,8 @@ public class TTEumFast extends ThresholdTuning {
 		ArrayList<ComparableTriplet>[] posteriors = new ArrayList[learner.getNumberOfLabels()];
 		int [] numPositives = new int[learner.getNumberOfLabels()];
 		
+		int numOfPositives = 0;
+		
 		for( int j = 0; j < data.n; j++ ) {
 			
 			HashSet<Integer> trueLabels = new HashSet<Integer>();
@@ -51,6 +61,8 @@ public class TTEumFast extends ThresholdTuning {
 			}
 			
 			HashSet<EstimatePair> sPE = learner.getSparseProbabilityEstimates(data.x[j], minThreshold);
+			
+			numOfPositives += sPE.size();
 			
 			for(EstimatePair pred : sPE) {
 				
@@ -72,6 +84,7 @@ public class TTEumFast extends ThresholdTuning {
 				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 				Date date = new Date();
 				System.out.println("\t\t" + dateFormat.format(date));
+				System.out.println( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double) (j+1) );
 			}
 			
 		}
@@ -130,19 +143,19 @@ public class TTEumFast extends ThresholdTuning {
 			//System.out.println("Label: " + i + " threshold: " + thresholds[i] + " F: " + maxFmeasure);
 		}
 
-		for( int i=0; i < this.m; i++ )
-			System.out.println( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
+//		for( int i=0; i < this.m; i++ )
+//			System.out.println( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
 		
 		System.out.printf( "Validated macro F-measure: %.5f\n", (avgFmeasure / (double) learner.getNumberOfLabels()) ) ;
 		
 
 		
-		System.out.println( "\t --> EUM fast end" );
+		System.out.println( "\t --> !!!!!!!!!!!!! EUM fast end" );
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
 		System.out.println("\t\t" + dateFormat.format(date));
-		
-		
+		System.out.println( "\t\tAvg. num. of predicted positives: " + numOfPositives / (double)(data.n) );
+		System.out.println( "############################################################" );		
 		return thresholds;
 	}
 	
