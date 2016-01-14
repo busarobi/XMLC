@@ -9,10 +9,6 @@ import util.HashFunction;
 public class UniversalHasher implements FeatureHasher {
 
 
-	private int seed = 0;
-	
-	private HashFunction[] taskhash;
-	private HashFunction[] tasksign;
 	private int nFeatures;
 	private int nTasks;
 	private int prime = 1;
@@ -24,18 +20,10 @@ public class UniversalHasher implements FeatureHasher {
 	public UniversalHasher(int seed, int nFeatures, int nTasks) {
 		
 		
-		this.seed = seed;
 		this.nFeatures = nFeatures;
 		this.nTasks = nTasks;
-		this.taskhash = new HashFunction[nTasks];
-		this.tasksign = new HashFunction[nTasks];
 		
 		Random random = new Random(seed);
-		
-		for (int i = 0; i < nTasks; i++) {
-			this.taskhash[i] = new HashFunction(seed + i, nFeatures);
-			this.tasksign[i] = new HashFunction(seed*nTasks + i);
-		}
 		
 		this.prime = nextprime(this.nFeatures);
 		System.out.println("Prime: " + this.prime);
@@ -101,12 +89,14 @@ public class UniversalHasher implements FeatureHasher {
 		
 		//return (Math.abs((feature*this.nTasks + label))) % this.nFeatures;
 		//return this.taskhash[label].hash(feature);
+		
+		//return (a*x) >> (w-M)
 	}
 
 	
 	public int getSign(int label, int feature) {
-		int value = (Math.abs((feature*this.nTasks + label) + this.d) % this.prime) % this.nFeatures;
-		return (int) ((value % 2) * 2 - 1);
+		int value = (label<<1-1)*feature; //(Math.abs((feature*this.nTasks + label) + this.d) % this.prime) % this.nFeatures;
+		return ((value & 1) == 0) ? -1 : 1;//  * 2 - 1);
 	}	
 		
 	

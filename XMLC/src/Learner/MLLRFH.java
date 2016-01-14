@@ -82,7 +82,7 @@ public class MLLRFH extends AbstractLearner {
 
 		// epochs
 		this.hasher = this.properties.getProperty("hasher", "Universal");
-		System.out.println("#### Hasher : " + this.hasher );
+		System.out.println("#### Hasher: " + this.hasher );
 		
 		
 		this.hd = Integer.parseInt(this.properties.getProperty("MLFeatureHashing", "50000000")); 
