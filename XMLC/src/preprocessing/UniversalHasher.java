@@ -17,13 +17,24 @@ public class UniversalHasher implements FeatureHasher {
 	private int c = 1;
 	private int d = 1;
 	
+	private int shift = 0;
+	private int multiplier = 1;
+	private int add = 0;
+	private final int INTEGER_LENGHT = 32;
+	
 	public UniversalHasher(int seed, int nFeatures, int nTasks) {
 		
 		
 		this.nFeatures = nFeatures;
 		this.nTasks = nTasks;
 		
+		this.shift = INTEGER_LENGHT - Integer.numberOfTrailingZeros(nFeatures);
+		System.out.println("Shift: " + this.shift);
+		this.multiplier = (this.nTasks & 1) == 0 ? this.nTasks +1 : this.nTasks; //<<1) + 1;
+		System.out.println("Shift: " + this.shift + " Multiplier: " + this.multiplier);
 		Random random = new Random(seed);
+		
+		this.add = random.nextInt(1 << this.shift);
 		
 		this.prime = nextprime(this.nFeatures);
 		System.out.println("Prime: " + this.prime);
@@ -81,28 +92,32 @@ public class UniversalHasher implements FeatureHasher {
 	    return perhapsprime;
 	}
 
-	
+
+
 	
 	public int getIndex(int label, int feature) {
-		//return (Math.abs((feature*this.nTasks + label) + this.b) % this.prime) % this.nFeatures;
-		return Math.abs(Math.abs((feature*this.nTasks + label) + this.b) % this.prime) % this.nFeatures;
-		
-		//return (Math.abs((feature*this.nTasks + label))) % this.nFeatures;
-		//return this.taskhash[label].hash(feature);
-		
-		//return (a*x) >> (w-M)
+		return ((feature * this.nTasks + label)) & (this.nFeatures - 1); 
 	}
 
+	//public int getIndex(int label, int feature) {
+	//	return Math.abs(Math.abs((feature*this.nTasks + label) + this.b) % this.prime) % this.nFeatures;
+	//}
 
-	public int getSign( int label, int feature ) {
-		int value = (label<<1-1)*feature; 
-		return ((value & 1) == 0) ? -1 : 1;
-	}
+	
+	public int getSign(int label, int feature) {
+		return  ( ( ( (label<<1-1)*feature) & 1) << 1) - 1;
+	}	
+
+
+//	public int getSign( int label, int feature ) {
+//		int value = (label<<1-1)*feature; 
+//		return ((value & 1) == 0) ? -1 : 1;
+//	}
 	
 	
 //	public int getSign(int label, int feature) {
-//		int value = (Math.abs((feature*this.nTasks + label) + this.d) % this.prime) % this.nFeatures;
-//		return (int) ((value % 2) * 2 - 1);
+		//int value = (Math.abs((feature*this.nTasks + label) + this.d) % this.prime);// % this.nFeatures;
+		//return ((value & 1) == 0) ? -1 : 1;
 //	}	
 		
 	
