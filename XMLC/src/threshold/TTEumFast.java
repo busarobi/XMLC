@@ -15,9 +15,19 @@ import Data.EstimatePair;
 import Learner.AbstractLearner;
 
 public class TTEumFast extends ThresholdTuning {
-
+	
+	protected double minThreshold = 0.001;
+	
 	public TTEumFast(int m, Properties properties) {
-		super(m, properties );		
+		super(m, properties );	
+		
+		this.minThreshold = Double.parseDouble(properties.getProperty("minThreshold", "0.001") );
+		
+		System.out.println("#####################################################" );
+		System.out.println("#### EUM fast" );
+		System.out.println("#### Min threshold: " + this.minThreshold );
+		System.out.println("#####################################################" );		
+		
 	}
 
 	@Override
@@ -28,8 +38,6 @@ public class TTEumFast extends ThresholdTuning {
 		DateFormat dateFormat1 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date1 = new Date();
 		System.out.println("\t\t" + dateFormat1.format(date1));
-		
-		double minThreshold = 0.001;
 		
 		thresholds = new double[this.m];
 		
