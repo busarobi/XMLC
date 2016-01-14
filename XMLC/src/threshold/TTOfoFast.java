@@ -25,7 +25,7 @@ public class TTOfoFast extends ThresholdTuning {
 		this.b = Integer.parseInt(properties.getProperty("b", "100") );
 		
 		System.out.println("#####################################################" );
-		System.out.println("#### OFO2" );
+		System.out.println("#### OFO Fast" );
 		System.out.println("#### iter: " + this.OFOepochs );
 		System.out.println("#### a: " + this.a );
 		System.out.println("#### b: " + this.b );
@@ -36,12 +36,12 @@ public class TTOfoFast extends ThresholdTuning {
 	public double[] validate(AVTable data, AbstractLearner learner) {
 		
 		{
-			System.out.println( "############## Start of TTOfo2" );
+			System.out.println( "############################################################" );
+			System.out.println( "--> @@@@@@@@@@@@@ Start of TTOfoFast" );
 			System.out.println( "Initial a:" +  this.a + "\tInitial b: " + this.b + "\tNumber of epochs: " + this.OFOepochs);
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			Date date = new Date();
-			System.out.println("\t\t" + dateFormat.format(date));
-			System.out.println( "############################################################" );
+			System.out.println("\t\t" + dateFormat.format(date));			
 		}
 
 		
@@ -58,9 +58,9 @@ public class TTOfoFast extends ThresholdTuning {
 		
 		learner.setThresholds(this.thresholds);
 		
+		int numOfPositives = 0;		
+		
 		for( int e = 0; e < this.OFOepochs; e++ ) { 
-			
-			int numOfPositives = 0;
 			
 			for( int j = 0; j < data.n; j++ ) {
 
@@ -97,7 +97,7 @@ public class TTOfoFast extends ThresholdTuning {
 				
 				
 				if ((j % 100000) == 0) {
-					System.out.println( "\t --> Instance: " + j +" (" + data.n + "), epoch: " + (e+1)  + "(" + this.OFOepochs + ")"  );
+					System.out.println( "\t --> Instance: " + j +" (" + data.n + "), epoch: " + (e+1)  + " (" + this.OFOepochs + ")"  );
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
 					System.out.println("\t\t" + dateFormat.format(date));
@@ -112,7 +112,7 @@ public class TTOfoFast extends ThresholdTuning {
 //			System.out.println( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
 	
 		{
-			System.out.println( "############## End of TTOfo2" );
+			System.out.println( "--> !!!!!!!!!!! End of TTOfoFast" );
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			Date date = new Date();
 			System.out.println("\t\t" + dateFormat.format(date));
@@ -124,7 +124,8 @@ public class TTOfoFast extends ThresholdTuning {
 			
 			avgFmeasure = (2.0 * avgFmeasure) / (double)this.thresholds.length;			
 			
-			System.out.printf( "Validated macro F-measure: %.5f\n", avgFmeasure ) ;			
+			System.out.printf( "Validated macro F-measure: %.5f\n", avgFmeasure ) ;
+			System.out.println( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double)(data.n * this.OFOepochs) );
 			System.out.println( "############################################################" );			
 		}
 

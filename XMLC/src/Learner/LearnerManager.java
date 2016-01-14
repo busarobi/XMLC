@@ -29,7 +29,8 @@ public class LearnerManager {
 	protected AVTable testdata =null;
 	protected AVTable traindata =null;
 	protected AVTable validdata =null;
-
+	protected boolean isHeader = false;
+	
 	// feature hasher
 	protected FeatureHasher fh = null;
 	protected int featureNum = 0;
@@ -39,6 +40,7 @@ public class LearnerManager {
 	public LearnerManager( String fname ){
 		properties = readProperty(fname);
 
+		this.isHeader = Boolean.parseBoolean(properties.getProperty("IsHeader"));
 //		featureNum = Integer.parseInt(properties.getProperty("FeatureHashing", "0"));
 
 //		if (featureNum>0){
@@ -70,7 +72,7 @@ public class LearnerManager {
 
 	public void readTrainData() throws Exception {
 		// reading train data
-		DataReader datareader = new DataReader(properties.getProperty("TrainFile"));
+		DataReader datareader = new DataReader(properties.getProperty("TrainFile"), false, this.isHeader);
 		traindata = datareader.read();
 //		if (fh != null ) {
 //			traindata = fh.transformSparse(traindata);
@@ -79,7 +81,7 @@ public class LearnerManager {
 
 	public void readTestData() throws Exception {
 		// test
-		DataReader testdatareader = new DataReader(properties.getProperty("TestFile"));
+		DataReader testdatareader = new DataReader(properties.getProperty("TestFile"),false, this.isHeader );
 		testdata = testdatareader.read();
 //		if (fh != null ) {
 //			testdata = fh.transformSparse(testdata);
@@ -93,7 +95,7 @@ public class LearnerManager {
 		if (validFileName == null ) {
 			validdata = traindata;
 		} else {
-			DataReader validdatareader = new DataReader(properties.getProperty("ValidFile"));
+			DataReader validdatareader = new DataReader(properties.getProperty("ValidFile"), false, this.isHeader);
 			validdata = validdatareader.read();
 //			if (fh != null ) {
 //				validdata = fh.transformSparse(validdata);

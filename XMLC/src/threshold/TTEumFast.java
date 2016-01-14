@@ -34,7 +34,7 @@ public class TTEumFast extends ThresholdTuning {
 	public double[] validate(AVTable data, AbstractLearner learner) {
 		System.out.println("Tuning threshold (TTeumFast)...");
 	
-		System.out.println( "\t --> EUM fast starts" );
+		System.out.println( "\t --> @@@@@@@@@@@@@@@@@@@ EUM fast starts" );
 		DateFormat dateFormat1 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date1 = new Date();
 		System.out.println("\t\t" + dateFormat1.format(date1));
@@ -150,12 +150,12 @@ public class TTEumFast extends ThresholdTuning {
 		
 
 		
-		System.out.println( "\t --> EUM fast end" );
+		System.out.println( "\t --> !!!!!!!!!!!!! EUM fast end" );
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
 		System.out.println("\t\t" + dateFormat.format(date));
-		
-		
+		System.out.println( "\t\tAvg. num. of predicted positives: " + numOfPositives / (double)(data.n) );
+		System.out.println( "############################################################" );		
 		return thresholds;
 	}
 	

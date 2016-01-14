@@ -65,19 +65,21 @@ public class TuneHyperParameters extends LearnerManager {
 			Map<String,Double> perftestpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);
 			
 			// valid			
-			ThresholdTuning th = new TTEumFast( learner.m, properties );
-			learner.tuneThreshold(th, validdata);
-
-			Map<String,Double> perfv = Evaluator.computePerformanceMetrics(learner, validdata);
-
-			this.info += "#### Valid:\n";
+//			ThresholdTuning th = new TTEumFast( learner.m, properties );
+//			learner.tuneThreshold(th, validdata);
+//
+//			Map<String,Double> perfv = Evaluator.computePerformanceMetrics(learner, validdata);
+//
+			
 			// generate result
-			for ( String perfName : perfv.keySet() ) {
-				System.out.println("##### Valid " + perfName + ": "  + perfv.get(perfName));
-				this.info += "##### Valid" + perfName + ": "  + perfv.get(perfName) + "\n";
-			}
+			this.info += "#### Valid:\n";
 			
-			
+//			for ( String perfName : perfv.keySet() ) {
+//				System.out.println("##### Valid " + perfName + ": "  + perfv.get(perfName));
+//				this.info += "##### Valid" + perfName + ": "  + perfv.get(perfName) + "\n";
+//			}
+//			
+//			
 			for ( String perfName : perfvalidpreck.keySet() ) {
 				System.out.println("##### Valid " + perfName + ": "  + perfvalidpreck.get(perfName) );
 				this.info += "##### Valid " + perfName + ": "  + perfvalidpreck.get(perfName) + "\n";
@@ -86,13 +88,13 @@ public class TuneHyperParameters extends LearnerManager {
 			
 			this.info += "#### Test:\n";
 			
-			Map<String,Double> perf = Evaluator.computePerformanceMetrics(learner, testdata);
-
-			// generate result
-			for ( String perfName : perf.keySet() ) {
-				System.out.println("##### Test " + perfName + ": "  + perf.get(perfName));
-				this.info += "##### Test" + perfName + ": "  + perf.get(perfName) + "\n";
-			}
+//			Map<String,Double> perf = Evaluator.computePerformanceMetrics(learner, testdata);
+//
+//			// generate result
+//			for ( String perfName : perf.keySet() ) {
+//				System.out.println("##### Test " + perfName + ": "  + perf.get(perfName));
+//				this.info += "##### Test" + perfName + ": "  + perf.get(perfName) + "\n";
+//			}
 			
 			
 			

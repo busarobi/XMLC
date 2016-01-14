@@ -15,7 +15,8 @@ import Data.AVTable;
 
 public class DataReader {
 	protected boolean additionalStat = false;
-		
+	protected boolean initialline = false;
+	
 	protected String fileName = null;
 	
 	public DataReader( String fileName )
@@ -28,9 +29,14 @@ public class DataReader {
 		this.fileName = fileName;
 		this.additionalStat = additionalStatistics;
 	}
+	
+	public DataReader( String fileName, boolean additionalStatistics, boolean initline )
+	{
+		this.fileName = fileName;
+		this.additionalStat = additionalStatistics;
+		this.initialline = initline;
+	}
 
-	
-	
 	public AVTable read() throws Exception
 	{
 		System.out.print( "Reading " + this.fileName + "..." );
@@ -45,6 +51,16 @@ public class DataReader {
 		HashSet<Integer> hashsetFeatures = new HashSet<Integer>(); 
 		HashSet<Integer> hashsetLabels = new HashSet<Integer>(); 
 		//
+		int ni = 0, di = 0, mi = 0;		
+		if (this.initialline){
+			String line = fp.readLine();
+			String[] tokens = line.split(" ");
+						
+			ni = Integer.parseInt(tokens[0]);
+			di = Integer.parseInt(tokens[1]);
+			mi = Integer.parseInt(tokens[2]);
+		}
+		
 		
 		while(true)
 		{
@@ -106,6 +122,16 @@ public class DataReader {
 		data.x = new AVPair[data.n][];
 		data.d = max_feature_index+1;
 		data.m = max_label_index+1;
+		
+		if (this.initialline){
+			if (data.n != ni) { 
+				System.out.println("Number of line does not match with data given in the header");
+				System.exit(-1);
+			}
+			data.d = di;
+			data.m = mi;					
+		}
+		
 		for(int i=0;i<data.n;i++)
 			data.x[i] = vx.elementAt(i);
 		data.y = new int[data.n][];

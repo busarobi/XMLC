@@ -35,7 +35,7 @@ public class TTExuFast extends ThresholdTuning {
 	@Override
 	public double[] validate(AVTable data, AbstractLearner learner) {
 		{
-			System.out.println( "############## Start of EXU Fast" );
+			System.out.println( "--> @@@@@@@@@@@@@@@ Start of EXU Fast" );
 			System.out.println( "Initial a:" +  this.a + "\tInitial b: " + this.b + "\tNumber of epochs: " + this.epochs);
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			Date date = new Date();
@@ -65,10 +65,10 @@ public class TTExuFast extends ThresholdTuning {
 		
 		
 		learner.setThresholds(this.thresholds);
+		int numOfPositives = 0;
 		
 		for( int e = 0; e < this.epochs; e++ ) { 
-
-			int numOfPositives = 0;
+			
 			for( int j = 0; j < data.n; j++ ) {
 
 				HashSet<Integer> predictedPositives = learner.getPositiveLabels(data.x[j]); //.getSparseProbabilityEstimates();
@@ -109,11 +109,11 @@ public class TTExuFast extends ThresholdTuning {
 				}
 				
 				if ((j % 100000) == 0) {
-					System.out.println( "\t --> Instance: " + j +" (" + data.n + "), epoch: " + (e+1)  + "(" + this.epochs + ")"  );
+					System.out.println( "\t --> Instance: " + j +" (" + data.n + "), epoch: " + (e+1)  + " (" + this.epochs + ")"  );
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
 					System.out.println("\t\t" + dateFormat.format(date));
-					System.out.println( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double) (j+1) );
+					System.out.println( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double) (j+1) );					
 				}
 
 				
@@ -127,7 +127,7 @@ public class TTExuFast extends ThresholdTuning {
 //			System.out.println( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
 	
 		{
-			System.out.println( "############## End of EXU Fast" );
+			System.out.println( "--> !!!!!!!!!!!! End of EXU Fast" );
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			Date date = new Date();
 			System.out.println("\t\t" + dateFormat.format(date));
@@ -139,7 +139,8 @@ public class TTExuFast extends ThresholdTuning {
 		
 			avgFmeasure = (2.0 * avgFmeasure) / (double)this.thresholds.length;
 						
-			System.out.printf( "Validated macro F-measure: %.5f\n", avgFmeasure ) ;			
+			System.out.printf( "Validated macro F-measure: %.5f\n", avgFmeasure ) ;
+			System.out.println( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double)(data.n * this.epochs) );
 			System.out.println( "############################################################" );			
 		}
 		
