@@ -22,6 +22,8 @@ public class UniversalHasher implements FeatureHasher {
 	private int add = 0;
 	private final int INTEGER_LENGHT = 32;
 	
+	private int mask = 1;
+	
 	public UniversalHasher(int seed, int nFeatures, int nTasks) {
 		
 		
@@ -32,6 +34,9 @@ public class UniversalHasher implements FeatureHasher {
 		System.out.println("Shift: " + this.shift);
 		this.multiplier = (this.nTasks & 1) == 0 ? this.nTasks +1 : this.nTasks; //<<1) + 1;
 		System.out.println("Shift: " + this.shift + " Multiplier: " + this.multiplier);
+		
+		this.mask = this.nFeatures - 1;
+		
 		Random random = new Random(seed);
 		
 		this.add = random.nextInt(1 << this.shift);
@@ -92,11 +97,9 @@ public class UniversalHasher implements FeatureHasher {
 	    return perhapsprime;
 	}
 
-
-
 	
 	public int getIndex(int label, int feature) {
-		return ((feature * this.nTasks + label)) & (this.nFeatures - 1); 
+		return ((feature * this.nTasks + label)) & (this.mask); 
 	}
 
 	//public int getIndex(int label, int feature) {
