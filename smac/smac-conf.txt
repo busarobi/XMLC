@@ -1,0 +1,16 @@
+paramfile = params.pcs
+runObj = QUALITY
+#3 hours algorithm time
+cutoffTime = 10800
+#7 days smac run-time
+wallclock-limit = 604800
+#12 days
+#wallclock-limit = 1036800
+deterministic = 1
+instance_file = smac-data/train
+test_instance_file = smac-data/test
+instance-suffix = txt
+test-instance-suffix = txt
+algo = java -Xmx5g -XX:+HeapDumpOnOutOfMemoryError -jar [jarName].jar [Path to trainFile] [Path to test File]
+num-test-instances = 1
+deterministic = true
