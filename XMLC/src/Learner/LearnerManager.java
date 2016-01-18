@@ -143,6 +143,14 @@ public class LearnerManager {
 //
 //		}
 		
+		
+		Map<String,Double> perfpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);
+		
+		for ( String perfName : perfpreck.keySet() ) {
+			System.out.println("##### " + perfName + ": "  + perfpreck.get(perfName));
+		}
+		
+		
 		// evaluate (EUM)
 		ThresholdTuning theum = new TTEumFast( learner.m, properties );
 		learner.tuneThreshold(theum, validdata);
@@ -182,11 +190,6 @@ public class LearnerManager {
 //		}
 	
 		
-		Map<String,Double> perfpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);
-		
-		for ( String perfName : perfpreck.keySet() ) {
-			System.out.println("##### " + perfName + ": "  + perfpreck.get(perfName));
-		}
 		
 		
 		

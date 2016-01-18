@@ -54,13 +54,15 @@ public class SmacRun {
 	private AVTable testdata;
 
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		final SmacRun main = new SmacRun();
 		final JCommander jc = new JCommander(main);
+		jc.parse(args);
 		MasterSeed.setSeed(Long.parseLong(main.mainParams.get(5)));
 		main.trainFile = main.mainParams.get(0);
-		main.trainFile = main.mainParams.get(1);
-		jc.parse(args);
+		main.testFile = main.mainParams.get(1);
+		main.readTrainData();
+		main.readTestData();
 		main.run();
 	}
 
@@ -70,6 +72,8 @@ public class SmacRun {
 		properties.put("k", k);
 		properties.put("epochs", epochs);
 		properties.put("Learner","PLTFHRKary");
+		properties.put("hasher", "Mask");
+		properties.put("MLFeatureHashing","67108864");
 		AbstractLearner learner = AbstractLearner.learnerFactory(properties);
 		
 		learner.allocateClassifiers(traindata);
