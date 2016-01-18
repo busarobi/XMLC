@@ -1,5 +1,8 @@
 package run;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -40,9 +43,6 @@ public class SmacRun {
 	@Parameter(names="-k")
 	int k;
 	
-	@Parameter(names="-epochs")
-	int epochs;
-	
 	String trainFile;
 	
 	String testFile;
@@ -59,8 +59,7 @@ public class SmacRun {
 		final JCommander jc = new JCommander(main);
 		jc.parse(args);
 		MasterSeed.setSeed(Long.parseLong(main.mainParams.get(5)));
-		main.trainFile = main.mainParams.get(0);
-		main.testFile = main.mainParams.get(1);
+		main.properties = main.readProperty(main.mainParams.get(0));
 		main.readTrainData();
 		main.readTestData();
 		main.run();
@@ -70,10 +69,6 @@ public class SmacRun {
 		properties.put("gamma", gamma);
 		properties.put("lambda", lambda);
 		properties.put("k", k);
-		properties.put("epochs", epochs);
-		properties.put("Learner","PLTFHRKary");
-		properties.put("hasher", "Mask");
-		properties.put("MLFeatureHashing","67108864");
 		AbstractLearner learner = AbstractLearner.learnerFactory(properties);
 		
 		learner.allocateClassifiers(traindata);
@@ -89,13 +84,31 @@ public class SmacRun {
 	
 	public void readTrainData() throws Exception {
 		// reading train data
-		DataReader datareader = new DataReader(trainFile, false, true);
+		DataReader datareader = new DataReader(properties.getProperty("TrainFile"), false, Boolean.parseBoolean(properties.getProperty("IsHeader")));
 		traindata = datareader.read();
 	}
 
 	public void readTestData() throws Exception {
 		// test
-		DataReader testdatareader = new DataReader(testFile,false, true);
+		DataReader testdatareader = new DataReader(properties.getProperty("TestFile"),false, Boolean.parseBoolean(properties.getProperty("IsHeader")));
 		testdata = testdatareader.read();
+	}
+	public Properties readProperty(String fname) {
+		System.out.print("Reading property file...");
+		Properties properties = new Properties();
+		try {
+			FileInputStream in = new FileInputStream(fname);
+			properties.load(in);
+			in.close();
+		} catch (FileNotFoundException e) {
+			System.err.println(e.getMessage());
+			System.exit(-1);
+		} catch (IOException e) {
+			System.err.println(e.getMessage());
+			System.exit(-1);
+		}
+		System.out.println("Done.");
+
+		return properties;
 	}
 }

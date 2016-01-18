@@ -11,6 +11,6 @@ instance_file = smac-data/train
 test_instance_file = smac-data/test
 instance-suffix = txt
 test-instance-suffix = txt
-algo = java -Xmx5g -XX:+HeapDumpOnOutOfMemoryError -jar [jarName].jar [Path to trainFile] [Path to test File]
+algo = java -Xmx5g -XX:+HeapDumpOnOutOfMemoryError -jar [jarName].jar [Path to config file]
 num-test-instances = 1
 deterministic = true
