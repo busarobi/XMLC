@@ -42,7 +42,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>run.SmacRun</mainClass>
+							<mainClass>Learner.LearnerManager</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

@@ -61,7 +61,7 @@ public class PLTFHRKary extends PLTFHKary {
 				
 		for (int ep = 0; ep < this.epochs; ep++) {
 
-			logger.info("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
+			logger.info("#############--> BEGIN of Epoch: {} ({})", (ep + 1), this.epochs );
 			// random permutation
 			ArrayList<Integer> indirectIdx = this.shuffleIndex();
 			
