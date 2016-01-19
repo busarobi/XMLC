@@ -2,7 +2,12 @@ package util;
 
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class CompleteTree extends Tree {
+	private static Logger logger = LoggerFactory.getLogger(CompleteTree.class);
+
 
 	//int[] childNodes = new int[this.k];
 	
@@ -79,7 +84,7 @@ public class CompleteTree extends Tree {
 		int k = 2, m = 933;
 		CompleteTree ct = new CompleteTree(k, m);
 		
-		System.out.println(ct.getSize());
+		logger.info(Integer.toString(ct.getSize()));
 		
 	}
 	

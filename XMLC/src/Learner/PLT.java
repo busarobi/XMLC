@@ -11,26 +11,30 @@ import java.util.PriorityQueue;
 import java.util.Properties;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import Data.AVPair;
 import Data.AVTable;
 import Data.DenseVectorExt;
 import Learner.step.StepFunction;
-import jsat.linear.DenseVector;
 import util.MasterSeed;
 
 public class PLT extends MLLogisticRegression {
+	private static Logger logger = LoggerFactory.getLogger(PLT.class);
+
 	protected int t = 0;
 	protected double innerThreshold = 0.15;
 
 	public PLT(Properties properties, StepFunction stepfunction) {
 		super(properties, stepfunction);
 
-		System.out.println("#####################################################" );
-		System.out.println("#### Leraner: PLT" );
+		logger.info("#####################################################" );
+		logger.info("#### Leraner: PLT" );
 
 		this.innerThreshold = Double.parseDouble(this.properties.getProperty("IThreshold", "0.15") );
-		System.out.println("#### Inner node threshold : " + this.innerThreshold );
-		System.out.println("#####################################################" );
+		logger.info("#### Inner node threshold : " + this.innerThreshold );
+		logger.info("#####################################################" );
 	}
 
 	@Override
@@ -40,12 +44,12 @@ public class PLT extends MLLogisticRegression {
 		this.d = data.d;
 		this.t = 2 * this.m - 1;
 
-		System.out.println( "Num. of labels: " + this.m + " Dim: " + this.d );
-		System.out.println( "Num. of inner node of the trees: " + this.t  );
+		logger.info( "Num. of labels: " + this.m + " Dim: " + this.d );
+		logger.info( "Num. of inner node of the trees: " + this.t  );
 
 		Random allocationRand = MasterSeed.nextRandom();
 
-		System.out.print( "Allocate the learners..." );
+		logger.info( "Allocate the learners..." );
 
 		this.w = new DenseVectorExt[this.t];
 		this.stepfunctions = new StepFunction[this.t];
@@ -61,7 +65,7 @@ public class PLT extends MLLogisticRegression {
 		for (int i = 0; i < this.m; i++) {
 			this.thresholds[i] = 0.2;
 		}
-		System.out.println( "Done." );
+		logger.info( "Done." );
 
 	}
 
@@ -69,7 +73,7 @@ public class PLT extends MLLogisticRegression {
 	public void train(AVTable data) {
 		for (int ep = 0; ep < this.epochs; ep++) {
 
-			System.out.println("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
+			logger.info("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 			// random permutation
 			ArrayList<Integer> indiriectIdx = new ArrayList<Integer>();
 			for (int i = 0; i < this.traindata.n; i++) {
@@ -84,14 +88,14 @@ public class PLT extends MLLogisticRegression {
 				HashSet<Integer> positiveTreeIndices = new HashSet<Integer>();
 				HashSet<Integer> negativeTreeIndices = new HashSet<Integer>();
 
-				//System.out.print("Positive Labels: ");
+				//logger.info("Positive Labels: ");
 
 				for (int j = 0; j < traindata.y[currIdx].length; j++) {
 
 					//if(j == traindata.y[currIdx].length - 1)
-					//	System.out.println(traindata.y[currIdx][j]);
+					//	logger.info(traindata.y[currIdx][j]);
 					//else
-					//	System.out.print(traindata.y[currIdx][j] + ", ");
+					//	logger.info(traindata.y[currIdx][j] + ", ");
 
 					int treeIndex = traindata.y[currIdx][j] + traindata.m - 1;
 					positiveTreeIndices.add(treeIndex);
@@ -113,7 +117,7 @@ public class PLT extends MLLogisticRegression {
 					PriorityQueue<Integer> queue = new PriorityQueue<Integer>();
 					queue.add(0);
 
-					//System.out.print("Positive tree indices: ");
+					//logger.info("Positive tree indices: ");
 
 					while(!queue.isEmpty()) {
 
@@ -142,15 +146,15 @@ public class PLT extends MLLogisticRegression {
 						}
 
 						if(queue.isEmpty()) {
-						//	System.out.println(node);
+						//	logger.info(node);
 						} else {
-						//	System.out.print(node + ", ");
+						//	logger.info(node + ", ");
 						}
 
 					}
 				}
 
-				//System.out.println("Negative tree indices: " + negativeTreeIndices.toString());
+				//logger.info("Negative tree indices: " + negativeTreeIndices.toString());
 
 
 				for(int j:positiveTreeIndices) {
@@ -163,7 +167,7 @@ public class PLT extends MLLogisticRegression {
 
 				for(int j:negativeTreeIndices) {
 
-					if(j >= this.t) System.out.println("ALARM");
+					if(j >= this.t) logger.info("ALARM");
 
 					double posterior = getPartialPosteriors(traindata.x[currIdx],j);
 					double inc = posterior - 0.0;
@@ -174,17 +178,17 @@ public class PLT extends MLLogisticRegression {
 				this.T++;
 
 				if ((i % 10000) == 0) {
-					System.out.println( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
+					logger.info( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
-					System.out.println("\t\t" + dateFormat.format(date));
-					System.out.println("\t\t" + this.stepfunctions[0].toString() );
-					System.out.println("\t\tWeight: " + this.w[0].get(0) );
+					logger.info("\t\t" + dateFormat.format(date));
+					logger.info("\t\t" + this.stepfunctions[0].toString() );
+					logger.info("\t\tWeight: " + this.w[0].get(0) );
 				}
 
 			}
 
-			System.out.println("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
+			logger.info("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 		}
 
 	}
@@ -274,7 +278,7 @@ public class PLT extends MLLogisticRegression {
 			}
 		}
 
-		//System.out.println("Predicted labels: " + positiveLabels.toString());
+		//logger.info("Predicted labels: " + positiveLabels.toString());
 
 		return positiveLabels;
 	}

@@ -8,12 +8,17 @@ import java.util.Date;
 import java.util.Properties;
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import Data.AVPair;
 import Data.AVTable;
 import Learner.step.StepFunction;
 import util.MasterSeed;
 
 public class MLLogisticRegressionNSampling extends MLLogisticRegression {
+	private static Logger logger = LoggerFactory.getLogger(MLLogisticRegressionNSampling.class);
+
 
 	// uniform = 0
 	// uniform sampling of negatives, the number of negatives to be updated is negativeSamplingParameter
@@ -31,19 +36,19 @@ public class MLLogisticRegressionNSampling extends MLLogisticRegression {
 
 	public MLLogisticRegressionNSampling(Properties properties, StepFunction stepfunction) {
 		super(properties, stepfunction);
-		System.out.println("#####################################################" );
-		System.out.println("#### Leraner: LogReg with Negative Sampling" );
+		logger.info("#####################################################" );
+		logger.info("#### Leraner: LogReg with Negative Sampling" );
 
 		// negative sampling mode
 		this.negativeSamplingMode = Integer.parseInt(this.properties.getProperty("nsamp", "0") );
 		this.negativeSamplingParameter = Double.parseDouble(this.properties.getProperty("nsamppar", "1.0") );
 		if (this.negativeSamplingMode == 0 ) {
-			System.out.println("#### Negative sampling : uniform");
+			logger.info("#### Negative sampling : uniform");
 			System.out.format("#### The number of negatives to be updated is %1.1f x the number of positives\n", this.negativeSamplingParameter);
 		}
 
 
-		System.out.println("#####################################################" );
+		logger.info("#####################################################" );
 
 	}
 
@@ -76,7 +81,7 @@ public class MLLogisticRegressionNSampling extends MLLogisticRegression {
 
 		for (int ep = 0; ep < this.epochs; ep++) {
 
-			System.out.println("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
+			logger.info("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 
 			// random permutation
 			ArrayList<Integer> indiriectIdx = new ArrayList<Integer>(this.traindata.n);
@@ -164,16 +169,16 @@ public class MLLogisticRegressionNSampling extends MLLogisticRegression {
 				this.T++;
 
 				if ((i % 10000) == 0) {
-					System.out.println( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
+					logger.info( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
-					System.out.println("\t\t" + dateFormat.format(date));
-					System.out.println("Weight: " + this.w[0].get(0) );
+					logger.info("\t\t" + dateFormat.format(date));
+					logger.info("Weight: " + this.w[0].get(0) );
 				}
 
 			}
 
-			System.out.println("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
+			logger.info("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 
 			for( int i = 0; i < this.m; i++ ){
 				this.P[i] = (this.truelabelDistribution[i][0])/(((double)this.truelabelDistribution[i][0]+this.truelabelDistribution[i][1]));

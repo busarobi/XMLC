@@ -8,13 +8,17 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import Data.AVTable;
-import Data.ComparablePair;
 import Data.ComparableTriplet;
 import Data.EstimatePair;
 import Learner.AbstractLearner;
 
 public class TTEumFast extends ThresholdTuning {
+	private static Logger logger = LoggerFactory.getLogger(TTEumFast.class);
+
 	
 	protected double minThreshold = 0.001;
 	
@@ -23,21 +27,21 @@ public class TTEumFast extends ThresholdTuning {
 		
 		this.minThreshold = Double.parseDouble(properties.getProperty("minThreshold", "0.001") );
 		
-		System.out.println("#####################################################" );
-		System.out.println("#### EUM fast" );
-		System.out.println("#### Min threshold: " + this.minThreshold );
-		System.out.println("#####################################################" );		
+		logger.info("#####################################################" );
+		logger.info("#### EUM fast" );
+		logger.info("#### Min threshold: " + this.minThreshold );
+		logger.info("#####################################################" );		
 		
 	}
 
 	@Override
 	public double[] validate(AVTable data, AbstractLearner learner) {
-		System.out.println("Tuning threshold (TTeumFast)...");
+		logger.info("Tuning threshold (TTeumFast)...");
 	
-		System.out.println( "\t --> @@@@@@@@@@@@@@@@@@@ EUM fast starts" );
+		logger.info( "\t --> @@@@@@@@@@@@@@@@@@@ EUM fast starts" );
 		DateFormat dateFormat1 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date1 = new Date();
-		System.out.println("\t\t" + dateFormat1.format(date1));
+		logger.info("\t\t" + dateFormat1.format(date1));
 		
 		thresholds = new double[this.m];
 		
@@ -80,11 +84,11 @@ public class TTEumFast extends ThresholdTuning {
 			}
 
 			if ((j % 100000) == 0) {
-				System.out.println( "\t --> Instance: " + j +" (" + data.n + ")" );
+				logger.info( "\t --> Instance: " + j +" (" + data.n + ")" );
 				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 				Date date = new Date();
-				System.out.println("\t\t" + dateFormat.format(date));
-				System.out.println( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double) (j+1) );
+				logger.info("\t\t" + dateFormat.format(date));
+				logger.info( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double) (j+1) );
 			}
 			
 		}
@@ -111,7 +115,7 @@ public class TTEumFast extends ThresholdTuning {
 			
 			for(ComparableTriplet triplet: posteriors[i]) {
 				
-				//System.out.println(triplet.getKey());
+				//logger.info(triplet.getKey());
 				
 				if(triplet.gety() == 1) {
 					tp++;
@@ -136,26 +140,26 @@ public class TTEumFast extends ThresholdTuning {
 				maxFmeasure = Fmeasure;
 			}
 				
-			//System.out.println(maxthreshold + " " + maxFmeasure);
+			//logger.info(maxthreshold + " " + maxFmeasure);
 			thresholds[i] = Math.min(1.0, maxthreshold);
 			avgFmeasure += maxFmeasure;
 		
-			//System.out.println("Label: " + i + " threshold: " + thresholds[i] + " F: " + maxFmeasure);
+			//logger.info("Label: " + i + " threshold: " + thresholds[i] + " F: " + maxFmeasure);
 		}
 
 //		for( int i=0; i < this.m; i++ )
-//			System.out.println( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
+//			logger.info( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
 		
-		System.out.printf( "Validated macro F-measure: %.5f\n", (avgFmeasure / (double) learner.getNumberOfLabels()) ) ;
+		logger.info( "Validated macro F-measure: {}", (avgFmeasure / (double) learner.getNumberOfLabels()) ) ;
 		
 
 		
-		System.out.println( "\t --> !!!!!!!!!!!!! EUM fast end" );
+		logger.info( "\t --> !!!!!!!!!!!!! EUM fast end" );
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
-		System.out.println("\t\t" + dateFormat.format(date));
-		System.out.println( "\t\tAvg. num. of predicted positives: " + numOfPositives / (double)(data.n) );
-		System.out.println( "############################################################" );		
+		logger.info("\t\t" + dateFormat.format(date));
+		logger.info( "\t\tAvg. num. of predicted positives: " + numOfPositives / (double)(data.n) );
+		logger.info( "############################################################" );		
 		return thresholds;
 	}
 	

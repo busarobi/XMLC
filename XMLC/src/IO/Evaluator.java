@@ -3,25 +3,25 @@ package IO;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Map;
-import java.util.PriorityQueue;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import Data.AVTable;
-import Data.ComparablePair;
 import Data.EstimatePair;
 import Learner.AbstractLearner;
 
 public class Evaluator {
 
-	
+	private static Logger logger = LoggerFactory.getLogger(Evaluator.class);
+
 	
     static public Map<String,Double> computePerformanceMetrics(AbstractLearner learner, AVTable data) {
-		System.out.println("--> Computing Hamming loss and F-measure...");
+		logger.info("--> Computing Hamming loss and F-measure...");
 
 		double macroF = 0.0;
 		int m = learner.getNumberOfLabels();
@@ -40,7 +40,7 @@ public class Evaluator {
 
 			HashSet<Integer> predictedLabels = learner.getPositiveLabels(data.x[i]);
 			
-			//System.out.println("Predicted labels: " + predictedLabels.toString());
+			//logger.info("Predicted labels: " + predictedLabels.toString());
 			
 			int predpositloc = predictedLabels.size(); 
 			numOfPositives += predpositloc;
@@ -81,12 +81,12 @@ public class Evaluator {
 			
 			
 			if ((i % 100000) == 0) {
-				System.out.println( "----->\t Evaluation Sample: "+ i +" (" + data.n + ")" );
+				logger.info( "----->\t Evaluation Sample: "+ i +" (" + data.n + ")" );
 				
 				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 				Date date = new Date();
-				System.out.println("\t\t" + dateFormat.format(date));
-				System.out.println( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double) (i+1) );				
+				logger.info("\t\t" + dateFormat.format(date));
+				logger.info( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double) (i+1) );				
 			}
 			
 		}
@@ -159,7 +159,7 @@ public class Evaluator {
 				int label = eP.getLabel();
 				double p = eP.getP();
 				
-				//System.out.println(index + " label: " + label + " p: " + p);
+				//logger.info(index + " label: " + label + " p: " + p);
 				
 				if(trueLabels.contains(label)) {
 					iscorrectprediction[index]++;
@@ -179,11 +179,11 @@ public class Evaluator {
 			}			
 
 			if ((i % 100000) == 0) {
-				System.out.println( "----->\t Prec@ computation: "+ i +" (" + data.n + ")" );
+				logger.info( "----->\t Prec@ computation: "+ i +" (" + data.n + ")" );
 				
 				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 				Date date = new Date();
-				System.out.println("\t\t" + dateFormat.format(date));								
+				logger.info("\t\t" + dateFormat.format(date));								
 			}
 			
 			
@@ -197,9 +197,9 @@ public class Evaluator {
     	
     	
 		//for(int i = 0; i < numLabels.length; i++) {
-		//	System.out.println("Label: " + i + " num: " + numLabels[i]);
+		//	logger.info("Label: " + i + " num: " + numLabels[i]);
 		//}
-		//System.out.println("Num instances: " + data.n);
+		//logger.info("Num instances: " + data.n);
 		
 		TreeMap<String,Double> arr = new TreeMap<String,Double>();
 		for(int i=0; i < k; i++){

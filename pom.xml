@@ -7,6 +7,14 @@
 	<build>
 		<sourceDirectory>XMLC/src</sourceDirectory>
 		<testSourceDirectory>XMLC/test</testSourceDirectory>
+		<resources>
+			<resource>
+				<directory>XMLC/resources</directory>
+				<excludes>
+					<exclude>**/*.java</exclude>
+				</excludes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -34,7 +42,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>Learner.TuneHyperParameters</mainClass>
+							<mainClass>run.SmacRun</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -71,6 +79,16 @@
 			<groupId>com.beust</groupId>
 			<artifactId>jcommander</artifactId>
 			<version>1.48</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+			<version>2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.2</version>
 		</dependency>
 	</dependencies>
 </project>

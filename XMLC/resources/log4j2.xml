@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Appenders>
+		<File name="infoFileAppender" fileName="logs/info.log" append="true">
+			<ThresholdFilter level="INFO" onMatch="ACCEPT" />
+			<PatternLayout pattern="(%d{DEFAULT}) %-5p [%t] [%c{1}.%M:%L] - %m%n" />
+		</File>
+		<File name="errFileAppender" fileName="logs/error.log" append="true">
+			<ThresholdFilter level="ERROR" onMatch="ACCEPT" />
+			<PatternLayout pattern="(%d{DEFAULT}) %-5p [%t] [%c{1}.%M:%L] - %m%n" />
+		</File>
+		<Console name="console" target="SYSTEM_OUT">
+			<PatternLayout pattern="(%d{DEFAULT}) %-5p [%t] [%c{1}.%M:%L] - %m%n" />
+		</Console>
+	</Appenders>
+	<Loggers>
+		<!-- <Logger name="sadl.integration" level="debug"/> -->
+		<Root level="info">
+			<AppenderRef ref="console" />
+			<AppenderRef ref="infoFileAppender" />
+			<AppenderRef ref="errFileAppender" />
+		</Root>
+	</Loggers>
+</Configuration>

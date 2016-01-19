@@ -5,9 +5,14 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.HashMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import Data.AVTable;
 
 public class ReindexingLabelsSymrcm {
+	private static Logger logger = LoggerFactory.getLogger(ReindexingLabelsSymrcm.class);
 
 
 	public static void main(String[] args) throws Exception {
@@ -15,7 +20,7 @@ public class ReindexingLabelsSymrcm {
 		
 		
 		//read permutation
-		System.out.print("Reading permuation...");
+		logger.info("Reading permuation...");
 		//String inputPermFileName = "/Users/busarobi/work/Fmeasure/LSHTC/dataraw/permutation.txt";
 		String inputPermFileName = "./permutation_sym_tree.txt";
 		BufferedReader fperm = new BufferedReader(new FileReader(inputPermFileName));
@@ -33,7 +38,7 @@ public class ReindexingLabelsSymrcm {
 				
 		fperm.close();
 		
-		System.out.println("Done.");
+		logger.info("Done.");
 		
 		//String inputFileName = "/Users/busarobi/work/Fmeasure/LSHTC/dataraw/train-remapped.csv";
 		//String inputFileName = "./train-remapped.csv";
@@ -56,7 +61,7 @@ public class ReindexingLabelsSymrcm {
 		}
 		
 		
-		System.out.println("Writing out the dataset...");
+		logger.info("Writing out the dataset...");
 		
 		BufferedReader fp = new BufferedReader(new FileReader(inputFileName));
 		
@@ -69,7 +74,7 @@ public class ReindexingLabelsSymrcm {
 		{
 			// labels
 			for(int j=0; j<data.y[i].length; j++ ) {
-				//System.out.println(data.y[i][j]);
+				//logger.info(data.y[i][j]);
 				bf.write(  "" + data.y[i][j]  );
 				if ( j < data.y[i].length - 1 )
 					bf.write( "," );
@@ -90,7 +95,7 @@ public class ReindexingLabelsSymrcm {
 			bf.write( "\n" );
 			
 			if ((i % 10000) == 0) {
-				System.out.println("Line: " + i + " (" + data.n + ")" );
+				logger.info("Line: " + i + " (" + data.n + ")" );
 			}
 			
 		}

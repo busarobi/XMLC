@@ -1,11 +1,14 @@
 package preprocessing;
 
-import java.util.Random;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import Data.AVPair;
 import Data.AVTable;
 
 public class MaskHasher implements FeatureHasher {
+	private static Logger logger = LoggerFactory.getLogger(MaskHasher.class);
+
 
 	private int nFeatures;
 	private int nTasks;
@@ -17,10 +20,10 @@ public class MaskHasher implements FeatureHasher {
 				
 		this.mask = this.nFeatures - 1;
 		
-		System.out.println("#####################################################" );
-		System.out.println("#### Mask hash" );
-		System.out.println("#### Num. of hashed features: " + (nTasks * this.nFeatures) );
-		System.out.println("#####################################################" );
+		logger.info("#####################################################" );
+		logger.info("#### Mask hash" );
+		logger.info("#### Num. of hashed features: " + (nTasks * this.nFeatures) );
+		logger.info("#####################################################" );
 		
 	}
 

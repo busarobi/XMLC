@@ -1,9 +1,14 @@
 package IO;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import Data.AVTable;
 
 
 public class Result {
+	private static Logger logger = LoggerFactory.getLogger(Result.class);
+
 	protected double[][] posteriors = null;
 	protected double HL = 0.0;
 	
@@ -74,7 +79,7 @@ public class Result {
 	
 		Result r2 = new Result(posteriors, testdata);
 		//Result r2 = new Result(testdata.y, testdata);
-		System.out.println( "Hamming loss: " + r2.getHL());
+		logger.info( "Hamming loss: " + r2.getHL());
 
 		
 	}

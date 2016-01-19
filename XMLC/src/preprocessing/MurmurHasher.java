@@ -3,12 +3,16 @@ package preprocessing;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import Data.AVPair;
 import Data.AVTable;
 import util.HashFunction;
 
 public class MurmurHasher implements FeatureHasher {
 
+	private static Logger logger = LoggerFactory.getLogger(MurmurHasher.class);
 
 	private HashFunction hash;
 	private HashFunction sign;
@@ -24,10 +28,10 @@ public class MurmurHasher implements FeatureHasher {
 		this.hash = new HashFunction(seed, nFeatures);
 		this.sign = new HashFunction(seed + 1);
 		
-		System.out.println("#####################################################" );
-		System.out.println("#### Murmur hash" );
-		System.out.println("#### Num. of hashed features: " + this.nFeatures );
-		System.out.println("#####################################################" );
+		logger.info("#####################################################" );
+		logger.info("#### Murmur hash" );
+		logger.info("#### Num. of hashed features: " + this.nFeatures );
+		logger.info("#####################################################" );
 	}
 
 	public MurmurHasher(int seed, int nFeatures, int nTasks) {
@@ -138,9 +142,9 @@ public class MurmurHasher implements FeatureHasher {
 		MurmurHasher fh = new MurmurHasher(0, 2);
 		AVPair[] result = fh.transformRowSparse(test);
 		for (AVPair p : result) {
-			System.out.println("Index: " + p.index + " Value: " + p.value);
+			logger.info("Index: " + p.index + " Value: " + p.value);
 		}
-		System.out.println();
+		logger.info("");
 
 		test = new AVPair[3];
 		test[0] = new AVPair();
@@ -156,13 +160,13 @@ public class MurmurHasher implements FeatureHasher {
 		fh = new MurmurHasher(0, 4, nTasks);
 		result = fh.transformRowSparse(test, 1);
 		for (int i = 0; i < nTasks; i++) {
-			System.out.println("Task #" + i + ":");
+			logger.info("Task #" + i + ":");
 			result = fh.transformRowSparse(test, i);
 			for (AVPair p : result) {
-				System.out.println("Index: " + p.index + " Value: " + p.value);
+				logger.info("Index: " + p.index + " Value: " + p.value);
 			}
 		}
-		System.out.println();
+		logger.info("");
 
 		fh = new MurmurHasher(1, 2, 2);
 		AVTable input = new AVTable();
@@ -177,7 +181,7 @@ public class MurmurHasher implements FeatureHasher {
 		AVTable cv_table = fh.transformSparse(input);
 		for (int i = 0; i < cv_table.n; i++) {
 			for (int j = 0; j < cv_table.x[i].length; j++) {
-				System.out.println("Index: " + cv_table.x[i][j].index + " Value: " + cv_table.x[i][j].value);
+				logger.info("Index: " + cv_table.x[i][j].index + " Value: " + cv_table.x[i][j].value);
 			}
 		}
 	}

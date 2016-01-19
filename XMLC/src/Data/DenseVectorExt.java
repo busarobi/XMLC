@@ -3,7 +3,6 @@ package Data;
 import java.util.List;
 
 import jsat.linear.DenseVector;
-import jsat.linear.IndexValue;
 import jsat.linear.Vec;
 
 public class DenseVectorExt extends DenseVector {

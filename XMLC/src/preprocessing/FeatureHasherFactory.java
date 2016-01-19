@@ -1,6 +1,10 @@
 package preprocessing;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class FeatureHasherFactory {
+	private static Logger logger = LoggerFactory.getLogger(FeatureHasherFactory.class);
 
 	public static FeatureHasher createFeatureHasher( String hasher, int fhseed, int hd, int d ) {
 		FeatureHasher fh = null;
@@ -11,7 +15,7 @@ public class FeatureHasherFactory {
 		} else if ( hasher.compareTo("Mask") == 0 ) {
 			fh = new MaskHasher(fhseed, hd, d);
 		} else {
-			System.out.println("Unknown hasher");
+			logger.info("Unknown hasher");
 			System.exit(-1);
 		}		
 		return fh;

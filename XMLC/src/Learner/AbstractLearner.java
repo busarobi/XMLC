@@ -5,11 +5,13 @@ import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Properties;
 import java.util.TreeSet;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import Data.AVPair;
 import Data.AVTable;
@@ -21,6 +23,8 @@ import threshold.ThresholdTuning;
 
 
 public abstract class AbstractLearner {
+	private static Logger logger = LoggerFactory.getLogger(AbstractLearner.class);
+
 	protected int m = 0; // num of labels
 	protected int d = 0; // number of features
 
@@ -52,7 +56,7 @@ public abstract class AbstractLearner {
 		StepFunction stepfunction = StepFunctionFactory.factory(properties);
 		
 		String learnerName = properties.getProperty("Learner");
-		System.out.println("--> Learner: " + learnerName);
+		logger.info("--> Learner: {}", learnerName);
 		if (learnerName.compareTo("MLLog")==0)
 			learner = new MLLogisticRegression(properties, stepfunction);
 		else if (learnerName.compareTo( "Constant" ) == 0)
@@ -165,7 +169,7 @@ public abstract class AbstractLearner {
 	public void outputPosteriors( String fname, AVTable data )
 	{
 		try{
-			System.out.print( "Saving posteriors (" + fname + ")..." );
+			logger.info( "Saving posteriors (" + fname + ")..." );
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
 			          new FileOutputStream(fname)));
 			    
@@ -181,9 +185,9 @@ public abstract class AbstractLearner {
 			}
 						
 			writer.close();
-			System.out.println( "Done." );
+			logger.info( "Done." );
 		} catch (IOException e) {
-			System.out.println(e.getMessage());
+			logger.info(e.getMessage());
 		}
 		
 	}

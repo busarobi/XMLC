@@ -10,10 +10,15 @@ import java.util.HashSet;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import Data.AVPair;
 import Data.AVTable;
 
 public class DataReader {
+	private static Logger logger = LoggerFactory.getLogger(DataReader.class);
+
 	protected boolean additionalStat = false;
 	protected boolean initialline = false;
 	
@@ -39,7 +44,7 @@ public class DataReader {
 
 	public AVTable read() throws Exception
 	{
-		System.out.print( "Reading " + this.fileName + "..." );
+		logger.info( "Reading " + this.fileName + "..." );
 		
 		BufferedReader fp = new BufferedReader(new FileReader(this.fileName));
 		Vector<int[]> vy = new Vector<int[]>();
@@ -90,9 +95,9 @@ public class DataReader {
 			for(int j=0;j<m;j++)
 			{
 				String[] tokens = stArr[j].split(":");
-				//System.out.println( stArr[j] );
+				//logger.info( stArr[j] );
 				if ( tokens.length == 1 ) {  // label
-					//System.out.println( tokens[0].replace(",", "") );					
+					//logger.info( tokens[0].replace(",", "") );					
 					y[indexy]= Integer.parseInt(tokens[0].replace(",", ""));
 					if (additionalStat)
 						hashsetLabels.add(y[indexy]);
@@ -125,7 +130,7 @@ public class DataReader {
 		
 		if (this.initialline){
 			if (data.n != ni) { 
-				System.out.println("Number of line does not match with data given in the header");
+				logger.info("Number of line does not match with data given in the header");
 				System.exit(-1);
 			}
 			data.d = di;
@@ -138,15 +143,15 @@ public class DataReader {
 		for(int i=0;i<data.n;i++)
 			data.y[i] = vy.elementAt(i);
 		
-		System.out.println( "Done." );
+		logger.info( "Done." );
 
-		System.out.println( "    -->  num x dim: labels " 
+		logger.info( "    -->  num x dim: labels " 
 		           + data.n + " x "+ data.d + " : " + data.m );
 		
 		
 		if ( additionalStat ) {
-			System.out.println("    -->  Number of distinct features: " + hashsetFeatures.size());
-			System.out.println("    -->  Number of distinct labels: " + hashsetLabels.size());
+			logger.info("    -->  Number of distinct features: " + hashsetFeatures.size());
+			logger.info("    -->  Number of distinct labels: " + hashsetLabels.size());
 			
 			
 			HashSet<Pair> hashsetPairs = new HashSet<Pair>();
@@ -161,7 +166,7 @@ public class DataReader {
 				
 			}
 	
-			System.out.println("    -->  Number of distinct pairs: " + hashsetPairs.size());
+			logger.info("    -->  Number of distinct pairs: " + hashsetPairs.size());
 		}
 		
 		return data;
@@ -207,7 +212,7 @@ public class DataReader {
 		{
 			// labels
 			for(int j=0; j<data.y[i].length; j++ ) {
-				//System.out.println(data.y[i][j]);
+				//logger.info(data.y[i][j]);
 				bf.write(  "" + data.y[i][j]  );
 				if ( j < data.y[i].length - 1 )
 					bf.write( "," );
@@ -249,7 +254,7 @@ public class DataReader {
 		DataReader datareader = new DataReader( fileName );
 		AVTable data = datareader.read();
 		
-		System.out.println( "N: " + data.n + " D: " + data.d + " M: " + data.m );
+		logger.info( "N: " + data.n + " D: " + data.d + " M: " + data.m );
 		
 		datareader.write(outfileName, data);		
 	}

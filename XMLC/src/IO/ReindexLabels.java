@@ -10,13 +10,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import Data.AVTable;
 
 
 public class ReindexLabels {
+	private static Logger logger = LoggerFactory.getLogger(ReindexLabels.class);
 
 	public static void main(String[] args) throws Exception {
 		
@@ -89,14 +92,14 @@ public class ReindexLabels {
 			}
 		}
 		
-		System.out.println("Number of different labels: " + labeltoindex.size() );
+		logger.info("Number of different labels: " + labeltoindex.size() );
 
 		
-		System.out.print("Allocating...");
+		logger.info("Allocating...");
 		
 		Map<ComparableIntegerPair, Integer> cooccurence = new TreeMap<ComparableIntegerPair, Integer>();
 		
-		System.out.println("Done.");
+		logger.info("Done.");
 		
 		for(int i=0; i < data.n; i++) {
 			for( int j = 0; j < data.y[i].length; j++ ){
@@ -127,17 +130,17 @@ public class ReindexLabels {
 			}	
 
 			if ((i % 10000) == 0) {
-				System.out.println( "\t --> Instance: " + i + " (" + data.n + ")" );
-				System.out.println("\t\t Size: " + cooccurence.size() );
+				logger.info( "\t --> Instance: " + i + " (" + data.n + ")" );
+				logger.info("\t\t Size: " + cooccurence.size() );
 				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 				Date date = new Date();
-				System.out.println("\t\t" + dateFormat.format(date));
+				logger.info("\t\t" + dateFormat.format(date));
 				
 			}
 			
 		}
 		
-		System.out.print("Writing the stat...");
+		logger.info("Writing the stat...");
 		
 		
 		BufferedWriter statbf = new BufferedWriter(new FileWriter("/Users/busarobi/work/XMLC/data/Amazon/train-remapped_stats.txt") );
@@ -172,7 +175,7 @@ public class ReindexLabels {
 		
 		statbf.close();
 
-		System.out.println("Done.");
+		logger.info("Done.");
 		
 		
 		// re-indexing				
@@ -184,7 +187,7 @@ public class ReindexLabels {
 		}
 		
 		
-		System.out.println("Writing out the dataset...");
+		logger.info("Writing out the dataset...");
 		
 		BufferedReader fp = new BufferedReader(new FileReader(inputFileName));
 		
@@ -195,7 +198,7 @@ public class ReindexLabels {
 		{
 			// labels
 			for(int j=0; j<data.y[i].length; j++ ) {
-				//System.out.println(data.y[i][j]);
+				//logger.info(data.y[i][j]);
 				bf.write(  "" + data.y[i][j]  );
 				if ( j < data.y[i].length - 1 )
 					bf.write( "," );
@@ -216,7 +219,7 @@ public class ReindexLabels {
 			bf.write( "\n" );
 			
 			if ((i % 10000) == 0) {
-				System.out.println("Line: " + i + "(" + data.n + ")" );
+				logger.info("Line: " + i + "(" + data.n + ")" );
 			}
 			
 		}
