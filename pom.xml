@@ -34,7 +34,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>run.SmacRun</mainClass>
+							<mainClass>Learner.TuneHyperParameters</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

@@ -58,7 +58,7 @@ public class SmacRun {
 		final SmacRun main = new SmacRun();
 		final JCommander jc = new JCommander(main);
 		jc.parse(args);
-		MasterSeed.setSeed(Long.parseLong(main.mainParams.get(5)));
+		MasterSeed.setSeed(Long.parseLong(main.mainParams.get(4)));
 		main.properties = main.readProperty(main.mainParams.get(0));
 		main.readTrainData();
 		main.readTestData();
