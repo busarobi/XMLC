@@ -61,6 +61,8 @@ public abstract class AbstractLearner {
 			learner = new MLLogisticRegressionNSampling(properties, stepfunction);
 		else if (learnerName.compareTo("MLLRFH") == 0)
 			learner = new MLLRFH(properties, stepfunction);
+		else if (learnerName.compareTo("MLLRFHNS") == 0)
+			learner = new MLLRFHNS(properties, stepfunction);
 		else if (learnerName.compareTo("MLLRFHR") == 0)
 			learner = new MLLRFHR(properties, stepfunction);
 		else if (learnerName.compareTo("PLTFHKary") == 0)
@@ -75,6 +77,8 @@ public abstract class AbstractLearner {
 			learner = new PLT(properties, stepfunction);
 		else if (learnerName.compareTo("BRTFHR") == 0)
 			learner = new BRTFHR(properties, stepfunction);
+		else if (learnerName.compareTo("BRTFHRNS") == 0)
+			learner = new BRTFHRNS(properties, stepfunction);
 		else {
 			System.err.println("Unknown learner");
 			System.exit(-1);
