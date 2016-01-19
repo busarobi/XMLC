@@ -13,34 +13,25 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.PriorityQueue;
 import java.util.Properties;
 import java.util.Queue;
-import java.util.Random;
-import java.util.TreeSet;
 
 import org.apache.commons.math3.analysis.function.Sigmoid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import Data.AVPair;
 import Data.AVTable;
-import Data.ComparablePair;
-import Data.EstimatePair;
-import Data.NodeComparatorPLT;
-import Data.NodePLT;
 import Learner.step.StepFunction;
-import jsat.linear.DenseVector;
 import preprocessing.MurmurHasher;
 import preprocessing.UniversalHasher;
-import threshold.ThresholdTuning;
-import util.MasterSeed;
 
 public class BRTFHR extends MLLRFHR {
-	
+	private static Logger logger = LoggerFactory.getLogger(BRTFHR.class);
+
 	protected int[] Tarray = null;	
 	protected double[] scalararray = null;
 	protected int t = 0;
@@ -48,9 +39,9 @@ public class BRTFHR extends MLLRFHR {
 	public BRTFHR(Properties properties, StepFunction stepfunction) {
 		super(properties, stepfunction);
 
-		System.out.println("#####################################################" );
-		System.out.println("#### Leraner: BRTFHR" );
-		System.out.println("#####################################################" );
+		logger.info("#####################################################" );
+		logger.info("#### Leraner: BRTFHR" );
+		logger.info("#####################################################" );
 	}
 
 	@Override
@@ -61,20 +52,20 @@ public class BRTFHR extends MLLRFHR {
 		this.d = data.d;
 		this.t = 2 * this.m - 1;
 
-		System.out.println( "#### Num. of labels: " + this.m + " Dim: " + this.d );
-		System.out.println( "#### Num. of inner node of the trees: " + this.t  );
-		System.out.println("#####################################################" );
+		logger.info( "#### Num. of labels: " + this.m + " Dim: " + this.d );
+		logger.info( "#### Num. of inner node of the trees: " + this.t  );
+		logger.info("#####################################################" );
 			
 		if ( this.hasher.compareTo("Universal") == 0 ) {			
 			this.fh = new UniversalHasher(fhseed, this.hd, this.t);
 		} else if ( this.hasher.compareTo("Murmur") == 0 ) {
 			this.fh = new MurmurHasher(fhseed, this.hd, this.t);
 		} else {
-			System.out.println("Unknown hasher");
+			logger.info("Unknown hasher");
 			System.exit(-1);
 		}
 		
-		System.out.print( "Allocate the learners..." );
+		logger.info( "Allocate the learners..." );
 
 		this.w = new double[this.hd];
 		this.thresholds = new double[this.t];
@@ -89,7 +80,7 @@ public class BRTFHR extends MLLRFHR {
 		Arrays.fill(this.Tarray, 1);
 		Arrays.fill(this.scalararray, 1.0);
 		
-		System.out.println( "Done." );
+		logger.info( "Done." );
 	}
 	
 		
@@ -101,12 +92,12 @@ public class BRTFHR extends MLLRFHR {
 		
 		for (int ep = 0; ep < this.epochs; ep++) {
 
-			System.out.println("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
+			logger.info("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 			// random permutation
 			ArrayList<Integer> indirectIdx = this.shuffleIndex();
 			
 			if(ep == 9000) {
-				System.out.println("Stop");
+				logger.info("Stop");
 			}
 			
 			for (int i = 0; i < traindata.n; i++) {
@@ -183,16 +174,16 @@ public class BRTFHR extends MLLRFHR {
 				*/
 				
 				if ((i % 10000) == 0) {
-					System.out.println( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
+					logger.info( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
-					System.out.println("\t\t" + dateFormat.format(date));
-					//System.out.println("Weight: " + this.w[0].get(0) );
-					System.out.println("Scalar: " + this.scalararray[0]);
+					logger.info("\t\t" + dateFormat.format(date));
+					//logger.info("Weight: " + this.w[0].get(0) );
+					logger.info("Scalar: " + this.scalararray[0]);
 				}
 			}
 
-			System.out.println("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
+			logger.info("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 		}
 		
 		int zeroW = 0;
@@ -205,7 +196,7 @@ public class BRTFHR extends MLLRFHR {
 			sumW += weight;
 			index++;
 		}
-		System.out.println("Hash weights (lenght, zeros, nonzeros, ratio, sumW, last nonzero): " + w.length + ", " + zeroW + ", " + (w.length - zeroW) + ", " + (double) (w.length - zeroW)/(double) w.length + ", " + sumW + ", " + maxNonZero);
+		logger.info("Hash weights (lenght, zeros, nonzeros, ratio, sumW, last nonzero): " + w.length + ", " + zeroW + ", " + (w.length - zeroW) + ", " + (double) (w.length - zeroW)/(double) w.length + ", " + sumW + ", " + maxNonZero);
 	}
 
 
@@ -294,7 +285,7 @@ public class BRTFHR extends MLLRFHR {
 			}
 		}
 
-		//System.out.println("Predicted labels: " + positiveLabels.toString());
+		//logger.info("Predicted labels: " + positiveLabels.toString());
 
 		return positiveLabels;
 	}
@@ -318,7 +309,7 @@ public class BRTFHR extends MLLRFHR {
 			this.thresholds[j] = t;
 		}		
 		
-		//System.out.println(Arrays.toString(this.thresholds));
+		//logger.info(Arrays.toString(this.thresholds));
 	}
 
 	
@@ -334,7 +325,7 @@ public class BRTFHR extends MLLRFHR {
 		}
 		
 		//for( int i=0; i < this.thresholds.length; i++ )
-		//	System.out.println( "Threshold: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
+		//	logger.info( "Threshold: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
 	
 		
 	}
@@ -344,7 +335,7 @@ public class BRTFHR extends MLLRFHR {
 	public void savemodel(String fname) {
 		// TODO Auto-generated method stub
 		try{
-			System.out.print( "Saving model (" + fname + ")..." );						
+			logger.info( "Saving model (" + fname + ")..." );						
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
 			          new FileOutputStream(fname)));
 
@@ -384,9 +375,9 @@ public class BRTFHR extends MLLRFHR {
 			
 			writer.close();
 			
-			System.out.println( "Done." );
+			logger.info( "Done." );
 		} catch (IOException e) {
-			System.out.println(e.getMessage());
+			logger.info(e.getMessage());
 		}
 
 	}
@@ -394,7 +385,7 @@ public class BRTFHR extends MLLRFHR {
 	@Override
 	public void loadmodel(String fname) {
 		try {
-			System.out.println( "Loading model (" + fname + ")..." );
+			logger.info( "Loading model (" + fname + ")..." );
 			Path p = Paths.get(fname);
 
 			BufferedReader reader = Files.newBufferedReader(p, Charset.forName("UTF-8"));
@@ -472,7 +463,7 @@ public class BRTFHR extends MLLRFHR {
 
 
 	    	this.scalar=1.0;
-		    System.out.println( "Done." );
+		    logger.info( "Done." );
 		} catch (IOException x) {
 		    System.err.format("IOException: %s%n", x);
 		}

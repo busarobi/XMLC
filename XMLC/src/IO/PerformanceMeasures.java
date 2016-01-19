@@ -2,10 +2,14 @@ package IO;
 
 import java.util.HashSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import Data.AVTable;
 
 public class PerformanceMeasures {
-	
+	private static Logger logger = LoggerFactory.getLogger(PerformanceMeasures.class);
+
 	public double computeHammingLoss(HashSet<Integer>[] predictedLabels, AVTable data ) {
 		return computeHammingLoss( predictedLabels, data.y, data.n, data.m );
 	}
@@ -98,8 +102,8 @@ public class PerformanceMeasures {
 		}
 	
 		PerformanceMeasures  pm = new PerformanceMeasures();
-		System.out.println( "Hamming loss: " + pm.computeHammingLoss(predictedLabels, testdata));
-		System.out.println("Macro-F: " + pm.computeMacroF(predictedLabels, testdata));
+		logger.info( "Hamming loss: " + pm.computeHammingLoss(predictedLabels, testdata));
+		logger.info("Macro-F: " + pm.computeMacroF(predictedLabels, testdata));
 		
 	}
 }

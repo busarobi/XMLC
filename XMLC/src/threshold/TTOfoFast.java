@@ -6,11 +6,15 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import Data.AVTable;
-import Data.EstimatePair;
 import Learner.AbstractLearner;
 
 public class TTOfoFast extends ThresholdTuning {
+	private static Logger logger = LoggerFactory.getLogger(TTOfoFast.class);
+
 	protected int OFOepochs = 1;
 	//protected int initValueDenum = 1;
 	
@@ -24,24 +28,24 @@ public class TTOfoFast extends ThresholdTuning {
 		this.a = Integer.parseInt(properties.getProperty("a", "1") );
 		this.b = Integer.parseInt(properties.getProperty("b", "100") );
 		
-		System.out.println("#####################################################" );
-		System.out.println("#### OFO Fast" );
-		System.out.println("#### iter: " + this.OFOepochs );
-		System.out.println("#### a: " + this.a );
-		System.out.println("#### b: " + this.b );
-		System.out.println("#####################################################" );		
+		logger.info("#####################################################" );
+		logger.info("#### OFO Fast" );
+		logger.info("#### iter: " + this.OFOepochs );
+		logger.info("#### a: " + this.a );
+		logger.info("#### b: " + this.b );
+		logger.info("#####################################################" );		
 	}
 
 	@Override
 	public double[] validate(AVTable data, AbstractLearner learner) {
 		
 		{
-			System.out.println( "############################################################" );
-			System.out.println( "--> @@@@@@@@@@@@@ Start of TTOfoFast" );
-			System.out.println( "Initial a:" +  this.a + "\tInitial b: " + this.b + "\tNumber of epochs: " + this.OFOepochs);
+			logger.info( "############################################################" );
+			logger.info( "--> @@@@@@@@@@@@@ Start of TTOfoFast" );
+			logger.info( "Initial a:" +  this.a + "\tInitial b: " + this.b + "\tNumber of epochs: " + this.OFOepochs);
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			Date date = new Date();
-			System.out.println("\t\t" + dateFormat.format(date));			
+			logger.info("\t\t" + dateFormat.format(date));			
 		}
 
 		
@@ -97,11 +101,11 @@ public class TTOfoFast extends ThresholdTuning {
 				
 				
 				if ((j % 100000) == 0) {
-					System.out.println( "\t --> Instance: " + j +" (" + data.n + "), epoch: " + (e+1)  + " (" + this.OFOepochs + ")"  );
+					logger.info( "\t --> Instance: " + j +" (" + data.n + "), epoch: " + (e+1)  + " (" + this.OFOepochs + ")"  );
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
-					System.out.println("\t\t" + dateFormat.format(date));
-					System.out.println( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double) (j+1) );
+					logger.info("\t\t" + dateFormat.format(date));
+					logger.info( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double) (j+1) );
 				}
 				
 			}
@@ -109,13 +113,13 @@ public class TTOfoFast extends ThresholdTuning {
 		}
 		
 //		for( int i=0; i < this.m; i++ )
-//			System.out.println( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
+//			logger.info( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
 	
 		{
-			System.out.println( "--> !!!!!!!!!!! End of TTOfoFast" );
+			logger.info( "--> !!!!!!!!!!! End of TTOfoFast" );
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			Date date = new Date();
-			System.out.println("\t\t" + dateFormat.format(date));
+			logger.info("\t\t" + dateFormat.format(date));
 			
 			double avgFmeasure = 0.0;
 			for( int i = 0; i < this.thresholds.length; i++ ){
@@ -124,9 +128,9 @@ public class TTOfoFast extends ThresholdTuning {
 			
 			avgFmeasure = (2.0 * avgFmeasure) / (double)this.thresholds.length;			
 			
-			System.out.printf( "Validated macro F-measure: %.5f\n", avgFmeasure ) ;
-			System.out.println( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double)(data.n * this.OFOepochs) );
-			System.out.println( "############################################################" );			
+			logger.info( "Validated macro F-measure: {}", avgFmeasure ) ;
+			logger.info( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double)(data.n * this.OFOepochs) );
+			logger.info( "############################################################" );			
 		}
 
 		

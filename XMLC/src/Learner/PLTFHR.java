@@ -13,31 +13,23 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Properties;
-import java.util.Random;
-import java.util.TreeSet;
 
 import org.apache.commons.math3.analysis.function.Sigmoid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import Data.AVPair;
 import Data.AVTable;
-import Data.ComparablePair;
-import Data.EstimatePair;
-import Data.NodeComparatorPLT;
-import Data.NodePLT;
 import Learner.step.StepFunction;
-import jsat.linear.DenseVector;
-import preprocessing.MurmurHasher;
 import preprocessing.UniversalHasher;
-import threshold.ThresholdTuning;
-import util.MasterSeed;
 
 public class PLTFHR extends PLTFH {
+	private static Logger logger = LoggerFactory.getLogger(PLTFHR.class);
+
 	protected int[] Tarray = null;	
 	protected double[] scalararray = null;
 	
@@ -49,12 +41,12 @@ public class PLTFHR extends PLTFH {
 	public PLTFHR(Properties properties, StepFunction stepfunction) {
 		super(properties, stepfunction);
 
-		System.out.println("#####################################################" );
-		System.out.println("#### Leraner: PLTFTHR" );
+		logger.info("#####################################################" );
+		logger.info("#### Leraner: PLTFTHR" );
 
 		//this.innerThreshold = Double.parseDouble(this.properties.getProperty("IThreshold", "0.15") );
-		//System.out.println("#### Inner node threshold : " + this.innerThreshold );
-		System.out.println("#####################################################" );
+		//logger.info("#### Inner node threshold : " + this.innerThreshold );
+		logger.info("#####################################################" );
 	}
 
 	@Override
@@ -66,7 +58,7 @@ public class PLTFHR extends PLTFH {
 		Arrays.fill(this.Tarray, 1);
 		Arrays.fill(this.scalararray, 1.0);
 		
-		//System.out.println( "Done." );
+		//logger.info( "Done." );
 	}
 	
 		
@@ -77,7 +69,7 @@ public class PLTFHR extends PLTFH {
 				
 		for (int ep = 0; ep < this.epochs; ep++) {
 
-			System.out.println("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
+			logger.info("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 			// random permutation
 			ArrayList<Integer> indirectIdx = this.shuffleIndex();
 			
@@ -139,7 +131,7 @@ public class PLTFHR extends PLTFH {
 					}
 				}
 
-				//System.out.println("Negative tree indices: " + negativeTreeIndices.toString());
+				//logger.info("Negative tree indices: " + negativeTreeIndices.toString());
 
 
 				for(int j:positiveTreeIndices) {
@@ -152,7 +144,7 @@ public class PLTFHR extends PLTFH {
 
 				for(int j:negativeTreeIndices) {
 
-					if(j >= this.t) System.out.println("ALARM");
+					if(j >= this.t) logger.info("ALARM");
 
 					double posterior = getPartialPosteriors(traindata.x[currIdx],j);
 					double inc = -(0.0 - posterior); 
@@ -163,16 +155,16 @@ public class PLTFHR extends PLTFH {
 		
 
 				if ((i % 100000) == 0) {
-					System.out.println( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
+					logger.info( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
-					System.out.println("\t\t" + dateFormat.format(date));
-					//System.out.println("Weight: " + this.w[0].get(0) );
-					System.out.println("Scalar: " + this.scalararray[0]);
+					logger.info("\t\t" + dateFormat.format(date));
+					//logger.info("Weight: " + this.w[0].get(0) );
+					logger.info("Scalar: " + this.scalararray[0]);
 				}
 			}
 
-			System.out.println("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
+			logger.info("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 		}
 		
 		int zeroW = 0;
@@ -185,7 +177,7 @@ public class PLTFHR extends PLTFH {
 			sumW += weight;
 			index++;
 		}
-		System.out.println("Hash weights (lenght, zeros, nonzeros, ratio, sumW, last nonzero): " + w.length + ", " + zeroW + ", " + (w.length - zeroW) + ", " + (double) (w.length - zeroW)/(double) w.length + ", " + sumW + ", " + maxNonZero);
+		logger.info("Hash weights (lenght, zeros, nonzeros, ratio, sumW, last nonzero): " + w.length + ", " + zeroW + ", " + (w.length - zeroW) + ", " + (double) (w.length - zeroW)/(double) w.length + ", " + sumW + ", " + maxNonZero);
 	}
 
 
@@ -196,7 +188,7 @@ public class PLTFHR extends PLTFH {
 		this.Tarray[label]++;
 		this.scalararray[label] *= (1 + this.learningRate * this.lambda);
 		
-		//System.out.println(this.learningRate + "\t" + this.scalar[label]);
+		//logger.info(this.learningRate + "\t" + this.scalar[label]);
 		
 		int n = traindata.x[currIdx].length;
 		
@@ -204,7 +196,7 @@ public class PLTFHR extends PLTFH {
 
 			int index = fh.getIndex(label, traindata.x[currIdx][i].index);
 			int sign = fh.getSign(label, traindata.x[currIdx][i].index);
-			//System.out.println(sign);
+			//logger.info(sign);
 			//double gradient = inc * traindata.x[currIdx][i].value; 
 			//double update = this.learningRate * gradient;
 			//this.w[index] -= update; 
@@ -212,7 +204,7 @@ public class PLTFHR extends PLTFH {
 			double gradient = this.scalararray[label] * inc * (traindata.x[currIdx][i].value * sign);
 			double update = (this.learningRate * gradient);// / this.scalar;		
 			this.w[index] -= update; 
-			//System.out.println("w -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
+			//logger.info("w -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
 			
 		}
 		
@@ -222,13 +214,13 @@ public class PLTFHR extends PLTFH {
 		//double gradient = inc;
 		//double update = this.learningRate * gradient;	
 		//this.w[biasIndex] -= update;
-		//System.out.println("bias -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
+		//logger.info("bias -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
 
 		
 		double gradient = this.scalararray[label] * inc;
 		double update = (this.learningRate * gradient);//  / this.scalar;		
 		this.bias[label] -= update;
-		//System.out.println("bias -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
+		//logger.info("bias -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
 	}
 
 
@@ -256,7 +248,7 @@ public class PLTFHR extends PLTFH {
 	public void savemodel(String fname) {
 		// TODO Auto-generated method stub
 		try{
-			System.out.print( "Saving model (" + fname + ")..." );						
+			logger.info( "Saving model (" + fname + ")..." );						
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
 			          new FileOutputStream(fname)));
 
@@ -296,9 +288,9 @@ public class PLTFHR extends PLTFH {
 			
 			writer.close();
 			
-			System.out.println( "Done." );
+			logger.info( "Done." );
 		} catch (IOException e) {
-			System.out.println(e.getMessage());
+			logger.info(e.getMessage());
 		}
 
 	}
@@ -306,7 +298,7 @@ public class PLTFHR extends PLTFH {
 	@Override
 	public void loadmodel(String fname) {
 		try {
-			System.out.println( "Loading model (" + fname + ")..." );
+			logger.info( "Loading model (" + fname + ")..." );
 			Path p = Paths.get(fname);
 
 			BufferedReader reader = Files.newBufferedReader(p, Charset.forName("UTF-8"));
@@ -384,7 +376,7 @@ public class PLTFHR extends PLTFH {
 
 
 	    	this.scalar=1.0;
-		    System.out.println( "Done." );
+		    logger.info( "Done." );
 		} catch (IOException x) {
 		    System.err.format("IOException: %s%n", x);
 		}

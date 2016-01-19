@@ -2,11 +2,14 @@ package preprocessing;
 
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import Data.AVPair;
 import Data.AVTable;
-import util.HashFunction;
 
 public class UniversalHasher implements FeatureHasher {
+	private static Logger logger = LoggerFactory.getLogger(UniversalHasher.class);
 
 
 	private int nFeatures;
@@ -29,16 +32,16 @@ public class UniversalHasher implements FeatureHasher {
 		this.nTasks = nTasks;
 		
 		this.shift = INTEGER_LENGHT - Integer.numberOfTrailingZeros(nFeatures);
-		System.out.println("Shift: " + this.shift);
+		logger.info("Shift: " + this.shift);
 		this.multiplier = (this.nTasks & 1) == 0 ? this.nTasks +1 : this.nTasks; //<<1) + 1;
-		System.out.println("Shift: " + this.shift + " Multiplier: " + this.multiplier);
+		logger.info("Shift: " + this.shift + " Multiplier: " + this.multiplier);
 		
 		Random random = new Random(seed);
 		
 		this.add = random.nextInt(1 << this.shift);
 		
 		this.prime = nextprime(this.nFeatures);
-		System.out.println("Prime: " + this.prime);
+		logger.info("Prime: " + this.prime);
 		
 		this.a = (2*random.nextInt()-1) % this.prime;
 		this.b = random.nextInt() % this.prime;
@@ -46,10 +49,10 @@ public class UniversalHasher implements FeatureHasher {
 		this.c = (2*random.nextInt()-1) % this.prime;
 		this.d = random.nextInt() % this.prime;		
 		
-		System.out.println("#####################################################" );
-		System.out.println("#### Universal hash" );
-		System.out.println("#### Num. of hashed features: " + (nTasks * this.nFeatures) );
-		System.out.println("#####################################################" );
+		logger.info("#####################################################" );
+		logger.info("#### Universal hash" );
+		logger.info("#### Num. of hashed features: " + (nTasks * this.nFeatures) );
+		logger.info("#####################################################" );
 		
 	}
 

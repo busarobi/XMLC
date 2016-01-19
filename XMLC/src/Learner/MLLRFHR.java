@@ -6,11 +6,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import Data.AVTable;
 import Learner.step.StepFunction;
 import util.MasterSeed;
 
 public class MLLRFHR extends MLLRFH {
+	private static Logger logger = LoggerFactory.getLogger(MLLRFHR.class);
+
 
 	protected int[] Tarray = null;	
 	protected double[] scalararray = null;
@@ -20,11 +26,11 @@ public class MLLRFHR extends MLLRFH {
 		super(properties, stepfunction);
 		shuffleRand = MasterSeed.nextRandom();		
 		
-		System.out.println("#####################################################" );
-		System.out.println("#### Leraner: MLLRFH" );
+		logger.info("#####################################################" );
+		logger.info("#### Leraner: MLLRFH" );
 
 		
-		System.out.println("#####################################################" );
+		logger.info("#####################################################" );
 	}
 
 	@Override
@@ -39,7 +45,7 @@ public class MLLRFHR extends MLLRFH {
 				
 		//how to initialize w?
 		
-		System.out.println( "Done." );
+		logger.info( "Done." );
 	}
 	
 	
@@ -51,7 +57,7 @@ public class MLLRFHR extends MLLRFH {
 		this.Tarray[label]++;
 		this.scalararray[label] *= (1 + this.learningRate * this.lambda);
 		
-		//System.out.println(this.learningRate + "\t" + this.scalar[label]);
+		//logger.info(this.learningRate + "\t" + this.scalar[label]);
 		
 		int n = traindata.x[currIdx].length;
 		
@@ -59,7 +65,7 @@ public class MLLRFHR extends MLLRFH {
 
 			int index = fh.getIndex(label, traindata.x[currIdx][i].index);
 			int sign = fh.getSign(label, traindata.x[currIdx][i].index);
-			//System.out.println(sign);
+			//logger.info(sign);
 			//double gradient = inc * traindata.x[currIdx][i].value; 
 			//double update = this.learningRate * gradient;
 			//this.w[index] -= update; 
@@ -67,7 +73,7 @@ public class MLLRFHR extends MLLRFH {
 			double gradient = this.scalararray[label] * inc * (traindata.x[currIdx][i].value * sign);
 			double update = (this.learningRate * gradient);// / this.scalar;		
 			this.w[index] -= update; 
-			//System.out.println("w -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
+			//logger.info("w -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
 			
 		}
 		
@@ -77,13 +83,13 @@ public class MLLRFHR extends MLLRFH {
 		//double gradient = inc;
 		//double update = this.learningRate * gradient;	
 		//this.w[biasIndex] -= update;
-		//System.out.println("bias -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
+		//logger.info("bias -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
 
 		
 		double gradient = this.scalararray[label] * inc;
 		double update = (this.learningRate * gradient);//  / this.scalar;		
 		this.bias[label] -= update;
-		//System.out.println("bias -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
+		//logger.info("bias -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
 	}
 
 	
@@ -94,7 +100,7 @@ public class MLLRFHR extends MLLRFH {
 		
 		for (int ep = 0; ep < this.epochs; ep++) {
 
-			System.out.println("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
+			logger.info("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 
 			ArrayList<Integer> indirectIdx = this.shuffleIndex();
 
@@ -123,17 +129,17 @@ public class MLLRFHR extends MLLRFH {
 				
 
 				if ((i % 10000) == 0) {
-					System.out.println( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
+					logger.info( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
-					System.out.println("\t\t" + dateFormat.format(date));
-					//System.out.println("Weight: " + this.w[0].get(0) );
-					System.out.println("Scalar: " + this.scalar);
+					logger.info("\t\t" + dateFormat.format(date));
+					//logger.info("Weight: " + this.w[0].get(0) );
+					logger.info("Scalar: " + this.scalar);
 				}
 
 			}
 
-			System.out.println("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
+			logger.info("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 		}
 		
 		int zeroW = 0;
@@ -146,7 +152,7 @@ public class MLLRFHR extends MLLRFH {
 			sumW += weight;
 			index++;
 		}
-		System.out.println("Hash weights (lenght, zeros, nonzeros, ratio, sumW, last nonzero): " + w.length + ", " + zeroW + ", " + (w.length - zeroW) + ", " + (double) (w.length - zeroW)/(double) w.length + ", " + sumW + ", " + maxNonZero);
+		logger.info("Hash weights (lenght, zeros, nonzeros, ratio, sumW, last nonzero): " + w.length + ", " + zeroW + ", " + (w.length - zeroW) + ", " + (double) (w.length - zeroW)/(double) w.length + ", " + sumW + ", " + maxNonZero);
 	}
 
 

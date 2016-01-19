@@ -6,10 +6,14 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import Data.AVTable;
 import Learner.AbstractLearner;
 
 public class TTExuFast extends ThresholdTuning {
+	private static Logger logger = LoggerFactory.getLogger(TTExuFast.class);
 
 	protected int epochs = 1;	
 	protected int a = 1;
@@ -22,12 +26,12 @@ public class TTExuFast extends ThresholdTuning {
 		this.a = Integer.parseInt(properties.getProperty("a", "1") );
 		this.b = Integer.parseInt(properties.getProperty("b", "100") );
 		
-		System.out.println("#####################################################" );
-		System.out.println("#### EXU Fast" );
-		System.out.println("#### iter: " + this.epochs );
-		System.out.println("#### a: " + this.a );
-		System.out.println("#### b: " + this.b );
-		System.out.println("#####################################################" );		
+		logger.info("#####################################################" );
+		logger.info("#### EXU Fast" );
+		logger.info("#### iter: " + this.epochs );
+		logger.info("#### a: " + this.a );
+		logger.info("#### b: " + this.b );
+		logger.info("#####################################################" );		
 	}
 
 	
@@ -35,11 +39,11 @@ public class TTExuFast extends ThresholdTuning {
 	@Override
 	public double[] validate(AVTable data, AbstractLearner learner) {
 		{
-			System.out.println( "--> @@@@@@@@@@@@@@@ Start of EXU Fast" );
-			System.out.println( "Initial a:" +  this.a + "\tInitial b: " + this.b + "\tNumber of epochs: " + this.epochs);
+			logger.info( "--> @@@@@@@@@@@@@@@ Start of EXU Fast" );
+			logger.info( "Initial a:" +  this.a + "\tInitial b: " + this.b + "\tNumber of epochs: " + this.epochs);
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			Date date = new Date();
-			System.out.println("\t\t" + dateFormat.format(date));
+			logger.info("\t\t" + dateFormat.format(date));
 		}
 		
 		int[] at = new int[this.m];
@@ -109,11 +113,11 @@ public class TTExuFast extends ThresholdTuning {
 				}
 				
 				if ((j % 100000) == 0) {
-					System.out.println( "\t --> Instance: " + j +" (" + data.n + "), epoch: " + (e+1)  + " (" + this.epochs + ")"  );
+					logger.info( "\t --> Instance: " + j +" (" + data.n + "), epoch: " + (e+1)  + " (" + this.epochs + ")"  );
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
-					System.out.println("\t\t" + dateFormat.format(date));
-					System.out.println( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double) (j+1) );					
+					logger.info("\t\t" + dateFormat.format(date));
+					logger.info( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double) (j+1) );					
 				}
 
 				
@@ -124,13 +128,13 @@ public class TTExuFast extends ThresholdTuning {
 		
 		
 //		for( int i=0; i < this.m; i++ )
-//			System.out.println( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
+//			logger.info( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
 	
 		{
-			System.out.println( "--> !!!!!!!!!!!! End of EXU Fast" );
+			logger.info( "--> !!!!!!!!!!!! End of EXU Fast" );
 			DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 			Date date = new Date();
-			System.out.println("\t\t" + dateFormat.format(date));
+			logger.info("\t\t" + dateFormat.format(date));
 			
 			double avgFmeasure = 0.0;
 			for( int i = 0; i < this.thresholds.length; i++ ){
@@ -139,9 +143,9 @@ public class TTExuFast extends ThresholdTuning {
 		
 			avgFmeasure = (2.0 * avgFmeasure) / (double)this.thresholds.length;
 						
-			System.out.printf( "Validated macro F-measure: %.5f\n", avgFmeasure ) ;
-			System.out.println( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double)(data.n * this.epochs) );
-			System.out.println( "############################################################" );			
+			logger.info( "Validated macro F-measure: {}", avgFmeasure ) ;
+			logger.info( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double)(data.n * this.epochs) );
+			logger.info( "############################################################" );			
 		}
 		
 		

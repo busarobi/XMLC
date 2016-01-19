@@ -2,6 +2,9 @@ package Learner.step;
 
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import Data.SparseVectorExt;
 import jsat.linear.IndexValue;
 import jsat.linear.SparseVector;
@@ -9,6 +12,7 @@ import jsat.linear.Vec;
 import jsat.math.Function;
 
 public class AdamStep implements StepFunction {
+	private static Logger logger = LoggerFactory.getLogger(AdamStep.class);
 
 	private double T = 1;
 
@@ -23,17 +27,17 @@ public class AdamStep implements StepFunction {
 	private double bSecond = 0.0;
 
 	public AdamStep(Properties properties) {
-		System.out.println("#####################################################");
-		System.out.println("#### Optimizer: Adam");
+		logger.info("#####################################################");
+		logger.info("#### Optimizer: Adam");
 		this.beta1 = Double.parseDouble(properties.getProperty("beta1", "0.9"));
-		System.out.println("#### beta1: " + this.beta1);
+		logger.info("#### beta1: " + this.beta1);
 		this.beta2 = Double.parseDouble(properties.getProperty("beta2", "0.999"));
-		System.out.println("#### beta2: " + this.beta2);
+		logger.info("#### beta2: " + this.beta2);
 		this.eps = Double.parseDouble(properties.getProperty("eps", "1e-8"));
-		System.out.println("#### eps: " + this.eps);
+		logger.info("#### eps: " + this.eps);
 		this.gamma = Double.parseDouble(properties.getProperty("gamma", "0.002"));
-		System.out.println("#### gamma: " + this.gamma);
-		System.out.println("#####################################################");
+		logger.info("#### gamma: " + this.gamma);
+		logger.info("#####################################################");
 	}
 
 	public AdamStep(double gamma, double beta1, double beta2, double eps) {

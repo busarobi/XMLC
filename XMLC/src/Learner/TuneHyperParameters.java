@@ -16,13 +16,16 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import Data.AVTable;
 import IO.Evaluator;
-import threshold.TTEumFast;
-import threshold.ThresholdTuning;
 import util.MasterSeed;
 
 public class TuneHyperParameters extends LearnerManager {
+	private static Logger logger = LoggerFactory.getLogger(TuneHyperParameters.class);
+
 	protected HashMap<String, List<String> > hyperparameters = new HashMap<String, List<String> >();
 	protected Random rand = new Random();
 	protected int numWorkers = 8;
@@ -75,13 +78,13 @@ public class TuneHyperParameters extends LearnerManager {
 			this.info += "#### Valid:\n";
 			
 //			for ( String perfName : perfv.keySet() ) {
-//				System.out.println("##### Valid " + perfName + ": "  + perfv.get(perfName));
+//				logger.info("##### Valid " + perfName + ": "  + perfv.get(perfName));
 //				this.info += "##### Valid" + perfName + ": "  + perfv.get(perfName) + "\n";
 //			}
 //			
 //			
 			for ( String perfName : perfvalidpreck.keySet() ) {
-				System.out.println("##### Valid " + perfName + ": "  + perfvalidpreck.get(perfName) );
+				logger.info("##### Valid " + perfName + ": "  + perfvalidpreck.get(perfName) );
 				this.info += "##### Valid " + perfName + ": "  + perfvalidpreck.get(perfName) + "\n";
 			}
 			
@@ -92,14 +95,14 @@ public class TuneHyperParameters extends LearnerManager {
 //
 //			// generate result
 //			for ( String perfName : perf.keySet() ) {
-//				System.out.println("##### Test " + perfName + ": "  + perf.get(perfName));
+//				logger.info("##### Test " + perfName + ": "  + perf.get(perfName));
 //				this.info += "##### Test" + perfName + ": "  + perf.get(perfName) + "\n";
 //			}
 			
 			
 			
 			for ( String perfName : perftestpreck.keySet() ) {
-				System.out.println("##### Test " + perfName + ": "  + perftestpreck.get(perfName));
+				logger.info("##### Test " + perfName + ": "  + perftestpreck.get(perfName));
 				this.info += "##### Test " + perfName + ": "  + perftestpreck.get(perfName) + "\n";
 			}
 			
@@ -119,7 +122,7 @@ public class TuneHyperParameters extends LearnerManager {
 
 	@Override
 	public Properties readProperty(String fname) {
-		System.out.print("Reading property file...");
+		logger.info("Reading property file...");
 		Properties properties = new Properties();
 		try {
 			FileInputStream in = new FileInputStream(fname);
@@ -132,7 +135,7 @@ public class TuneHyperParameters extends LearnerManager {
 			System.err.println(e.getMessage());
 			System.exit(-1);
 		}
-		System.out.println("Done.");
+		logger.info("Done.");
 
 		return properties;
 	}
@@ -188,21 +191,21 @@ public class TuneHyperParameters extends LearnerManager {
 //			List<String> lambda1Array = Arrays.asList("0.1","0.01","0.005","0.001","0.0001","0.00001","0.000001","0.0000001","0.00000001", "0.0");			
 //			hyperparameters.put("lambda1", lambda1Array);
 			
-			System.out.println("#####################################################" );
-			System.out.println("#### Random hyperparameter tunning " );
+			logger.info("#####################################################" );
+			logger.info("#### Random hyperparameter tunning " );
 
 			// number of workers
 			this.numWorkers = Integer.parseInt(this.properties.getProperty("numWorkers", "4"));
-			System.out.println("#### num of workers: " + this.numWorkers );
+			logger.info("#### num of workers: " + this.numWorkers );
 
 			// number of workers
 			this.numOfTrials = Integer.parseInt(this.properties.getProperty("numOfTrials", "100"));
-			System.out.println("#### num of trials: " + this.numOfTrials );
+			logger.info("#### num of trials: " + this.numOfTrials );
 
-			System.out.println("#####################################################" );
+			logger.info("#####################################################" );
 			
 		} catch (Exception e ){
-			System.out.println(e.getMessage());
+			logger.info(e.getMessage());
 		}
 
 	}
@@ -292,7 +295,7 @@ public class TuneHyperParameters extends LearnerManager {
 	}
 
 	public static void main(String[] args) throws Exception {
-		System.out.println("Working Directory = " + System.getProperty("user.dir"));
+		logger.info("Working Directory = " + System.getProperty("user.dir"));
 
 		// read properties
 		if (args.length < 2) {

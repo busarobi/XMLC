@@ -3,13 +3,13 @@ package run;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
@@ -21,6 +21,8 @@ import Learner.AbstractLearner;
 import util.MasterSeed;
 
 public class SmacRun {
+
+	private static Logger logger = LoggerFactory.getLogger(SmacRun.class);
 
 	/*
 	 * ################### SMAC Params ###################
@@ -78,7 +80,7 @@ public class SmacRun {
 		Map<String,Double> perftestpreck = Evaluator.computePrecisionAtk(learner, testdata, 1);
 		
 		for ( String perfName : perftestpreck.keySet() ) {
-			System.out.println("Result for SMAC: SUCCESS, 0, 0, " + (1 - perftestpreck.get(perfName)) + ", 0");
+			logger.info("Result for SMAC: SUCCESS, 0, 0, {}, 0",(1 - perftestpreck.get(perfName)));
 		}
 	}
 	
@@ -94,7 +96,7 @@ public class SmacRun {
 		testdata = testdatareader.read();
 	}
 	public Properties readProperty(String fname) {
-		System.out.print("Reading property file...");
+		logger.info("Reading property file...");
 		Properties properties = new Properties();
 		try {
 			FileInputStream in = new FileInputStream(fname);
@@ -107,7 +109,7 @@ public class SmacRun {
 			System.err.println(e.getMessage());
 			System.exit(-1);
 		}
-		System.out.println("Done.");
+		logger.info("Done.");
 
 		return properties;
 	}

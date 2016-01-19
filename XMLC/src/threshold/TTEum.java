@@ -4,12 +4,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import Data.AVTable;
 import Data.ComparablePair;
 import Learner.AbstractLearner;
 
 public class TTEum extends ThresholdTuning {
-		
+	private static Logger logger = LoggerFactory.getLogger(TTEum.class);
+
 	public TTEum(int m, Properties properties) {
 		super(m, properties );		
 	}
@@ -29,7 +33,7 @@ public class TTEum extends ThresholdTuning {
 			
 			for( int j = 0; j < data.n; j++ ) {
 				double post = learner.getPosteriors(data.x[j], i);
-				//System.out.println ( post );
+				//logger.info ( post );
 				ComparablePair entry = new ComparablePair( post, j);
 				posteriors.add(entry);
 			}
@@ -74,7 +78,7 @@ public class TTEum extends ThresholdTuning {
 				}
 			}			
 			
-//			System.out.println( "Class: " + i +" (" + numOfPositives + ")\t" 
+//			logger.info( "Class: " + i +" (" + numOfPositives + ")\t" 
 //			                         +" F: " + String.format("%.4f", maxFmeasure ) 
 //			                         + " Th: " + String.format("%.4f", maxthreshold) );
 			
@@ -82,7 +86,7 @@ public class TTEum extends ThresholdTuning {
 			avgFmeasure += maxFmeasure;
 			
 		}
-		System.out.printf( "Validated macro F-measure: %.5f\n", (avgFmeasure / (double) learner.getNumberOfLabels()) ) ;
+		logger.info( "Validated macro F-measure: {}", (avgFmeasure / (double) learner.getNumberOfLabels()) ) ;
 		
 		return thresholds;
 	}

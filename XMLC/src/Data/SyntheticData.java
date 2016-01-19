@@ -1,13 +1,15 @@
 package Data;
 
 import java.io.BufferedWriter;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.OutputStreamWriter;
 import java.util.Random;
+
 import org.apache.commons.math3.analysis.function.Sigmoid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SyntheticData {
+	private static Logger logger = LoggerFactory.getLogger(SyntheticData.class);
 
 	
 	public static double getPosterior(double[] w, double bias, double [] x) {
@@ -54,18 +56,18 @@ public class SyntheticData {
 				int y = random.nextDouble() < p ? 1 : 0;
 				if(y == 1) {
 					if(first) {
-						System.out.print(j);
+						logger.info(Integer.toString(j));
 						writer.write("" + j);
 						first = false;
 					}
 					else {
-						System.out.print(","+j);
+						logger.info(","+j);
 						writer.write(","+j);
 					}
 				}
 			}
 			String str = exampleToString(x);
-			System.out.println(" " + str);
+			logger.info(" " + str);
 			writer.write(" " + str + "\n");			
 			
 		}

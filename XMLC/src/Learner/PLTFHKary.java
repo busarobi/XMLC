@@ -3,34 +3,29 @@ package Learner;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Properties;
-import java.util.Random;
 import java.util.TreeSet;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import Data.AVPair;
-import Data.NodePLT;
-import Data.NodeComparatorPLT;
 import Data.AVTable;
 import Data.ComparablePair;
 import Data.EstimatePair;
+import Data.NodeComparatorPLT;
+import Data.NodePLT;
 import Learner.step.StepFunction;
-import jsat.linear.DenseVector;
 import preprocessing.FeatureHasherFactory;
-import preprocessing.MaskHasher;
-import preprocessing.MurmurHasher;
 import preprocessing.UniversalHasher;
-import threshold.ThresholdTuning;
 import util.CompleteTree;
-import util.MasterSeed;
 
 public class PLTFHKary extends MLLRFH {
-	
+	private static Logger logger = LoggerFactory.getLogger(PLTFHKary.class);
+
 	protected int t = 0;
 	
 	CompleteTree tree = null;
@@ -40,12 +35,12 @@ public class PLTFHKary extends MLLRFH {
 	public PLTFHKary(Properties properties, StepFunction stepfunction) {
 		super(properties, stepfunction);
 		
-		System.out.println("#####################################################" );
-		System.out.println("#### Leraner: PLTFTHKary" );
+		logger.info("#####################################################" );
+		logger.info("#### Leraner: PLTFTHKary" );
 		
 		// k-ary tree
 		this.k = Integer.parseInt(this.properties.getProperty("k", "2"));
-		System.out.println("#### k: " + this.k );
+		logger.info("#### k: " + this.k );
 
 	}
 
@@ -61,13 +56,13 @@ public class PLTFHKary extends MLLRFH {
 		
 		this.t = this.tree.getSize(); 
 
-		System.out.println( "#### Num. of labels: " + this.m + " Dim: " + this.d );
-		System.out.println( "#### Num. of inner node of the trees: " + this.t  );
-		System.out.println("#####################################################" );
+		logger.info( "#### Num. of labels: " + this.m + " Dim: " + this.d );
+		logger.info( "#### Num. of inner node of the trees: " + this.t  );
+		logger.info("#####################################################" );
 			
 		this.fh = FeatureHasherFactory.createFeatureHasher(this.hasher, fhseed, this.hd, this.t);
 		
-		System.out.print( "Allocate the learners..." );
+		logger.info( "Allocate the learners..." );
 
 		this.w = new double[this.hd];
 		this.thresholds = new double[this.t];
@@ -77,7 +72,7 @@ public class PLTFHKary extends MLLRFH {
 			this.thresholds[i] = 0.5;
 		}
 		
-		System.out.println( "Done." );
+		logger.info( "Done." );
 	}
 		
 	@Override
@@ -87,7 +82,7 @@ public class PLTFHKary extends MLLRFH {
 				
 		for (int ep = 0; ep < this.epochs; ep++) {
 
-			System.out.println("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
+			logger.info("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 			// random permutation
 			ArrayList<Integer> indirectIdx = this.shuffleIndex();
 			
@@ -138,7 +133,7 @@ public class PLTFHKary extends MLLRFH {
 					}
 				}
 
-				//System.out.println("Negative tree indices: " + negativeTreeIndices.toString());
+				//logger.info("Negative tree indices: " + negativeTreeIndices.toString());
 
 				for(int j:positiveTreeIndices) {
 
@@ -150,7 +145,7 @@ public class PLTFHKary extends MLLRFH {
 
 				for(int j:negativeTreeIndices) {
 
-					if(j >= this.t) System.out.println("ALARM");
+					if(j >= this.t) logger.info("ALARM");
 
 					double posterior = getPartialPosteriors(traindata.x[currIdx],j);
 					double inc = -(0.0 - posterior); 
@@ -161,16 +156,16 @@ public class PLTFHKary extends MLLRFH {
 				this.T++;
 
 				if ((i % 100000) == 0) {
-					System.out.println( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
+					logger.info( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
-					System.out.println("\t\t" + dateFormat.format(date));
-					//System.out.println("Weight: " + this.w[0].get(0) );
-					System.out.println("Scalar: " + this.scalar);
+					logger.info("\t\t" + dateFormat.format(date));
+					//logger.info("Weight: " + this.w[0].get(0) );
+					logger.info("Scalar: " + this.scalar);
 				}
 			}
 
-			System.out.println("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
+			logger.info("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 		}
 		
 		int zeroW = 0;
@@ -183,13 +178,13 @@ public class PLTFHKary extends MLLRFH {
 			sumW += weight;
 			index++;
 		}
-		System.out.println("Hash weights (lenght, zeros, nonzeros, ratio, sumW, last nonzero): " + w.length + ", " + zeroW + ", " + (w.length - zeroW) + ", " + (double) (w.length - zeroW)/(double) w.length + ", " + sumW + ", " + maxNonZero);
+		logger.info("Hash weights (lenght, zeros, nonzeros, ratio, sumW, last nonzero): " + w.length + ", " + zeroW + ", " + (w.length - zeroW) + ", " + (double) (w.length - zeroW)/(double) w.length + ", " + sumW + ", " + maxNonZero);
 	}
 
 
 	public double getPartialPosteriors(AVPair[] x, int label) {
 		double posterior = super.getPosteriors(x, label);
-		//System.out.println("Partial posterior: " + posterior + " Tree index: " + label);
+		//logger.info("Partial posterior: " + posterior + " Tree index: " + label);
 		return posterior;
 	}
 
@@ -209,7 +204,7 @@ public class PLTFHKary extends MLLRFH {
 			posterior *= getPartialPosteriors(x, treeIndex);
 
 		}
-		//if(posterior > 0.5) System.out.println("Posterior: " + posterior + "Label: " + label);
+		//if(posterior > 0.5) logger.info("Posterior: " + posterior + "Label: " + label);
 		return posterior;
 	}
 
@@ -246,7 +241,7 @@ public class PLTFHKary extends MLLRFH {
 			}
 		}
 
-		//System.out.println("Predicted labels: " + positiveLabels.toString());
+		//logger.info("Predicted labels: " + positiveLabels.toString());
 
 		return positiveLabels;
 	}
@@ -284,7 +279,7 @@ public class PLTFHKary extends MLLRFH {
 			}
 		}
 
-		//System.out.println("Predicted labels: " + positiveLabels.toString());
+		//logger.info("Predicted labels: " + positiveLabels.toString());
 
 		return positiveLabels;
 	}
@@ -323,7 +318,7 @@ public class PLTFHKary extends MLLRFH {
 			}
 		}
 	
-		//System.out.println("Predicted labels: " + positiveLabels.toString());
+		//logger.info("Predicted labels: " + positiveLabels.toString());
 
 		return positiveLabels;
 	}
@@ -366,7 +361,7 @@ public class PLTFHKary extends MLLRFH {
 		}
 		
 		//for( int i=0; i < this.thresholds.length; i++ )
-		//	System.out.println( "Threshold: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
+		//	logger.info( "Threshold: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
 	
 		
 	}
@@ -406,7 +401,7 @@ public class PLTFHKary extends MLLRFH {
 			}
 		}
 
-		//System.out.println("Predicted labels: " + positiveLabels.toString());
+		//logger.info("Predicted labels: " + positiveLabels.toString());
 
 		return positiveLabels;
 	}

@@ -6,8 +6,11 @@ import java.util.Date;
 import java.util.Random;
 
 import org.apache.commons.math3.analysis.function.Sigmoid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FastSigmoid {
+	private static Logger logger = LoggerFactory.getLogger(FastSigmoid.class);
 
 	public static float fastSigmoid(float x) {
 		return ((fastTanH(x) + 1)/(float)2.0);
@@ -40,10 +43,10 @@ public class FastSigmoid {
 		int rep = 1000000000;
 		
 		
-		System.out.println("Number of calls: " + rep );
+		logger.info("Number of calls: " + rep );
 		DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 		Date date = new Date();
-		System.out.println("Fast sigmoid starts\t\t" + dateFormat.format(date));
+		logger.info("Fast sigmoid starts\t\t" + dateFormat.format(date));
 
 		for( int i = 0; i < rep; i++ ){
 			double val = (r.nextDouble()-0.5) * 100.0;
@@ -52,14 +55,14 @@ public class FastSigmoid {
 
 		
 		date = new Date();
-		System.out.println("Fast sigmoid ends\t\t" + dateFormat.format(date));
+		logger.info("Fast sigmoid ends\t\t" + dateFormat.format(date));
 
 		
 		Sigmoid s = new Sigmoid();
 
 
 		date = new Date();
-		System.out.println("Sigmoid starts\t\t" + dateFormat.format(date));
+		logger.info("Sigmoid starts\t\t" + dateFormat.format(date));
 
 		for( int i = 0; i < rep; i++ ){
 			double val = (r.nextDouble()-0.5) * 100.0;
@@ -68,7 +71,7 @@ public class FastSigmoid {
 
 		
 		date = new Date();
-		System.out.println("Sigmoid ends\t\t" + dateFormat.format(date));
+		logger.info("Sigmoid ends\t\t" + dateFormat.format(date));
 		
 		
 	}

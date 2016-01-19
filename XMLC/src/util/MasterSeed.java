@@ -13,12 +13,17 @@ package util;
 
 import java.util.Random;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * 
  * @author Timo Klerx
  *
  */
 public class MasterSeed {
+	private static Logger logger = LoggerFactory.getLogger(MasterSeed.class);
+
 	private static long seed = 7222525536004714236L;
 	private static Random r = new Random(seed);
 	private static boolean wasSet = false;
@@ -38,7 +43,7 @@ public class MasterSeed {
 
 	public static Random nextRandom() {
 		long temp = r.nextLong();
-		System.out.println("Creating new Random object with seed "+temp);
+		logger.info("Creating new Random object with seed={}",temp);
 		return new Random(temp);
 	}
 
