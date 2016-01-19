@@ -66,9 +66,9 @@ public class SmacRun {
 	}
 
 	private void run() {
-		properties.put("gamma", gamma);
-		properties.put("lambda", lambda);
-		properties.put("k", k);
+		properties.setProperty("gamma", Double.toString(gamma));
+		properties.setProperty("lambda", Double.toString(lambda));
+		properties.setProperty("k", Integer.toString(k));
 		AbstractLearner learner = AbstractLearner.learnerFactory(properties);
 		
 		learner.allocateClassifiers(traindata);
