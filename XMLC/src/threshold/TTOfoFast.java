@@ -78,14 +78,9 @@ public class TTOfoFast extends ThresholdTuning {
 					b[predictedLabel]++;
 					thresholdsToChange.add(predictedLabel);
 				}
-				
-				HashSet<Integer> trueLabels = new HashSet<Integer>();
-			
-				for(int m = 0; m < data.y[j].length; m++) {
-					trueLabels.add(data.y[j][m]);
-				}
-				
-				for(int trueLabel : trueLabels) {
+								
+				for(int m = 0; m < data.y[j].length; m++) {			
+					int trueLabel = data.y[j][m];					
 					b[trueLabel]++;
 					thresholdsToChange.add(trueLabel);
 					if(predictedPositives.contains(trueLabel)) {

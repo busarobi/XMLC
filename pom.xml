@@ -42,7 +42,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>Learner.LearnerManager</mainClass>
+							<mainClass>Learner.TuneHyperParameters</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

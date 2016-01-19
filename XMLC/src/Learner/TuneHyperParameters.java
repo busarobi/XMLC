@@ -157,8 +157,8 @@ public class TuneHyperParameters extends LearnerManager {
 			
 
 			// number of leaves
-			//List<String> kArray = Arrays.asList("2","4","8","16","32","64");
-			List<String> kArray = Arrays.asList("2","4","8");
+			List<String> kArray = Arrays.asList("2","4","8","16","32","64");
+			//List<String> kArray = Arrays.asList("2","4","8");
 			//List<String> lambdaArray = Arrays.asList("0.0001","0.00001","0.000001","0.0000001");
 			hyperparameters.put("k", kArray);
 			
