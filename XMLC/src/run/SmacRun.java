@@ -80,7 +80,7 @@ public class SmacRun {
 		Map<String,Double> perftestpreck = Evaluator.computePrecisionAtk(learner, testdata, 1);
 		
 		for ( String perfName : perftestpreck.keySet() ) {
-			logger.info("Result for SMAC: SUCCESS, 0, 0, {}, 0",(1 - perftestpreck.get(perfName)));
+			System.out.println("Result for SMAC: SUCCESS, 0, 0, " + (1 - perftestpreck.get(perfName)) + ", 0");
 		}
 	}
 	
