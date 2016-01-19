@@ -21,6 +21,8 @@ import Data.ComparablePair;
 import Data.EstimatePair;
 import Learner.step.StepFunction;
 import jsat.linear.DenseVector;
+import preprocessing.FeatureHasherFactory;
+import preprocessing.MaskHasher;
 import preprocessing.MurmurHasher;
 import preprocessing.UniversalHasher;
 import threshold.ThresholdTuning;
@@ -63,14 +65,7 @@ public class PLTFHKary extends MLLRFH {
 		System.out.println( "#### Num. of inner node of the trees: " + this.t  );
 		System.out.println("#####################################################" );
 			
-		if ( this.hasher.compareTo("Universal") == 0 ) {			
-			this.fh = new UniversalHasher(fhseed, this.hd, this.t);
-		} else if ( this.hasher.compareTo("Murmur") == 0 ) {
-			this.fh = new MurmurHasher(fhseed, this.hd, this.t);
-		} else {
-			System.out.println("Unknown hasher");
-			System.exit(-1);
-		}
+		this.fh = FeatureHasherFactory.createFeatureHasher(this.hasher, fhseed, this.hd, this.t);
 		
 		System.out.print( "Allocate the learners..." );
 

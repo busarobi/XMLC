@@ -5,7 +5,7 @@ import java.util.Properties;
 public class StepFunctionFactory {
 	public static StepFunction factory( Properties properties ){
 		StepFunction stepfunction;
-		String stepName = properties.getProperty("StepFunction");
+		String stepName = properties.getProperty("StepFunction","Simple");
 		if (stepName.compareTo("Adam") == 0) {
 			stepfunction = new AdamStep(properties);
 		} else if (stepName.compareTo("Simple") == 0) {

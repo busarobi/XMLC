@@ -69,10 +69,10 @@ public class ReindexLabels {
 		
 		
 		
-		String inputFileName = "/Users/busarobi/work/Fmeasure/LSHTC/dataraw/train-remapped.csv";
+		//String inputFileName = "/Users/busarobi/work/Fmeasure/LSHTC/dataraw/train-remapped.csv";
+		String inputFileName = "/Users/busarobi/work/XMLC/data/Amazon/amazon_train.txt";
 		
-		
-		DataReader datareader = new DataReader(inputFileName);
+		DataReader datareader = new DataReader(inputFileName, true, true);
 		AVTable data = datareader.read();
 
 				
@@ -140,7 +140,7 @@ public class ReindexLabels {
 		System.out.print("Writing the stat...");
 		
 		
-		BufferedWriter statbf = new BufferedWriter(new FileWriter("/Users/busarobi/work/Fmeasure/LSHTC/dataraw/train-remapped_stats.txt") );
+		BufferedWriter statbf = new BufferedWriter(new FileWriter("/Users/busarobi/work/XMLC/data/Amazon/train-remapped_stats.txt") );
 		
 		for( ComparableIntegerPair cp : cooccurence.keySet() ) {
 			statbf.write( "" + cp.getFirst() + "," + cp.getSecond() + "," + cooccurence.get(cp) +"\n" );

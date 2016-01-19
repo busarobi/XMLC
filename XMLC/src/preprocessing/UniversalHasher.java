@@ -22,8 +22,6 @@ public class UniversalHasher implements FeatureHasher {
 	private int add = 0;
 	private final int INTEGER_LENGHT = 32;
 	
-	private int mask = 1;
-	
 	public UniversalHasher(int seed, int nFeatures, int nTasks) {
 		
 		
@@ -34,8 +32,6 @@ public class UniversalHasher implements FeatureHasher {
 		System.out.println("Shift: " + this.shift);
 		this.multiplier = (this.nTasks & 1) == 0 ? this.nTasks +1 : this.nTasks; //<<1) + 1;
 		System.out.println("Shift: " + this.shift + " Multiplier: " + this.multiplier);
-		
-		this.mask = this.nFeatures - 1;
 		
 		Random random = new Random(seed);
 		
@@ -52,7 +48,7 @@ public class UniversalHasher implements FeatureHasher {
 		
 		System.out.println("#####################################################" );
 		System.out.println("#### Universal hash" );
-		System.out.println("#### Num. of hashed features: " + this.nFeatures );
+		System.out.println("#### Num. of hashed features: " + (nTasks * this.nFeatures) );
 		System.out.println("#####################################################" );
 		
 	}
@@ -98,26 +94,20 @@ public class UniversalHasher implements FeatureHasher {
 	}
 
 	
+
 	public int getIndex(int label, int feature) {
-		return ((feature * this.nTasks + label)) & (this.mask); 
+		return Math.abs(Math.abs((feature*this.nTasks + label) + this.b) % this.prime) % this.nFeatures;
 	}
 
-	//public int getIndex(int label, int feature) {
-	//	return Math.abs(Math.abs((feature*this.nTasks + label) + this.b) % this.prime) % this.nFeatures;
-	//}
-
 	
-	public int getSign(int label, int feature) {
-		return  ( ( ( (label<<1-1)*feature) & 1) << 1) - 1;
-	}	
 
 
-//	public int getSign( int label, int feature ) {
-//		int value = (label<<1-1)*feature; 
-//		return ((value & 1) == 0) ? -1 : 1;
-//	}
+	public int getSign( int label, int feature ) {
+		int value = (label<<1-1)*feature; 
+		return ((value & 1) == 0) ? -1 : 1;
+	}
 	
-	
+// old universal hashing for signs  	
 //	public int getSign(int label, int feature) {
 		//int value = (Math.abs((feature*this.nTasks + label) + this.d) % this.prime);// % this.nFeatures;
 		//return ((value & 1) == 0) ? -1 : 1;

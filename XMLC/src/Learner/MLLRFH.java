@@ -27,6 +27,8 @@ import Learner.step.StepFunction;
 import jsat.linear.DenseVector;
 import jsat.linear.IndexValue;
 import preprocessing.FeatureHasher;
+import preprocessing.FeatureHasherFactory;
+import preprocessing.MaskHasher;
 import preprocessing.MurmurHasher;
 import preprocessing.UniversalHasher;
 import util.HashFunction;
@@ -97,15 +99,8 @@ public class MLLRFH extends AbstractLearner {
 		this.m = data.m;
 		this.d = data.d;
 
-		
-		if ( this.hasher.compareTo("Universal") == 0 ) {			
-			this.fh = new UniversalHasher(fhseed, this.hd, this.m);
-		} else if ( this.hasher.compareTo("Murmur") == 0 ) {
-			this.fh = new MurmurHasher(fhseed, this.hd, this.m);
-		} else {
-			System.out.println("Unknown hasher");
-			System.exit(-1);
-		}
+				
+		this.fh = FeatureHasherFactory.createFeatureHasher(this.hasher, fhseed, this.hd, this.m);		
 		
 		System.out.println( "Num. of labels: " + this.m + " Dim: " + this.d + " Hash dim: " + this.hd );
 		System.out.print( "Allocate the learners..." );
