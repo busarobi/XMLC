@@ -36,4 +36,17 @@ public class AVTable {
 		return prior;
 	}
 	
+	static public int[] getNumOfLabels( AVTable data){
+		int[] numOfLabels = new int[data.m];
+
+		
+		for(int i=0; i < data.n; i++ ){
+			for( int j = 0; j < data.y[i].length; j++ ){
+				numOfLabels[data.y[i][j]]++;
+			}
+		}					
+		
+		return numOfLabels;
+	}
+	
 }

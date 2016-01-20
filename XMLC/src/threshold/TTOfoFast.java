@@ -53,11 +53,24 @@ public class TTOfoFast extends ThresholdTuning {
 		int[] a = new int[this.m];
 		int[] b = new int[this.m];
 					
-		for( int i = 0; i < this.m; i++ ) {
-			a[i] = this.a;
-			b[i] = this.b;
+		if (this.a >= 0 ) { 
+			for( int i = 0; i < this.m; i++ ) {
+				a[i] = this.a;
+				b[i] = this.b;
 						
-			this.thresholds[i] = ((double) a[i]) / ((double) b[i]);
+				this.thresholds[i] = ((double) a[i]) / ((double) b[i]);
+			}
+		} else {
+			System.out.println("\t\t--> Initialized with the prior!");
+			int[] numOfLabels = AVTable.getNumOfLabels(data);
+
+			for( int i = 0; i < this.m; i++ ) {
+				a[i] = numOfLabels[i];
+				b[i] = numOfLabels[i] + data.n;
+						
+				this.thresholds[i] = ((double) a[i]) / ((double) b[i]);
+			}
+			
 		}
 		
 		learner.setThresholds(this.thresholds);
