@@ -6,20 +6,25 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import Data.AVTable;
 import IO.DataReader;
 import IO.Evaluator;
+import Learner.step.AdamStep;
+import Learner.step.GradStep;
+import Learner.step.GradStepL1;
+import Learner.step.StepFunction;
 import preprocessing.FeatureHasher;
+import preprocessing.MurmurHasher;
 import threshold.TTEum;
+import threshold.TTEumFast;
+import threshold.TTExu;
+import threshold.TTExuFast;
+import threshold.TTOfo;
+import threshold.TTOfoFast;
 import threshold.ThresholdTuning;
 import util.MasterSeed;
 
 public class LearnerManager {
-	private static Logger logger = LoggerFactory.getLogger(LearnerManager.class);
-
 	protected Properties properties = null;
 	protected AVTable testdata =null;
 	protected AVTable traindata =null;
@@ -39,15 +44,15 @@ public class LearnerManager {
 //		featureNum = Integer.parseInt(properties.getProperty("FeatureHashing", "0"));
 
 //		if (featureNum>0){
-//			logger.info( "Feature hashing (dim: " + featureNum + ")...");
+//			System.out.print( "Feature hashing (dim: " + featureNum + ")...");
 //			fh = new MurmurHasher(0, featureNum);
-//			logger.info( "Done.");
+//			System.out.println( "Done.");
 //		}
 	}
 
 
 	public Properties readProperty(String fname) {
-		logger.info("Reading property file...");
+		System.out.print("Reading property file...");
 		Properties properties = new Properties();
 		try {
 			FileInputStream in = new FileInputStream(fname);
@@ -60,7 +65,7 @@ public class LearnerManager {
 			System.err.println(e.getMessage());
 			System.exit(-1);
 		}
-		logger.info("Done.");
+		System.out.println("Done.");
 
 		return properties;
 	}
@@ -128,61 +133,61 @@ public class LearnerManager {
 	public void compositeEvaluation()
 	{
 
-		double [] thresholds = {/*0.0, 0.01, 0.05, */ 0.1, 0.25, 0.5};
-		Map<String,Double> [] perf = new Map[thresholds.length];
-		
-		for(int t = 0; t < thresholds.length ; t++){
-
-			this.learner.setThresholds(thresholds[t]);
-			perf[t] = Evaluator.computePerformanceMetrics(learner, testdata);
-
-		}
+//		double [] thresholds = {/*0.0, 0.01,*/ 0.05, 0.1, 0.25, 0.5};
+//		Map<String,Double> [] perf = new Map[thresholds.length];
+//		
+//		for(int t = 0; t < thresholds.length ; t++){
+//
+//			this.learner.setThresholds(thresholds[t]);
+//			perf[t] = Evaluator.computePerformanceMetrics(learner, testdata);
+//
+//		}
 		
 		
 		Map<String,Double> perfpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);
 		
 		for ( String perfName : perfpreck.keySet() ) {
-			logger.info("##### " + perfName + ": "  + perfpreck.get(perfName));
+			System.out.println("##### " + perfName + ": "  + perfpreck.get(perfName));
 		}
 		
 		
 		// evaluate (EUM)
-		//ThresholdTuning theum = new TTEumFast( learner.m, properties );
-		//learner.tuneThreshold(theum, validdata);
-		//Map<String,Double> perfTTEUMFast = Evaluator.computePerformanceMetrics(learner, testdata);
+		ThresholdTuning theum = new TTEumFast( learner.m, properties );
+		learner.tuneThreshold(theum, validdata);
+		Map<String,Double> perfTTEUMFast = Evaluator.computePerformanceMetrics(learner, testdata);
 							
 		// evaluate (OFO)
-		//ThresholdTuning th = new TTOfoFast( learner.m, properties );
-		//learner.tuneThreshold(th, validdata);			
-		//Map<String,Double> perfTTOFOFast = Evaluator.computePerformanceMetrics(learner, testdata);
+		ThresholdTuning th = new TTOfoFast( learner.m, properties );
+		learner.tuneThreshold(th, validdata);			
+		Map<String,Double> perfTTOFOFast = Evaluator.computePerformanceMetrics(learner, testdata);
 		
 		// evaluate (EXU)
-		//ThresholdTuning thexu = new TTExuFast( learner.m, properties );
-		//learner.tuneThreshold(thexu, validdata);
-		//Map<String,Double> perfTTExu = Evaluator.computePerformanceMetrics(learner, testdata);		
+		ThresholdTuning thexu = new TTExuFast( learner.m, properties );
+		learner.tuneThreshold(thexu, validdata);
+		Map<String,Double> perfTTExu = Evaluator.computePerformanceMetrics(learner, testdata);		
 		
 		
-		//for ( String perfName : perfTTEUMFast.keySet() ) {
-		//	logger.info("##### EUM " + perfName + ": "  + perfTTEUMFast.get(perfName));
-		//}
-		
-		
-		//for ( String perfName : perfTTOFOFast.keySet() ) {
-		//	logger.info("##### OFO " + perfName + ": "  + perfTTOFOFast.get(perfName));
-		//}
-
-
-		//for ( String perfName : perfTTExu.keySet() ) {
-		//	logger.info("##### EXU " + perfName + ": "  + perfTTExu.get(perfName));
-		//}
-		
-		
-		for(int t = 0; t < thresholds.length; t++){
-			logger.info("##########-----  Threshold: " + thresholds[t]);
-			for ( String perfName : perf[t].keySet() ) {
-				logger.info("##### EUM" + perfName + ": "  + perf[t].get(perfName));
-			}
+		for ( String perfName : perfTTEUMFast.keySet() ) {
+			System.out.println("##### EUM " + perfName + ": "  + perfTTEUMFast.get(perfName));
 		}
+		
+		
+		for ( String perfName : perfTTOFOFast.keySet() ) {
+			System.out.println("##### OFO " + perfName + ": "  + perfTTOFOFast.get(perfName));
+		}
+
+
+		for ( String perfName : perfTTExu.keySet() ) {
+			System.out.println("##### EXU " + perfName + ": "  + perfTTExu.get(perfName));
+		}
+		
+		
+//		for(int t = 0; t < thresholds.length; t++){
+//			System.out.println("##########-----  Threshold: " + thresholds[t]);
+//			for ( String perfName : perf[t].keySet() ) {
+//				System.out.println("##### EUM" + perfName + ": "  + perf[t].get(perfName));
+//			}
+//		}
 	
 		
 		
@@ -202,12 +207,12 @@ public class LearnerManager {
 
 
 //		for ( String perfName : perfOFO.keySet() ) {
-//			logger.info("##### OFO" + perfName + ": "  + perfOFO.get(perfName));
+//			System.out.println("##### OFO" + perfName + ": "  + perfOFO.get(perfName));
 //		}
 //
 //
 //		for ( String perfName : perfEXU.keySet() ) {
-//			logger.info("##### EXU " + perfName + ": "  + perfEXU.get(perfName));
+//			System.out.println("##### EXU " + perfName + ": "  + perfEXU.get(perfName));
 //		}
 
 
@@ -226,7 +231,7 @@ public class LearnerManager {
 
 
 	public static void main(String[] args) throws Exception {
-		logger.info("Working Directory = " + System.getProperty("user.dir"));
+		System.out.println("Working Directory = " + System.getProperty("user.dir"));
 
 
 		// read properties
