@@ -61,7 +61,7 @@ public class TTOfoFast extends ThresholdTuning {
 				this.thresholds[i] = ((double) a[i]) / ((double) b[i]);
 			}
 		} else {
-			System.out.println("\t\t--> Initialized with the prior!");
+			logger.info("\t\t--> Initialized with the prior!");
 			int[] numOfLabels = AVTable.getNumOfLabels(data);
 
 			for( int i = 0; i < this.m; i++ ) {

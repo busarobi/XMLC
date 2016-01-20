@@ -59,7 +59,7 @@ public class TTExuFast extends ThresholdTuning {
 				bt[i] = this.b;			
 			}
 		} else {
-			System.out.println("\t\t--> Initialized with the prior!");
+			logger.info("\t\t--> Initialized with the prior!");
 			int[] numOfLabels = AVTable.getNumOfLabels(data);
 
 			for( int i = 0; i < this.m; i++ ) {
