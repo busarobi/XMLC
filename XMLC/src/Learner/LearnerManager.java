@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import Data.AVTable;
 import IO.DataReader;
 import IO.Evaluator;
@@ -25,6 +28,8 @@ import threshold.ThresholdTuning;
 import util.MasterSeed;
 
 public class LearnerManager {
+	private static Logger logger = LoggerFactory.getLogger(LearnerManager.class);
+	
 	protected Properties properties = null;
 	protected AVTable testdata =null;
 	protected AVTable traindata =null;
@@ -52,7 +57,7 @@ public class LearnerManager {
 
 
 	public Properties readProperty(String fname) {
-		System.out.print("Reading property file...");
+		logger.info("Reading property file...");
 		Properties properties = new Properties();
 		try {
 			FileInputStream in = new FileInputStream(fname);
@@ -65,7 +70,7 @@ public class LearnerManager {
 			System.err.println(e.getMessage());
 			System.exit(-1);
 		}
-		System.out.println("Done.");
+		logger.info("Done.");
 
 		return properties;
 	}
@@ -147,7 +152,7 @@ public class LearnerManager {
 		Map<String,Double> perfpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);
 		
 		for ( String perfName : perfpreck.keySet() ) {
-			System.out.println("##### " + perfName + ": "  + perfpreck.get(perfName));
+			logger.info("##### " + perfName + ": "  + perfpreck.get(perfName));
 		}
 		
 		
@@ -168,17 +173,17 @@ public class LearnerManager {
 		
 		
 		for ( String perfName : perfTTEUMFast.keySet() ) {
-			System.out.println("##### EUM " + perfName + ": "  + perfTTEUMFast.get(perfName));
+			logger.info("##### EUM " + perfName + ": "  + perfTTEUMFast.get(perfName));
 		}
 		
 		
 		for ( String perfName : perfTTOFOFast.keySet() ) {
-			System.out.println("##### OFO " + perfName + ": "  + perfTTOFOFast.get(perfName));
+			logger.info("##### OFO " + perfName + ": "  + perfTTOFOFast.get(perfName));
 		}
 
 
 		for ( String perfName : perfTTExu.keySet() ) {
-			System.out.println("##### EXU " + perfName + ": "  + perfTTExu.get(perfName));
+			logger.info("##### EXU " + perfName + ": "  + perfTTExu.get(perfName));
 		}
 		
 		
@@ -231,12 +236,12 @@ public class LearnerManager {
 
 
 	public static void main(String[] args) throws Exception {
-		System.out.println("Working Directory = " + System.getProperty("user.dir"));
+		logger.info("Working Directory = " + System.getProperty("user.dir"));
 
 
 		// read properties
 		if (args.length < 1) {
-			System.err.println("No config file given!");
+			logger.info("No config file given!");
 			System.exit(-1);
 		}
 
