@@ -150,8 +150,9 @@ public class TTEumFast extends ThresholdTuning {
 //		for( int i=0; i < this.m; i++ )
 //			logger.info( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
 		
+		this.numberOfPredictedPositives = numOfPositives;
 		logger.info( "Validated macro F-measure: {}", (avgFmeasure / (double) learner.getNumberOfLabels()) ) ;
-		
+		this.validatedFmeasure = (avgFmeasure / (double) learner.getNumberOfLabels());
 
 		
 		logger.info( "\t --> !!!!!!!!!!!!! EUM fast end" );
@@ -287,8 +288,10 @@ public class TTEumFast extends ThresholdTuning {
 //		for( int i=0; i < this.m; i++ )
 //			logger.info( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
 		
-		logger.info( "Validated macro F-measure: {}", (avgFmeasure / (double) m) ) ;
+		this.numberOfPredictedPositives = numOfPositives;
 		
+		logger.info( "Validated macro F-measure: {}", (avgFmeasure / (double) m) ) ;
+		this.validatedFmeasure = (avgFmeasure / (double) m);
 
 		
 		logger.info( "\t --> !!!!!!!!!!!!! EUM fast end" );

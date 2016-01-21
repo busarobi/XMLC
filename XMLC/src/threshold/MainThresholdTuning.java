@@ -1,9 +1,11 @@
 package threshold;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -25,6 +27,8 @@ import Learner.AbstractLearner;
 
 public class MainThresholdTuning {
 	private static Logger logger = LoggerFactory.getLogger(MainThresholdTuning.class);
+	protected String resultString = "";
+	protected String outFileName = "";
 	
 	private String posteriorFileValid = null;
 	private String posteriorFileTest = null;
@@ -36,7 +40,9 @@ public class MainThresholdTuning {
 	protected AVTable testposteriors =null;
 	protected AVTable validposteriors =null;
 	
-	private double[] thresholdForEUM = {0.01,0.05,0.1,0.15,0.2};
+	private double[] thresholdForEUM = {0.01,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4};
+	private int[] barray = {100,50,20,10,7,5,4,3,2};
+	
 	private int m = 0;
 	private double threshold = 0.01;
 	protected Properties properties = null;
@@ -79,8 +85,16 @@ public class MainThresholdTuning {
 		this.labelFileTest = this.properties.getProperty("TestLabelFile");
 		logger.info("### Test label file: " + this.labelFileTest );
 
-		this.threshold = Double.parseDouble(properties.getProperty("minThreshold", "0.001") );
+		if (!this.properties.containsKey("OutFile")) {
+			logger.info("OutFile file is not given!");
+			System.exit(-1);
+		}
+			
+		this.outFileName = this.properties.getProperty("OutFile");
+		logger.info("### OutFile: " + this.outFileName );
 		
+		
+		this.threshold = Double.parseDouble(properties.getProperty("minThreshold", "0.001") );		
 		logger.info("#### Min threshold: " + this.threshold );
 				
 		
@@ -141,33 +155,153 @@ public class MainThresholdTuning {
 		return sPE;
 	}
 	
-	public double[] tuneThresholdEUM() {		
-		double[] scores = new double[this.thresholdForEUM.length];
-		
+	public void tuneThresholdEUM() {		
 		for( int i=0; i < this.thresholdForEUM.length; i++ ) {
 			logger.info("##########################################################################");
+			this.resultString += "##########################################################################\n";
+			
 			logger.info("Threshold: " + this.thresholdForEUM[i]);
-			properties.setProperty("minThreshold", Double.toHexString(this.thresholdForEUM[i]));
+			this.resultString += "EUM,threshold,"+this.thresholdForEUM[i] + "\n";
+			
+			// set the minThreshold
+			properties.setProperty("minThreshold", Double.toString(this.thresholdForEUM[i]));
 			ThresholdTuning theum = new TTEumFast( this.m, properties );
 			double[] thresholds = theum.validate(this.validlabels, this.validposteriors);
 			
+			this.resultString += "EUM,valid F-measure," + theum.getValidatedFmeasure() + "\n";
+			
+			this.resultString += "EUM,valid num. of predicted positives," + theum.getNumberOfPredictedPositives() + "\n";
+			this.resultString += "EUM,valid avg. num. of predicted positives," + (theum.getNumberOfPredictedPositives()/ (double)this.validlabels.n) + "\n";
+
 			// compute the positive labels
-			HashSet<Integer>[] positiveLabelsArray = getPositiveLabels(this.testlabels, this.testposteriors, thresholds );
+			HashSet<Integer>[] positiveLabelsArray = getPositiveLabels(this.validlabels, this.validposteriors, thresholds );
 			// compute F-measure
-			Map<String,Double> perf = this.computePerformanceMetrics(positiveLabelsArray, this.testlabels );
+			Map<String,Double> perf = this.computePerformanceMetrics(positiveLabelsArray, this.validlabels );
 
 			for ( String perfName : perf.keySet() ) {
-				logger.info("##### " + perfName + ": "  + perf.get(perfName));
+				logger.info("##### EUM valid " + perfName + ": "  + fmt(perf.get(perfName)));
+				this.resultString += "EUM,valid " + perfName + ","  + fmt(perf.get(perfName)) + "\n";
 			}
+
+			
+			// compute the positive labels
+			positiveLabelsArray = getPositiveLabels(this.testlabels, this.testposteriors, thresholds );
+			// compute F-measure
+			perf = this.computePerformanceMetrics(positiveLabelsArray, this.testlabels );
+
+			for ( String perfName : perf.keySet() ) {
+				logger.info("##### EUM " + perfName + ": "  + fmt(perf.get(perfName)));
+				this.resultString += "EUM,test " + perfName + ","  + fmt(perf.get(perfName)) + "\n";
+			}
+			
 
 		}
 		
-		return scores;
+	}
+
+	public void tuneThresholdOFO() {		
+		
+		for( int i=0; i < this.barray.length; i++ ) {
+			logger.info("##########################################################################");
+			this.resultString += "##########################################################################\n";
+		
+			logger.info("Threshold: " + this.barray[i]);
+			this.resultString += "OFO,threshold,"+this.barray[i] + "\n";
+			
+			//
+			properties.setProperty("b", Integer.toString(this.barray[i]));
+			
+			
+			ThresholdTuning tofo = new TTOfoFast( this.m, properties );
+			double[] thresholds = tofo.validate(this.validlabels, this.validposteriors);
+			
+			this.resultString += "OFO,valid F-measure," + tofo.getValidatedFmeasure() + "\n";
+			
+			this.resultString += "OFO,valid num. of predicted positives," + tofo.getNumberOfPredictedPositives() + "\n";
+			this.resultString += "OFO,valid avg. num. of predicted positives," + (tofo.getNumberOfPredictedPositives()/ (double)this.validlabels.n) + "\n";
+	
+			// compute the positive labels
+			HashSet<Integer>[] positiveLabelsArray = getPositiveLabels(this.validlabels, this.validposteriors, thresholds );
+			// compute F-measure
+			Map<String,Double> perf = this.computePerformanceMetrics(positiveLabelsArray, this.validlabels );
+
+			for ( String perfName : perf.keySet() ) {
+				logger.info("##### OFO valid " + perfName + ": "  + fmt(perf.get(perfName)));
+				this.resultString += "OFO,valid " + perfName + ","  + fmt(perf.get(perfName)) + "\n";
+			}
+			
+			
+			// compute the positive labels
+			positiveLabelsArray = getPositiveLabels(this.testlabels, this.testposteriors, thresholds );
+			// compute F-measure
+			perf = this.computePerformanceMetrics(positiveLabelsArray, this.testlabels );
+
+			for ( String perfName : perf.keySet() ) {
+				logger.info("##### OFO test" + perfName + ": "  + fmt(perf.get(perfName)));
+				this.resultString += "OFO,test " + perfName + ","  + fmt(perf.get(perfName)) + "\n";
+			}			
+		}
+	}
+	
+	
+	public void tuneThresholdEXU() {				
+		
+		for( int i=0; i < this.barray.length; i++ ) {
+			logger.info("##########################################################################");
+			this.resultString += "##########################################################################\n";
+		
+			logger.info("Threshold: " + this.barray[i]);
+			this.resultString += "EXU,threshold,"+this.barray[i] + "\n";
+			
+			//
+			properties.setProperty("b", Integer.toString(this.barray[i]));
+			
+			
+			ThresholdTuning texu = new TTExuFast( this.m, properties );
+			double[] thresholds = texu.validate(this.validlabels, this.validposteriors);
+			
+			this.resultString += "EXU,valid F-measure," + texu.getValidatedFmeasure() + "\n";
+			
+			this.resultString += "EXU,valid num. of predicted positives," + texu.getNumberOfPredictedPositives() + "\n";
+			this.resultString += "EXU,valid Avg. num. of predicted positives," + (texu.getNumberOfPredictedPositives()/ (double)this.validlabels.n) + "\n";
+
+			// compute the positive labels
+			HashSet<Integer>[] positiveLabelsArray = getPositiveLabels(this.validlabels, this.validposteriors, thresholds );
+			// compute F-measure
+			Map<String,Double> perf = this.computePerformanceMetrics(positiveLabelsArray, this.validlabels );
+
+			for ( String perfName : perf.keySet() ) {
+				logger.info("##### EXU valid " + perfName + ": "  + fmt(perf.get(perfName)));
+				this.resultString += "EXU,valid " + perfName + ","  + fmt(perf.get(perfName)) + "\n";
+			}
+			
+			
+			
+			// compute the positive labels
+			positiveLabelsArray = getPositiveLabels(this.testlabels, this.testposteriors, thresholds );
+			// compute F-measure
+			perf = this.computePerformanceMetrics(positiveLabelsArray, this.testlabels );
+
+			for ( String perfName : perf.keySet() ) {
+				logger.info("##### EXU test" + perfName + ": "  + fmt(perf.get(perfName)));
+				this.resultString += "EXU,test " + perfName + ","  + fmt(perf.get(perfName)) + "\n";
+			}
+			
+
+		}
+	}
+	
+	public String fmt(double d)
+	{
+	    if(d == (long) d)
+	        return String.format("%d",(long)d);
+	    else
+	        return String.format("%g",d);
 	}
 
 	protected HashSet<Integer>[] getPositiveLabels(AVTable labels, AVTable posteriors, double[] thresholds ){
 		HashSet<Integer>[] positiveLabelsArray = new HashSet[labels.n];
-		for(int i=0; i<testlabels.n; i++ ){
+		for(int i=0; i<labels.n; i++ ){
 			positiveLabelsArray[i] = new HashSet<Integer>();
 			for(int j=0; j < posteriors.x[i].length; j++) {
 				int labelidx = posteriors.x[i][j].index;
@@ -267,18 +401,19 @@ public class MainThresholdTuning {
 			}
 		}
 		
-		double normalizedmacroF = macroF/(double) presentedlabels;
+		double normalizedmacroF = macroF/this.m;
 		
 		TreeMap<String,Double> arr = new TreeMap<String,Double>();
 		arr.put(" Hamming loss", HL);
 		arr.put(" macro F-measure", macroF);
-		arr.put( " learner.m", (double) this.m);
-		arr.put( " Num of presented labels", (double) presentedlabels);
+		//arr.put( " learner.m", (double) this.m);
+		//arr.put( " Num of presented labels", (double) presentedlabels);
 		
 
-		arr.put(" Normalized macro F-measue (with presented labels)", normalizedmacroF);
-		arr.put(" Normalized Hamming loss (with learner.m)", normalizedHL );
-
+		arr.put(" Normalized macro F-measue (with m)", normalizedmacroF);
+		arr.put(" Normalized Hamming loss (with m)", normalizedHL );
+		arr.put(" num. of predicted positives", (double)numOfPositives );
+		arr.put(" avg. num. of predicted positives", (double)numOfPositives/ (double) data.n );
 		
 		return arr;
 
@@ -300,10 +435,48 @@ public class MainThresholdTuning {
 		MainThresholdTuning th = new MainThresholdTuning(args[0]);
 		
 		th.loadPosteriors();
+		th.addTestDataInforToResult();
 		
 		th.tuneThresholdEUM();
+		th.tuneThresholdOFO();
+		th.tuneThresholdEXU();
+		
+		th.writeOutResult();
 	}
 
+	protected void addTestDataInforToResult() {
+		this.resultString += "##########################################################################\n";
+		
+		this.resultString += "GEN,Num of labels,"+this.m + "\n";
+		
+		int numOfPostiveLabel = 0;
+		
+		for( int i = 0; i < this.validlabels.n; i++ ){
+			numOfPostiveLabel += this.validlabels.y[i].length;
+		}
+		
+		this.resultString += "GEN,valid num of positive labels,"+ numOfPostiveLabel + "\n";
+		this.resultString += "GEN,valid avg. num of positive labels,"+ (numOfPostiveLabel / (double) this.validlabels.n )+ "\n";
+
+		
+		numOfPostiveLabel = 0;
+		
+		for( int i = 0; i < this.testlabels.n; i++ ){
+			numOfPostiveLabel += this.testlabels.y[i].length;
+		}
+		
+		this.resultString += "GEN,test num of positive labels,"+ numOfPostiveLabel + "\n";
+		this.resultString += "GEN,test avg. num of positive labels,"+ (numOfPostiveLabel / (double) this.testlabels.n )+ "\n";
+		
+	}
+	
+	
+	protected void writeOutResult() throws IOException {
+		BufferedWriter bf = new BufferedWriter(new FileWriter(this.outFileName) );
+		bf.write(this.resultString);
+		bf.close();
+	}
+	
 	
 	public Properties readProperty(String fname) {
 		logger.info("Reading property file...");
