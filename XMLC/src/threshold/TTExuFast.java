@@ -52,20 +52,29 @@ public class TTExuFast extends ThresholdTuning {
 		int[] indices = new int[data.n];
 		for( int i = 0; i < data.n; i++ ) indices[i] = 0;
 		
+		if (this.a >= 0) {
+			for( int i = 0; i < this.m; i++ ) {
+
+				at[i] = this.a;
+				bt[i] = this.b;			
+			}
+		} else {
+			logger.info("\t\t--> Initialized with the prior!");
+			int[] numOfLabels = AVTable.getNumOfLabels(data);
+
+			for( int i = 0; i < this.m; i++ ) {
+				at[i] = numOfLabels[i];
+				bt[i] = numOfLabels[i] + data.n;			
+			}
+		}
 		
-		for( int i = 0; i < this.m; i++ ) {
-			//at[i] = (int) Math.round(prior[i] * 1000);
-			//bt[i] = 1000;
-			at[i] = a;
-			bt[i] = b;
-			
+		for( int i = 0; i < this.m; i++ ) {		
 			double F00 = (2.0 * at[i]) / ((double) bt[i]);
 			double F01 = (2.0 * at[i]) / ((double) bt[i]+1);
-			double F11 = (2.0 * (at[i]+1)) / ((double) bt[i]+2);
-			
-			
+			double F11 = (2.0 * (at[i]+1)) / ((double) bt[i]+2);		
+		
 			this.thresholds[i] = (F01 - F00) / (2*F01 - F00 - F11 );
-		}
+		}		
 		
 		
 		learner.setThresholds(this.thresholds);
@@ -86,13 +95,8 @@ public class TTExuFast extends ThresholdTuning {
 					thresholdsToChange.add(predictedLabel);
 				}
 				
-				HashSet<Integer> trueLabels = new HashSet<Integer>();
-			
-				for(int m = 0; m < data.y[j].length; m++) {
-					trueLabels.add(data.y[j][m]);
-				}
-				
-				for(int trueLabel : trueLabels) {
+				for(int m = 0; m < data.y[j].length; m++) {			
+					int trueLabel = data.y[j][m];					
 					bt[trueLabel]++;
 					thresholdsToChange.add(trueLabel);
 					if(predictedPositives.contains(trueLabel)) {

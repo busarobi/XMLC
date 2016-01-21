@@ -53,11 +53,24 @@ public class TTOfoFast extends ThresholdTuning {
 		int[] a = new int[this.m];
 		int[] b = new int[this.m];
 					
-		for( int i = 0; i < this.m; i++ ) {
-			a[i] = this.a;
-			b[i] = this.b;
+		if (this.a >= 0 ) { 
+			for( int i = 0; i < this.m; i++ ) {
+				a[i] = this.a;
+				b[i] = this.b;
 						
-			this.thresholds[i] = ((double) a[i]) / ((double) b[i]);
+				this.thresholds[i] = ((double) a[i]) / ((double) b[i]);
+			}
+		} else {
+			logger.info("\t\t--> Initialized with the prior!");
+			int[] numOfLabels = AVTable.getNumOfLabels(data);
+
+			for( int i = 0; i < this.m; i++ ) {
+				a[i] = numOfLabels[i];
+				b[i] = numOfLabels[i] + data.n;
+						
+				this.thresholds[i] = ((double) a[i]) / ((double) b[i]);
+			}
+			
 		}
 		
 		learner.setThresholds(this.thresholds);
@@ -78,14 +91,9 @@ public class TTOfoFast extends ThresholdTuning {
 					b[predictedLabel]++;
 					thresholdsToChange.add(predictedLabel);
 				}
-				
-				HashSet<Integer> trueLabels = new HashSet<Integer>();
-			
-				for(int m = 0; m < data.y[j].length; m++) {
-					trueLabels.add(data.y[j][m]);
-				}
-				
-				for(int trueLabel : trueLabels) {
+								
+				for(int m = 0; m < data.y[j].length; m++) {			
+					int trueLabel = data.y[j][m];					
 					b[trueLabel]++;
 					thresholdsToChange.add(trueLabel);
 					if(predictedPositives.contains(trueLabel)) {
