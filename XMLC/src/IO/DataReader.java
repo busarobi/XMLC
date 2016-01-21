@@ -232,6 +232,27 @@ public class DataReader {
 		
 		bf.close();
 	}
+
+	public static void writeLabels( String outfname, AVTable data ) throws IOException
+	{
+		BufferedWriter bf = new BufferedWriter(new FileWriter(outfname) );
+		
+		for( int i = 0; i<data.n; i++)
+		{
+			// labels
+			for(int j=0; j<data.y[i].length; j++ ) {
+				//logger.info(data.y[i][j]);
+				bf.write(  "" + data.y[i][j]  );
+				if ( j < data.y[i].length - 1 )
+					bf.write( "," );
+				else
+					bf.write( "\n" );
+			}		
+		}
+		
+		bf.close();
+	}
+	
 	
 	
 	public String fmt(double d)
