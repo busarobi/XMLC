@@ -78,7 +78,13 @@ public class SmacRun {
 
 		learner.allocateClassifiers(traindata);
 		learner.train(traindata);
-
+//		try {
+//			learner.savemodel("model.saved");
+//			learner = AbstractLearner.loadmodel("model.saved");
+//		} catch (IOException | ClassNotFoundException e) {
+//			e.printStackTrace();
+//		}
+		
 		Map<String, Double> perftestpreck = Evaluator.computePrecisionAtk(learner, testdata, 1);
 		if (perftestpreck.size() > 1) {
 			throw new IllegalArgumentException("There may be only one result for this experiment");

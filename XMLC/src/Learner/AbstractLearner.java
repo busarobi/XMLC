@@ -2,9 +2,12 @@ package Learner;
 
 
 import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.Serializable;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Properties;
@@ -20,26 +23,33 @@ import Data.EstimatePair;
 import Learner.step.StepFunction;
 import Learner.step.StepFunctionFactory;
 import threshold.ThresholdTuning;
+import util.IoUtils;
 
 
-public abstract class AbstractLearner {
+public abstract class AbstractLearner implements Serializable{
+	private static final long serialVersionUID = -1399552145906714507L;
+
 	private static Logger logger = LoggerFactory.getLogger(AbstractLearner.class);
 
 	protected int m = 0; // num of labels
 	protected int d = 0; // number of features
 
 
-	protected Properties properties = null;
+	transient protected Properties properties = null;
 	protected double[] thresholds = null;
-	protected StepFunction stepFunction;
+	transient protected StepFunction stepFunction;
 	// abstract functions
 	public abstract void allocateClassifiers( AVTable data );
 	public abstract void train( AVTable data );
 	//public abstract Evaluator test( AVTable data );
 	public abstract double getPosteriors(AVPair[] x, int label);
 
-	public abstract void savemodel(String fname );
-	public abstract void loadmodel(String fname );
+	public void savemodel(String fname ) throws IOException{
+		IoUtils.serialize(this, Paths.get(fname));
+	}
+	public static AbstractLearner loadmodel(String fname ) throws FileNotFoundException, ClassNotFoundException, IOException{
+		return (AbstractLearner) IoUtils.deserialize(Paths.get(fname));
+	}
 
 	public int getPrediction(AVPair[] x, int label){
 		if ( this.thresholds[label] <= getPosteriors(x, label) ) {

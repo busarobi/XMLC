@@ -1,6 +1,9 @@
 package Data;
 
-public class AVTable {
+import java.io.Serializable;
+
+public class AVTable implements Serializable{
+	private static final long serialVersionUID = -2220004687028677199L;
 	public int n;           // number of samples
 	public int m;           // number of labels
 	public int d;           // number of features

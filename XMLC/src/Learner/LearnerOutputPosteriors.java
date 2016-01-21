@@ -6,16 +6,12 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,10 +20,6 @@ import Data.AVTable;
 import Data.EstimatePair;
 import IO.DataReader;
 import IO.Evaluator;
-import threshold.TTEumFast;
-import threshold.TTExuFast;
-import threshold.TTOfoFast;
-import threshold.ThresholdTuning;
 
 public class LearnerOutputPosteriors extends LearnerManager {
 	private static Logger logger = LoggerFactory.getLogger(LearnerOutputPosteriors.class);

@@ -24,6 +24,9 @@ import preprocessing.FeatureHasherFactory;
 import preprocessing.UniversalHasher;
 
 public class PLTFH extends MLLRFH {
+	private static final long serialVersionUID = -3957428810519241741L;
+
+
 	private static Logger logger = LoggerFactory.getLogger(PLTFH.class);
 
 	
@@ -479,9 +482,8 @@ public class PLTFH extends MLLRFH {
 	
 		
 	
-	@Override
-	public void loadmodel(String fname) {
-		super.loadmodel(fname);
+	public void load(String fname) {
+		super.load(fname);
 		this.t = 2 * this.m - 1;
 		this.fh = new UniversalHasher(this.fhseed, this.hd, this.t);
 	}

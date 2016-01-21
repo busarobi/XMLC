@@ -21,6 +21,8 @@ import Learner.step.StepFunction;
 import util.MasterSeed;
 
 public class PLT extends MLLogisticRegression {
+	private static final long serialVersionUID = -7781940205438325371L;
+
 	private static Logger logger = LoggerFactory.getLogger(PLT.class);
 
 	protected int t = 0;
@@ -284,9 +286,8 @@ public class PLT extends MLLogisticRegression {
 	}
 
 
-	@Override
-	public void loadmodel(String fname) {
-		super.loadmodel(fname);
+	public void load(String fname) {
+		super.load(fname);
 		this.t = (this.w.length-1)/2;
 	}
 
