@@ -54,15 +54,20 @@ public class SmacRun {
 
 	private AVTable testdata;
 
-	public static void main(String[] args) throws Exception {
-		final SmacRun main = new SmacRun();
-		final JCommander jc = new JCommander(main);
-		jc.parse(args);
-		MasterSeed.setSeed(Long.parseLong(main.mainParams.get(4)));
-		main.properties = main.readProperty(main.mainParams.get(0));
-		main.readTrainData();
-		main.readTestData();
-		main.run();
+	public static void main(String[] args) {
+		try {
+			final SmacRun main = new SmacRun();
+			final JCommander jc = new JCommander(main);
+			jc.parse(args);
+			MasterSeed.setSeed(Long.parseLong(main.mainParams.get(4)));
+			main.properties = main.readProperty(main.mainParams.get(0));
+			main.readTrainData();
+			main.readTestData();
+			main.run();
+		} catch (Throwable e) {
+			logger.error("Unexpected exception occured.",e);
+			e.printStackTrace();
+		}
 	}
 
 	private void run() {
