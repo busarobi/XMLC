@@ -22,7 +22,7 @@ public class MaskHasher implements FeatureHasher {
 		
 		logger.info("#####################################################" );
 		logger.info("#### Mask hash" );
-		logger.info("#### Num. of hashed features: " + ((long)nTasks * (long)this.nFeatures) );
+		logger.info("#### Num. of hashed features: " + (nTasks * this.nFeatures) );
 		logger.info("#####################################################" );
 		
 	}
@@ -32,7 +32,7 @@ public class MaskHasher implements FeatureHasher {
 //	}
 
 	public int getIndex(int label, int feature) {
-		return (int) ((((long)(feature * this.nTasks) + (long) label)) & (this.mask)); 
+		return (int) ((((feature * this.nTasks) + label)) & (this.mask)); 
 	}
 	
 	

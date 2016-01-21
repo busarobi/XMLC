@@ -5,9 +5,17 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -104,15 +112,23 @@ public class LearnerOutputPosteriors extends LearnerManager {
 	}
 	
 	public void writePosteriorsToFile( AbstractLearner learner, AVTable data, String fname, double minThreshold ) throws IOException{
-		logger.info("Output labels to " + fname );
+		logger.info("Output posteriors to " + fname );
 		BufferedWriter bf = new BufferedWriter(new FileWriter(fname) );
 		
 		int numOfPositives = 0;
 		for( int i = 0; i<data.n; i++)
 		{
 			HashSet<EstimatePair> sPE = learner.getSparseProbabilityEstimates(data.x[i], minThreshold);
-			
 			numOfPositives += sPE.size();
+			
+			List<EstimatePair> sortedList = new ArrayList<>();
+			sortedList.addAll(sPE);
+			Collections.sort(sortedList, new Comparator<EstimatePair>() {
+				@Override
+				public int compare(EstimatePair o1, EstimatePair o2) {
+					return Integer.compare(o1.getLabel(), o2.getLabel());
+				}
+			});
 			
 			for(EstimatePair pred : sPE) {
 				bf.write(  "" + pred.getLabel() + ":" + pred.getP() + " "  );
@@ -134,7 +150,7 @@ public class LearnerOutputPosteriors extends LearnerManager {
 		
 	}
 	
-	public void writeLabels() throws IOException {
+	public void outputLabels() throws IOException {
 		logger.info("Output valid label" );
 		DataReader.writeLabels( this.lableFileValid, this.validdata );
 		logger.info("Output test label" );
@@ -160,6 +176,8 @@ public class LearnerOutputPosteriors extends LearnerManager {
 	    lm.readTestData();
 
 	    lm.compositeEvaluation();
+	    lm.outputPosteriors();
+	    lm.outputLabels();
 	}
 	
 	
