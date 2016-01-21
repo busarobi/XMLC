@@ -82,7 +82,7 @@ public class MainThresholdTuning {
 		this.threshold = Double.parseDouble(properties.getProperty("minThreshold", "0.001") );
 		
 		logger.info("#### Min threshold: " + this.threshold );
-		logger.info("#####################################################" );		
+				
 		
 		
 		String trainFile = properties.getProperty("TrainFile");
@@ -92,13 +92,17 @@ public class MainThresholdTuning {
 	    
 	    String[] tokens = line.split(" ");
 	    this.m =  Integer.parseInt(tokens[2]);
-		
+	    
+	    
+	    logger.info("#### Num. of labels: " + this.m );
+	    
+	    logger.info("#####################################################" );
 	}
 	
 	private void loadPosteriors() throws Exception {
 		DataReader testdatareader = new DataReader(this.labelFileTest, false, false);
 		this.testlabels = testdatareader.read();
-
+		
 		DataReader validddatareader = new DataReader(this.lableFileValid, false, false);
 		this.validlabels = validddatareader.read();
 

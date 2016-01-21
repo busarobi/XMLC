@@ -131,7 +131,7 @@ public class LearnerOutputPosteriors extends LearnerManager {
 			});
 			
 			for(EstimatePair pred : sPE) {
-				bf.write(  "" + pred.getLabel() + ":" + pred.getP() + " "  );
+				bf.write(  "" + (pred.getLabel()+1) + ":" + pred.getP() + " "  );
 			}
 			
 			bf.write( "\n" );

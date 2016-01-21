@@ -181,8 +181,8 @@ public class TTEumFast extends ThresholdTuning {
 		//int[] indices = new int[data.n];
 		//for( int i = 0; i < data.n; i++ ) indices[i] = 0;
 		
-		ArrayList<ComparableTriplet>[] posteriors = new ArrayList[m];
-		int [] numPositives = new int[m];
+		ArrayList<ComparableTriplet>[] posteriors = new ArrayList[this.m];
+		int [] numPositives = new int[this.m];
 		
 		int numOfPositives = 0;
 		
