@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import Data.AVTable;
+import Data.EstimatePair;
 import Learner.AbstractLearner;
 
 public class TTOfoFast extends ThresholdTuning {
@@ -143,6 +144,12 @@ public class TTOfoFast extends ThresholdTuning {
 
 		
 		return this.thresholds;
+	}
+
+	@Override
+	public double[] validate( AVTable data, AVTable sPEarray ) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

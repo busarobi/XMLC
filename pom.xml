@@ -42,7 +42,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>Learner.LearnerManager</mainClass>
+							<mainClass>Learner.LearnerOutputPosteriors</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

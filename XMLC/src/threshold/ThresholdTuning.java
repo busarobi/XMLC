@@ -1,8 +1,10 @@
 package threshold;
 
+import java.util.HashSet;
 import java.util.Properties;
 
 import Data.AVTable;
+import Data.EstimatePair;
 import Learner.AbstractLearner;
 
 public abstract class ThresholdTuning {
@@ -22,6 +24,6 @@ public abstract class ThresholdTuning {
 	}
 	
 	abstract public double[] validate( AVTable data, AbstractLearner learner ); 
-	
+	abstract public double[] validate( AVTable data, AVTable sPEarray );
 	
 }

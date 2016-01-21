@@ -2,6 +2,7 @@ package threshold;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import Data.AVTable;
 import Data.ComparablePair;
+import Data.EstimatePair;
 import Learner.AbstractLearner;
 
 public class TTEum extends ThresholdTuning {
@@ -90,7 +92,13 @@ public class TTEum extends ThresholdTuning {
 		
 		return thresholds;
 	}
-	
+
+	@Override
+	public double[] validate( AVTable data, AVTable sPEarray ) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	
 }
 

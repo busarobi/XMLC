@@ -1,11 +1,13 @@
 package threshold;
 
+import java.util.HashSet;
 import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import Data.AVTable;
+import Data.EstimatePair;
 import Learner.AbstractLearner;
 
 public class TTOfo extends ThresholdTuning {
@@ -73,6 +75,12 @@ public class TTOfo extends ThresholdTuning {
 			logger.info( "Class: " + i + " Th: " + String.format("%.4f", this.thresholds[i])  );
 	
 		return this.thresholds;
+	}
+
+	@Override
+	public double[] validate( AVTable data, AVTable sPEarray ) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
