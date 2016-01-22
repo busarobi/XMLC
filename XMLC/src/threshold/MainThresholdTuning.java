@@ -40,7 +40,7 @@ public class MainThresholdTuning {
 	protected AVTable testposteriors =null;
 	protected AVTable validposteriors =null;
 	
-	private double[] thresholdForEUM = {0.01,0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4};
+	private double[] thresholdForEUM = {0.01,0.05,0.1,0.15,0.2,0.25,0.3,0.4,0.5};
 	private int[] barray = {100,50,20,10,7,5,4,3,2};
 	
 	private int m = 0;
