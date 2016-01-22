@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Properties;
 
-import org.apache.commons.math3.analysis.function.Sigmoid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +27,8 @@ import Learner.step.StepFunction;
 import preprocessing.UniversalHasher;
 
 public class PLTFHR extends PLTFH {
+	private static final long serialVersionUID = 8959369680174721738L;
+
 	private static Logger logger = LoggerFactory.getLogger(PLTFHR.class);
 
 	protected int[] Tarray = null;	
@@ -224,7 +225,6 @@ public class PLTFHR extends PLTFH {
 	}
 
 
-	Sigmoid s = new Sigmoid();
 	@Override
 	public double getPartialPosteriors(AVPair[] x, int label) {
 		double posterior = 0.0;
@@ -244,9 +244,7 @@ public class PLTFHR extends PLTFH {
 	}
 	
 	
-	@Override
-	public void savemodel(String fname) {
-		// TODO Auto-generated method stub
+	public void save(String fname) {
 		try{
 			logger.info( "Saving model (" + fname + ")..." );						
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
@@ -295,8 +293,7 @@ public class PLTFHR extends PLTFH {
 
 	}
 
-	@Override
-	public void loadmodel(String fname) {
+	public void load(String fname) {
 		try {
 			logger.info( "Loading model (" + fname + ")..." );
 			Path p = Paths.get(fname);

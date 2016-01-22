@@ -24,13 +24,22 @@ import preprocessing.UniversalHasher;
 import util.CompleteTree;
 
 public class PLTFHKary extends MLLRFH {
+	private static final long serialVersionUID = 7616508564698690408L;
+
 	private static Logger logger = LoggerFactory.getLogger(PLTFHKary.class);
 
-	protected int t = 0;
+	transient protected int t = 0;
 	
-	CompleteTree tree = null;
+	transient CompleteTree tree = null;
 	
 	protected int k = 2;
+	
+	protected Object readResolve(){
+		this.tree = new CompleteTree(this.k, this.m);
+		this.t = this.tree.getSize(); 
+		this.fh = FeatureHasherFactory.createFeatureHasher(this.hasher, fhseed, this.hd, this.t);
+		return this;
+	}
 	
 	public PLTFHKary(Properties properties, StepFunction stepfunction) {
 		super(properties, stepfunction);
@@ -445,9 +454,8 @@ public class PLTFHKary extends MLLRFH {
 	
 		
 	
-	@Override
-	public void loadmodel(String fname) {
-		super.loadmodel(fname);
+	public void load(String fname) {
+		super.load(fname);
 		this.t = 2 * this.m - 1;
 		this.fh = new UniversalHasher(this.fhseed, this.hd, this.t);
 	}

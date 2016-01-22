@@ -1,11 +1,13 @@
 package util;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class CompleteTree extends Tree {
+public class CompleteTree extends Tree implements Serializable {
+	private static final long serialVersionUID = 5656121729850759773L;
 	private static Logger logger = LoggerFactory.getLogger(CompleteTree.class);
 
 

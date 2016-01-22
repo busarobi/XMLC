@@ -31,6 +31,11 @@ import preprocessing.UniversalHasher;
 import util.MasterSeed;
 
 public class MLLRFHNS extends AbstractLearner {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5052825572366584869L;
+
 	private static Logger logger = LoggerFactory.getLogger(MLLRFHNS.class);
 
 	protected int epochs = 1;
@@ -45,6 +50,8 @@ public class MLLRFHNS extends AbstractLearner {
 	protected AVTable traindata = null;
 
 	Random shuffleRand;
+	transient Sigmoid s = new Sigmoid();
+
 	
 	protected FeatureHasher fh = null;
 	
@@ -287,7 +294,6 @@ public class MLLRFHNS extends AbstractLearner {
 	}
 	
 	
-	Sigmoid s = new Sigmoid();
 	@Override
 	public double getPosteriors(AVPair[] x, int label) {
 		double posterior = 0.0;
@@ -339,8 +345,7 @@ public class MLLRFHNS extends AbstractLearner {
 
 	
 	
-	@Override
-	public void savemodel(String fname) {
+	public void save(String fname) {
 		// TODO Auto-generated method stub
 		try{
 			logger.info( "Saving model (" + fname + ")..." );						
@@ -381,8 +386,7 @@ public class MLLRFHNS extends AbstractLearner {
 
 	}
 
-	@Override
-	public void loadmodel(String fname) {
+	public void load(String fname) {
 		try {
 			logger.info( "Loading model (" + fname + ")..." );
 			Path p = Paths.get(fname);

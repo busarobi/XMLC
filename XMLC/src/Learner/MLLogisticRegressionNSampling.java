@@ -17,6 +17,9 @@ import Learner.step.StepFunction;
 import util.MasterSeed;
 
 public class MLLogisticRegressionNSampling extends MLLogisticRegression {
+	private static final long serialVersionUID = -3088978460592180002L;
+
+
 	private static Logger logger = LoggerFactory.getLogger(MLLogisticRegressionNSampling.class);
 
 

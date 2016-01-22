@@ -12,17 +12,10 @@ import org.slf4j.LoggerFactory;
 import Data.AVTable;
 import IO.DataReader;
 import IO.Evaluator;
-import Learner.step.AdamStep;
-import Learner.step.GradStep;
-import Learner.step.GradStepL1;
-import Learner.step.StepFunction;
 import preprocessing.FeatureHasher;
-import preprocessing.MurmurHasher;
 import threshold.TTEum;
 import threshold.TTEumFast;
-import threshold.TTExu;
 import threshold.TTExuFast;
-import threshold.TTOfo;
 import threshold.TTOfoFast;
 import threshold.ThresholdTuning;
 import util.MasterSeed;
@@ -128,7 +121,7 @@ public class LearnerManager {
 				learner.savemodel(modelFile);
 			}
 		} else {
-			learner.loadmodel(inputmodelFile);
+			this.learner = AbstractLearner.loadmodel(inputmodelFile);
 		}
 
 	}

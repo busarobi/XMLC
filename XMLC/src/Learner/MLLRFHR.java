@@ -15,6 +15,9 @@ import Learner.step.StepFunction;
 import util.MasterSeed;
 
 public class MLLRFHR extends MLLRFH {
+	private static final long serialVersionUID = 867786178489831896L;
+
+
 	private static Logger logger = LoggerFactory.getLogger(MLLRFHR.class);
 
 

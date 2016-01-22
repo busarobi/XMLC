@@ -13,6 +13,7 @@
 
 package Learner.step;
 
+import java.io.Serializable;
 import java.util.Properties;
 
 import org.slf4j.Logger;
@@ -24,7 +25,9 @@ import jsat.linear.Vec;
 import jsat.math.decayrates.DecayRate;
 import jsat.math.decayrates.PowerDecay;
 
-public class GradStepL1 implements StepFunction {
+public class GradStepL1 implements StepFunction, Serializable {
+	private static final long serialVersionUID = -8754614352551821958L;
+
 	private static Logger logger = LoggerFactory.getLogger(GradStepL1.class);
 
 	//private LossFunc loss = new LogisticLoss();;

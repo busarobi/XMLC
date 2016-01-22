@@ -29,6 +29,8 @@ import Learner.step.StepFunction;
 import util.MasterSeed;
 
 public class MLLogisticRegression extends AbstractLearner {
+	private static final long serialVersionUID = 6048253331791813751L;
+
 	private static Logger logger = LoggerFactory.getLogger(MLLogisticRegression.class);
 
 	protected int epochs = 20;
@@ -50,6 +52,9 @@ public class MLLogisticRegression extends AbstractLearner {
 	protected int updateMode = 0;
 
 	Random shuffleRand;
+	
+	transient Sigmoid s = new Sigmoid();
+
 
 	public MLLogisticRegression(Properties properties, StepFunction stepfunction) {
 		super(properties, stepfunction);
@@ -189,7 +194,6 @@ public class MLLogisticRegression extends AbstractLearner {
 
 
 
-	Sigmoid s = new Sigmoid();
 	@Override
 	public double getPosteriors(AVPair[] x, int label) {
 		double posterior = this.w[label].dot(x);
@@ -199,8 +203,7 @@ public class MLLogisticRegression extends AbstractLearner {
 		return posterior;
 	}
 
-	@Override
-	public void savemodel(String fname) {
+	public void save(String fname) {
 		// TODO Auto-generated method stub
 		try{
 			logger.info( "Saving model (" + fname + ")..." );
@@ -229,8 +232,7 @@ public class MLLogisticRegression extends AbstractLearner {
 
 	}
 
-	@Override
-	public void loadmodel(String fname) {
+	public void load(String fname) {
 		try {
 			logger.info( "Loading model (" + fname + ")..." );
 			Path p = Paths.get(fname);

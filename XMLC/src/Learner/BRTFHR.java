@@ -30,11 +30,15 @@ import preprocessing.MurmurHasher;
 import preprocessing.UniversalHasher;
 
 public class BRTFHR extends MLLRFHR {
+	private static final long serialVersionUID = 6513552130781797264L;
+
 	private static Logger logger = LoggerFactory.getLogger(BRTFHR.class);
 
 	protected int[] Tarray = null;	
 	protected double[] scalararray = null;
 	protected int t = 0;
+	transient Sigmoid s = new Sigmoid();
+
 	
 	public BRTFHR(Properties properties, StepFunction stepfunction) {
 		super(properties, stepfunction);
@@ -226,7 +230,6 @@ public class BRTFHR extends MLLRFHR {
 
 	}
 
-	Sigmoid s = new Sigmoid();
 	
 	public double getPartialPosteriors(AVPair[] x, int label) {
 		
@@ -331,8 +334,7 @@ public class BRTFHR extends MLLRFHR {
 	}
 
 	
-	@Override
-	public void savemodel(String fname) {
+	public void save(String fname) {
 		// TODO Auto-generated method stub
 		try{
 			logger.info( "Saving model (" + fname + ")..." );						
@@ -382,8 +384,7 @@ public class BRTFHR extends MLLRFHR {
 
 	}
 
-	@Override
-	public void loadmodel(String fname) {
+	public void load(String fname) {
 		try {
 			logger.info( "Loading model (" + fname + ")..." );
 			Path p = Paths.get(fname);

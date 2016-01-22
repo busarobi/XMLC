@@ -12,6 +12,8 @@ import Learner.step.StepFunction;
 
 public class ConstantLearner extends AbstractLearner {
 
+	private static final long serialVersionUID = 579975688059937300L;
+
 	public ConstantLearner(Properties properties, StepFunction stepfunction) {
 		super(properties, stepfunction);
 		// TODO Auto-generated constructor stub
@@ -51,17 +53,4 @@ public class ConstantLearner extends AbstractLearner {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
-	@Override
-	public void savemodel(String fname) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void loadmodel(String fname) {
-		// TODO Auto-generated method stub
-
-	}
-
 }

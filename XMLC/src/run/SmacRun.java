@@ -34,37 +34,40 @@ public class SmacRun {
 	// just for parsing the one silly smac parameter
 	@Parameter(names = "-1", hidden = true)
 	private Boolean bla;
-	
-	
-	@Parameter(names="-gamma")
+
+	@Parameter(names = "-gamma")
 	double gamma;
-	
-	@Parameter(names="-lambda")
+
+	@Parameter(names = "-lambda")
 	double lambda;
-	
-	@Parameter(names="-k")
+
+	@Parameter(names = "-k")
 	int k;
-	
+
 	String trainFile;
-	
+
 	String testFile;
-	
+
 	Properties properties = new Properties();
 
 	private AVTable traindata;
 
 	private AVTable testdata;
 
-	
-	public static void main(String[] args) throws Exception {
-		final SmacRun main = new SmacRun();
-		final JCommander jc = new JCommander(main);
-		jc.parse(args);
-		MasterSeed.setSeed(Long.parseLong(main.mainParams.get(4)));
-		main.properties = main.readProperty(main.mainParams.get(0));
-		main.readTrainData();
-		main.readTestData();
-		main.run();
+	public static void main(String[] args) {
+		try {
+			final SmacRun main = new SmacRun();
+			final JCommander jc = new JCommander(main);
+			jc.parse(args);
+			MasterSeed.setSeed(Long.parseLong(main.mainParams.get(4)));
+			main.properties = main.readProperty(main.mainParams.get(0));
+			main.readTrainData();
+			main.readTestData();
+			main.run();
+		} catch (Throwable e) {
+			logger.error("Unexpected exception occured.",e);
+			e.printStackTrace();
+		}
 	}
 
 	private void run() {
@@ -72,29 +75,41 @@ public class SmacRun {
 		properties.setProperty("lambda", Double.toString(lambda));
 		properties.setProperty("k", Integer.toString(k));
 		AbstractLearner learner = AbstractLearner.learnerFactory(properties);
-		
+
 		learner.allocateClassifiers(traindata);
 		learner.train(traindata);
+//		try {
+//			learner.savemodel("model.saved");
+//			learner = AbstractLearner.loadmodel("model.saved");
+//		} catch (IOException | ClassNotFoundException e) {
+//			e.printStackTrace();
+//		}
 		
-		
-		Map<String,Double> perftestpreck = Evaluator.computePrecisionAtk(learner, testdata, 1);
-		
-		for ( String perfName : perftestpreck.keySet() ) {
-			logger.info("Result for SMAC: SUCCESS, 0, 0, {}, 0",(1 - perftestpreck.get(perfName)));
+		Map<String, Double> perftestpreck = Evaluator.computePrecisionAtk(learner, testdata, 1);
+		if (perftestpreck.size() > 1) {
+			throw new IllegalArgumentException("There may be only one result for this experiment");
+		} else {
+			for (String perfName : perftestpreck.keySet()) {
+				System.out.println("Result for SMAC: SUCCESS, 0, 0, " + (1 - perftestpreck.get(perfName)) + ", 0");
+				logger.info("Performance is: {}", perftestpreck.get(perfName));
+			}
 		}
 	}
-	
+
 	public void readTrainData() throws Exception {
 		// reading train data
-		DataReader datareader = new DataReader(properties.getProperty("TrainFile"), false, Boolean.parseBoolean(properties.getProperty("IsHeader")));
+		DataReader datareader = new DataReader(properties.getProperty("TrainFile"), false,
+				Boolean.parseBoolean(properties.getProperty("IsHeader")));
 		traindata = datareader.read();
 	}
 
 	public void readTestData() throws Exception {
 		// test
-		DataReader testdatareader = new DataReader(properties.getProperty("TestFile"),false, Boolean.parseBoolean(properties.getProperty("IsHeader")));
+		DataReader testdatareader = new DataReader(properties.getProperty("TestFile"), false,
+				Boolean.parseBoolean(properties.getProperty("IsHeader")));
 		testdata = testdatareader.read();
 	}
+
 	public Properties readProperty(String fname) {
 		logger.info("Reading property file...");
 		Properties properties = new Properties();

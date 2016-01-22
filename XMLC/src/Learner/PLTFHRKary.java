@@ -27,10 +27,13 @@ import Learner.step.StepFunction;
 import preprocessing.UniversalHasher;
 
 public class PLTFHRKary extends PLTFHKary {
+	private static final long serialVersionUID = -8118572654228214071L;
+
+
 	private static Logger logger = LoggerFactory.getLogger(PLTFHRKary.class);
 
 	
-	protected int[] Tarray = null;	
+	transient protected int[] Tarray = null;	
 	protected double[] scalararray = null;
 	
 	public PLTFHRKary(Properties properties, StepFunction stepfunction) {
@@ -182,11 +185,16 @@ public class PLTFHRKary extends PLTFHKary {
 		this.bias[label] -= update;
 		//logger.info("bias -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
 	}
+	protected Object readResolve(){
+		return super.readResolve();
+	}
 
 
-	Sigmoid s = new Sigmoid();
 	@Override
 	public double getPartialPosteriors(AVPair[] x, int label) {
+		if(s==null){
+			s = new Sigmoid();
+		}
 		double posterior = 0.0;
 		
 		
@@ -204,9 +212,7 @@ public class PLTFHRKary extends PLTFHKary {
 	}
 	
 	
-	@Override
-	public void savemodel(String fname) {
-		// TODO Auto-generated method stub
+	public void save(String fname) {
 		try{
 			logger.info( "Saving model (" + fname + ")..." );						
 			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
@@ -255,8 +261,7 @@ public class PLTFHRKary extends PLTFHKary {
 
 	}
 
-	@Override
-	public void loadmodel(String fname) {
+	public void load(String fname) {
 		try {
 			logger.info( "Loading model (" + fname + ")..." );
 			Path p = Paths.get(fname);
