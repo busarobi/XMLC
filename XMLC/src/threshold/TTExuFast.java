@@ -19,6 +19,26 @@ public class TTExuFast extends ThresholdTuning {
 	protected int epochs = 1;	
 	protected int a = 1;
 	protected int b = 1;
+
+	protected int[] aInit = null;
+	protected int[] bInit = null;
+	
+	
+	public void setaInit(int[] aInit) {
+		if (aInit.length != this.m ) {
+			System.exit(-1);
+		}
+ 
+		this.aInit = aInit;
+	}
+
+	public void setbInit(int[] bInit) {
+		if (bInit.length != this.m ) {
+			System.exit(-1);
+		}
+
+		this.bInit = bInit;
+	}
 	
 	public TTExuFast(int m, Properties properties) {
 		super(m, properties);
@@ -59,6 +79,11 @@ public class TTExuFast extends ThresholdTuning {
 				at[i] = this.a;
 				bt[i] = this.b;			
 			}
+		} else if  ( ( this.aInit != null ) && (this.bInit != null ) ) {
+			for( int i = 0; i < this.m; i++ ) {
+				at[i] = this.aInit[i];
+				bt[i] = this.bInit[i];
+			}			
 		} else {
 			logger.info("\t\t--> Initialized with the prior!");
 			int[] numOfLabels = AVTable.getNumOfLabels(data);
@@ -184,6 +209,11 @@ public class TTExuFast extends ThresholdTuning {
 				at[i] = this.a;
 				bt[i] = this.b;			
 			}
+		} else if  ( ( this.aInit != null ) && (this.bInit != null ) ) {
+			for( int i = 0; i < this.m; i++ ) {
+				at[i] = this.aInit[i];
+				bt[i] = this.bInit[i];
+			}			
 		} else {
 			logger.info("\t\t--> Initialized with the prior!");
 			int[] numOfLabels = AVTable.getNumOfLabels(data);

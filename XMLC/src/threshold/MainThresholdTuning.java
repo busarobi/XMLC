@@ -45,7 +45,7 @@ public class MainThresholdTuning {
 	private int[] barray = {/*10000,1000,*/200,
 							100,50,20,10,7,5,4,3,2};
 	
-	private int m = 0;
+	protected int m = 0;
 	//private double threshold = 0.01;
 	protected Properties properties = null;
 	
@@ -115,20 +115,24 @@ public class MainThresholdTuning {
 	    logger.info("#####################################################" );
 	}
 	
-	private void loadPosteriors() throws Exception {
+	protected void loadPosteriors() throws Exception {
 		DataReader testdatareader = new DataReader(this.labelFileTest, false, false);
 		this.testlabels = testdatareader.read();
+		this.testlabels.m = this.m;
 		
 		DataReader validddatareader = new DataReader(this.lableFileValid, false, false);
 		this.validlabels = validddatareader.read();
-
+		this.validlabels.m = this.m;
+		
 		DataReader testpostreader = new DataReader(this.posteriorFileTest, false, false);
 		this.testposteriors = testpostreader.read();
-
+		this.testposteriors.m = this.m;
+				
 		logger.info("Min. post value : " + fmt(this.getMinimum(this.testposteriors)));
 		
 		DataReader validpostreader = new DataReader(this.posteriorFileValid, false, false);
 		this.validposteriors = validpostreader.read();
+		this.validposteriors.m = this.m;
 		
 		logger.info("Min. valid value : " + fmt(this.getMinimum(this.validposteriors)));
 		

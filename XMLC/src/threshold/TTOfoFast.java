@@ -21,7 +21,27 @@ public class TTOfoFast extends ThresholdTuning {
 	
 	protected int a = 0;
 	protected int b = 1;
+
+	protected int[] aInit = null;
+	protected int[] bInit = null;
 	
+	
+	public void setaInit(int[] aInit) {
+		if (aInit.length != this.m ) {
+			System.exit(-1);
+		}
+ 
+		this.aInit = aInit;
+	}
+
+	public void setbInit(int[] bInit) {
+		if (bInit.length != this.m ) {
+			System.exit(-1);
+		}
+
+		this.bInit = bInit;
+	}
+
 	public TTOfoFast(int m, Properties properties) {
 		super(m, properties);
 		
@@ -61,7 +81,14 @@ public class TTOfoFast extends ThresholdTuning {
 						
 				this.thresholds[i] = ((double) a[i]) / ((double) b[i]);
 			}
-		} else {
+		} else if  ( ( this.aInit != null ) && (this.bInit != null ) ) {
+			for( int i = 0; i < this.m; i++ ) {
+				a[i] = this.aInit[i];
+				b[i] = this.bInit[i];
+						
+				this.thresholds[i] = ((double) a[i]) / ((double) b[i]);
+			}			
+		} else if ( (this.a < 0) || (this.b < 0) ) {
 			logger.info("\t\t--> Initialized with the prior!");
 			int[] numOfLabels = AVTable.getNumOfLabels(data);
 
@@ -171,6 +198,13 @@ public class TTOfoFast extends ThresholdTuning {
 						
 				this.thresholds[i] = ((double) a[i]) / ((double) b[i]);
 			}
+		} else if  ( ( this.aInit != null ) && (this.bInit != null ) ) {
+			for( int i = 0; i < this.m; i++ ) {
+				a[i] = this.aInit[i];
+				b[i] = this.bInit[i];
+						
+				this.thresholds[i] = ((double) a[i]) / ((double) b[i]);
+			}			
 		} else {
 			logger.info("\t\t--> Initialized with the prior!");
 			int[] numOfLabels = AVTable.getNumOfLabels(data);
