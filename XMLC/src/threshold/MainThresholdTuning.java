@@ -40,11 +40,13 @@ public class MainThresholdTuning {
 	protected AVTable testposteriors =null;
 	protected AVTable validposteriors =null;
 	
-	private double[] thresholdForEUM = {0.01,0.05,0.1,0.15,0.2,0.25,0.3,0.4,0.5};
-	private int[] barray = {100,50,20,10,7,5,4,3,2};
+	private double[] thresholdForEUM = {/*0.0001, 0.001,*/ 0.005,
+										0.01,0.05,0.1,0.15,0.2,0.25,0.3,0.4,0.5};
+	private int[] barray = {/*10000,1000,*/200,
+							100,50,20,10,7,5,4,3,2};
 	
 	private int m = 0;
-	private double threshold = 0.01;
+	//private double threshold = 0.01;
 	protected Properties properties = null;
 	
 	public MainThresholdTuning(String fname) throws IOException {		
@@ -94,8 +96,8 @@ public class MainThresholdTuning {
 		logger.info("### OutFile: " + this.outFileName );
 		
 		
-		this.threshold = Double.parseDouble(properties.getProperty("minThreshold", "0.001") );		
-		logger.info("#### Min threshold: " + this.threshold );
+		//this.threshold = Double.parseDouble(properties.getProperty("minThreshold", "0.001") );		
+		//logger.info("#### Min threshold: " + this.threshold );
 				
 		
 		
@@ -123,10 +125,12 @@ public class MainThresholdTuning {
 		DataReader testpostreader = new DataReader(this.posteriorFileTest, false, false);
 		this.testposteriors = testpostreader.read();
 
+		logger.info("Min. post value : " + fmt(this.getMinimum(this.testposteriors)));
+		
 		DataReader validpostreader = new DataReader(this.posteriorFileValid, false, false);
 		this.validposteriors = validpostreader.read();
 		
-		
+		logger.info("Min. valid value : " + fmt(this.getMinimum(this.validposteriors)));
 		
 //		logger.info("Reading vaild psoteriors");
 //		this.validposteriors = readPosteriors( this.posteriorFileValid, this.validlabels.n );
@@ -134,6 +138,19 @@ public class MainThresholdTuning {
 //		this.testposteriors = readPosteriors( this.posteriorFileTest, this.testlabels.n );
 	}
 
+	protected double getMinimum(AVTable data ) {
+		double min = Double.MAX_VALUE;
+		
+		for(int i = 0; i < data.n; i++ ){
+			for( int j = 0; j < data.x[i].length; j++ ){
+				if ( min > data.x[i][j].value) min = data.x[i][j].value; 
+			}
+		}
+		
+		return min;		
+	}
+	
+	
 	private HashSet<EstimatePair>[] readPosteriors( String fname, int n ) throws IOException {
 		BufferedReader fp = new BufferedReader(new FileReader(fname));
 		HashSet<EstimatePair>[] sPE = new HashSet[n];
