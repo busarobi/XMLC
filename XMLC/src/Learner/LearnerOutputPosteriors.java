@@ -168,8 +168,11 @@ public class LearnerOutputPosteriors extends LearnerManager {
 	    lm.readTestData();
 
 	    lm.compositeEvaluation();
-	    lm.outputPosteriors();
+	    
 	    lm.outputLabels();
+	    
+	    lm.outputPosteriors();
+	    
 	}
 	
 	
