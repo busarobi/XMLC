@@ -21,6 +21,7 @@ public class TTEumFast extends ThresholdTuning {
 
 	
 	protected double minThreshold = 0.001;
+	protected double[] minThresholdArray = null;
 	
 	public TTEumFast(int m, Properties properties) {
 		super(m, properties );	
@@ -32,6 +33,9 @@ public class TTEumFast extends ThresholdTuning {
 		logger.info("#### Min threshold: " + this.minThreshold );
 		logger.info("#####################################################" );		
 		
+//		this.minThresholdArray = new double[this.m];
+//		for( int i = 0; i < this.m; i++ )
+//			this.minThresholdArray[i] = this.minThreshold;
 	}
 
 	@Override

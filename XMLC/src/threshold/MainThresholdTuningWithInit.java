@@ -28,8 +28,10 @@ public class MainThresholdTuningWithInit extends MainThresholdTuning {
 		double[] thresholds = null;
 		if ( method.compareTo("OFO") == 0 ) {
 			int[] binitArray = new int[this.m];
+			//int[] ainitArray = new int[this.m];
 			for( int i = 0; i < this.m; i++ ) {
-				binitArray[i] = posLabels[i] +  this.validposteriors.n;
+//				binitArray[i] = posLabels[i] +  this.validposteriors.n;
+				binitArray[i] = this.validposteriors.n;
 			}
 			// set the minThreshold
 			th = new TTOfoFast(this.m, properties);
@@ -37,10 +39,12 @@ public class MainThresholdTuningWithInit extends MainThresholdTuning {
 			((TTOfoFast) th).setbInit(binitArray);
 		
 			thresholds = th.validate(this.validlabels, this.validposteriors);
+			//thresholds = th.validate(this.validlabels, this.validposteriors);
 		} else if ( method.compareTo("EXU") == 0 ) {
 			int[] binitArray = new int[this.m];
 			for( int i = 0; i < this.m; i++ ) {
-				binitArray[i] = posLabels[i] +  this.validposteriors.n;
+//				binitArray[i] = posLabels[i] +  this.validposteriors.n;
+				binitArray[i] = this.testposteriors.n;
 			}
 			// set the minThreshold
 			th = new TTExuFast(this.m, properties);
@@ -48,7 +52,7 @@ public class MainThresholdTuningWithInit extends MainThresholdTuning {
 			((TTExuFast) th).setbInit(binitArray);
 		
 			thresholds = th.validate(this.validlabels, this.validposteriors);
-			
+			//thresholds = th.validate(this.validlabels, this.validposteriors);
 		}
 		this.resultString += method + ",valid F-measure," + th.getValidatedFmeasure() + "\n";
 

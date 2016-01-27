@@ -74,7 +74,7 @@ public class TTOfoFast extends ThresholdTuning {
 		int[] a = new int[this.m];
 		int[] b = new int[this.m];
 					
-		if (this.a >= 0 ) { 
+		if ( (this.a >= 0 ) && (this.aInit == null)) { 
 			for( int i = 0; i < this.m; i++ ) {
 				a[i] = this.a;
 				b[i] = this.b;
@@ -191,7 +191,7 @@ public class TTOfoFast extends ThresholdTuning {
 		int[] a = new int[this.m];
 		int[] b = new int[this.m];
 					
-		if (this.a >= 0 ) { 
+		if ((this.a >= 0 ) && (this.aInit == null) ){ 
 			for( int i = 0; i < this.m; i++ ) {
 				a[i] = this.a;
 				b[i] = this.b;

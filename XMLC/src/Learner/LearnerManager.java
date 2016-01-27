@@ -141,43 +141,49 @@ public class LearnerManager {
 //
 //		}
 		
+		Map<String,Double> perfvalidpreck = Evaluator.computePrecisionAtk(this.learner, this.validdata, 5);
+		Map<String,Double> perftestpreck = Evaluator.computePrecisionAtk(this.learner, this.testdata, 5);
 		
-		Map<String,Double> perfpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);
+		//Map<String,Double> perfpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);
 		
-		for ( String perfName : perfpreck.keySet() ) {
-			logger.info("##### " + perfName + ": "  + perfpreck.get(perfName));
-		}
-		
-		
-		// evaluate (EUM)
-		ThresholdTuning theum = new TTEumFast( learner.m, properties );
-		learner.tuneThreshold(theum, validdata);
-		Map<String,Double> perfTTEUMFast = Evaluator.computePerformanceMetrics(learner, testdata);
-							
-		// evaluate (OFO)
-		ThresholdTuning th = new TTOfoFast( learner.m, properties );
-		learner.tuneThreshold(th, validdata);			
-		Map<String,Double> perfTTOFOFast = Evaluator.computePerformanceMetrics(learner, testdata);
-		
-		// evaluate (EXU)
-		ThresholdTuning thexu = new TTExuFast( learner.m, properties );
-		learner.tuneThreshold(thexu, validdata);
-		Map<String,Double> perfTTExu = Evaluator.computePerformanceMetrics(learner, testdata);		
-		
-		
-		for ( String perfName : perfTTEUMFast.keySet() ) {
-			logger.info("##### EUM " + perfName + ": "  + perfTTEUMFast.get(perfName));
-		}
-		
-		
-		for ( String perfName : perfTTOFOFast.keySet() ) {
-			logger.info("##### OFO " + perfName + ": "  + perfTTOFOFast.get(perfName));
+		for ( String perfName : perfvalidpreck.keySet() ) {
+			logger.info("##### Valid " + perfName + ": "  + perfvalidpreck.get(perfName) );			
 		}
 
-
-		for ( String perfName : perfTTExu.keySet() ) {
-			logger.info("##### EXU " + perfName + ": "  + perfTTExu.get(perfName));
+		for ( String perfName : perftestpreck.keySet() ) {
+			logger.info("##### Test " + perfName + ": "  + perftestpreck.get(perfName));			
 		}
+		
+		
+//		// evaluate (EUM)
+//		ThresholdTuning theum = new TTEumFast( learner.m, properties );
+//		learner.tuneThreshold(theum, validdata);
+//		Map<String,Double> perfTTEUMFast = Evaluator.computePerformanceMetrics(learner, testdata);
+//							
+//		// evaluate (OFO)
+//		ThresholdTuning th = new TTOfoFast( learner.m, properties );
+//		learner.tuneThreshold(th, validdata);			
+//		Map<String,Double> perfTTOFOFast = Evaluator.computePerformanceMetrics(learner, testdata);
+//		
+//		// evaluate (EXU)
+//		ThresholdTuning thexu = new TTExuFast( learner.m, properties );
+//		learner.tuneThreshold(thexu, validdata);
+//		Map<String,Double> perfTTExu = Evaluator.computePerformanceMetrics(learner, testdata);		
+//		
+//		
+//		for ( String perfName : perfTTEUMFast.keySet() ) {
+//			logger.info("##### EUM " + perfName + ": "  + perfTTEUMFast.get(perfName));
+//		}
+//		
+//		
+//		for ( String perfName : perfTTOFOFast.keySet() ) {
+//			logger.info("##### OFO " + perfName + ": "  + perfTTOFOFast.get(perfName));
+//		}
+//
+//
+//		for ( String perfName : perfTTExu.keySet() ) {
+//			logger.info("##### EXU " + perfName + ": "  + perfTTExu.get(perfName));
+//		}
 		
 		
 //		for(int t = 0; t < thresholds.length; t++){

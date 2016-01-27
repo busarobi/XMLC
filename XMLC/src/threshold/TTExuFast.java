@@ -73,7 +73,7 @@ public class TTExuFast extends ThresholdTuning {
 		int[] indices = new int[data.n];
 		for( int i = 0; i < data.n; i++ ) indices[i] = 0;
 		
-		if (this.a >= 0) {
+		if ( (this.a >= 0) && (this.aInit == null)) {
 			for( int i = 0; i < this.m; i++ ) {
 
 				at[i] = this.a;
@@ -203,7 +203,7 @@ public class TTExuFast extends ThresholdTuning {
 		int[] indices = new int[data.n];
 		for( int i = 0; i < data.n; i++ ) indices[i] = 0;
 		
-		if (this.a >= 0) {
+		if ( (this.a >= 0) && (this.aInit == null) ) {
 			for( int i = 0; i < this.m; i++ ) {
 
 				at[i] = this.a;

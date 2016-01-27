@@ -48,6 +48,8 @@ public class MainThresholdTuning {
 	protected int m = 0;
 	//private double threshold = 0.01;
 	protected Properties properties = null;
+	protected boolean fastxml = false;
+	
 	
 	public MainThresholdTuning(String fname) throws IOException {		
 		this.properties = this.readProperty(fname);
@@ -99,7 +101,7 @@ public class MainThresholdTuning {
 		//this.threshold = Double.parseDouble(properties.getProperty("minThreshold", "0.001") );		
 		//logger.info("#### Min threshold: " + this.threshold );
 				
-		
+		this.fastxml = Boolean.parseBoolean(this.properties.getProperty("IsFastXML","false"));
 		
 		String trainFile = properties.getProperty("TrainFile");
 		BufferedReader brTrain = new BufferedReader(new FileReader(trainFile));
@@ -115,6 +117,7 @@ public class MainThresholdTuning {
 	    logger.info("#####################################################" );
 	}
 	
+	
 	protected void loadPosteriors() throws Exception {
 		DataReader testdatareader = new DataReader(this.labelFileTest, false, false);
 		this.testlabels = testdatareader.read();
@@ -127,12 +130,26 @@ public class MainThresholdTuning {
 		DataReader testpostreader = new DataReader(this.posteriorFileTest, false, false);
 		this.testposteriors = testpostreader.read();
 		this.testposteriors.m = this.m;
-				
+		
+		if ( this.fastxml ) {
+			for( int i = 0; i < this.testposteriors.n; i++ ){
+				for( int j = 0; j < this.testposteriors.x[i].length; j++ )
+					this.testposteriors.x[i][j].index++;
+			}
+		}
+
 		logger.info("Min. post value : " + fmt(this.getMinimum(this.testposteriors)));
 		
 		DataReader validpostreader = new DataReader(this.posteriorFileValid, false, false);
 		this.validposteriors = validpostreader.read();
 		this.validposteriors.m = this.m;
+
+		if (this.fastxml){
+			for( int i = 0; i < this.validposteriors.n; i++ ){
+				for( int j = 0; j < this.validposteriors.x[i].length; j++ )
+					this.validposteriors.x[i][j].index++;
+			}
+		}
 		
 		logger.info("Min. valid value : " + fmt(this.getMinimum(this.validposteriors)));
 		
