@@ -113,6 +113,7 @@ public class LearnerManager {
 		// train
 		String inputmodelFile = properties.getProperty("InputModelFile");
 		if (inputmodelFile == null ) {
+			this.readTrainData();
 			learner.allocateClassifiers(traindata);
 			learner.train(traindata);
 
@@ -121,6 +122,7 @@ public class LearnerManager {
 				learner.savemodel(modelFile);
 			}
 		} else {
+			logger.info("Loading model file...");
 			this.learner = AbstractLearner.loadmodel(inputmodelFile);
 		}
 
@@ -245,7 +247,7 @@ public class LearnerManager {
 		}
 
 		LearnerManager lm = new LearnerManager(args[0]);
-		lm.readTrainData();
+		//lm.readTrainData();
 	    lm.train();
 
 	    lm.readValidData();

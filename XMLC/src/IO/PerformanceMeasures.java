@@ -23,14 +23,14 @@ public class PerformanceMeasures {
 			
 			int tp = 0, fn = 0;
 			
-			if (y[i] == null ) continue;
-			
-			for(int trueLabel: y[i]) {
-				if(predictedLabels[i].contains(trueLabel)) {
-					tp++;
-				} else {
-					fn++;
-				}
+			if (y[i] != null ) { 			
+				for(int trueLabel: y[i]) {
+					if(predictedLabels[i].contains(trueLabel)) {
+						tp++;
+					} else {
+						fn++;
+					}
+				}			
 			}
 			
 			HL += fn + (predictedLabels[i].size() - tp);
@@ -58,13 +58,13 @@ public class PerformanceMeasures {
 		
 		for(int i = 0; i < predictedLabels.length; i++ ) {
 			
-			if (y[i] == null ) continue;
-			
-			for(int trueLabel: y[i]) {
-				if(predictedLabels[i].contains(trueLabel)) {
-					tp[trueLabel]++;
+			if (y[i] != null ){			
+				for(int trueLabel: y[i]) {
+					if(predictedLabels[i].contains(trueLabel)) {
+						tp[trueLabel]++;
+					}
+					yloc[trueLabel]++;
 				}
-				yloc[trueLabel]++;
 			}
 
 			for(int predictedLabel: predictedLabels[i]) {

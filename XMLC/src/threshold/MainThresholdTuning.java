@@ -40,9 +40,9 @@ public class MainThresholdTuning {
 	protected AVTable testposteriors =null;
 	protected AVTable validposteriors =null;
 	
-	private double[] thresholdForEUM = {/*0.0001, 0.001,*/ 0.005,
+	private double[] thresholdForEUM = {0.0001, 0.001, 0.005,
 										0.01,0.05,0.1,0.15,0.2,0.25,0.3,0.4,0.5};
-	private int[] barray = {/*10000,1000,*/200,
+	private int[] barray = {10000,1000,200,
 							100,50,20,10,7,5,4,3,2};
 	
 	protected int m = 0;
@@ -237,6 +237,47 @@ public class MainThresholdTuning {
 		
 	}
 
+	public void tuneThresholdFTA() {		
+		for( int i=0; i < this.thresholdForEUM.length; i++ ) {
+			logger.info("##########################################################################");
+			this.resultString += "##########################################################################\n";
+			
+			logger.info("Threshold: " + this.thresholdForEUM[i]);
+			this.resultString += "FTA,threshold,"+this.thresholdForEUM[i] + "\n";
+			
+			// set the minThreshold
+			//properties.setProperty("minThreshold", Double.toString(this.thresholdForEUM[i]));
+			//ThresholdTuning theum = new TTEumFast( this.m, properties );
+			double[] thresholds = new double[this.m];
+			for( int j = 0; j < this.m; j++ ) thresholds[j] = this.thresholdForEUM[i];
+			
+			// compute the positive labels
+			HashSet<Integer>[] positiveLabelsArray = getPositiveLabels(this.validlabels, this.validposteriors, thresholds );
+			// compute F-measure
+			Map<String,Double> perf = this.computePerformanceMetrics(positiveLabelsArray, this.validlabels );
+
+			for ( String perfName : perf.keySet() ) {
+				logger.info("##### FTA valid " + perfName + ": "  + fmt(perf.get(perfName)));
+				this.resultString += "FTA,valid " + perfName + ","  + fmt(perf.get(perfName)) + "\n";
+			}
+			
+			
+			// compute the positive labels
+			positiveLabelsArray = getPositiveLabels(this.testlabels, this.testposteriors, thresholds );
+			// compute F-measure
+			perf = this.computePerformanceMetrics(positiveLabelsArray, this.testlabels );
+
+			for ( String perfName : perf.keySet() ) {
+				logger.info("##### FTA test" + perfName + ": "  + fmt(perf.get(perfName)));
+				this.resultString += "FTA,test " + perfName + ","  + fmt(perf.get(perfName)) + "\n";
+			}			
+			
+
+		}
+		
+	}
+	
+	
 	public void tuneThresholdOFO() {		
 		
 		for( int i=0; i < this.barray.length; i++ ) {
@@ -475,6 +516,7 @@ public class MainThresholdTuning {
 		th.loadPosteriors();
 		th.addTestDataInforToResult();
 		
+		th.tuneThresholdFTA();
 		th.tuneThresholdEUM();
 		th.tuneThresholdOFO();
 		th.tuneThresholdEXU();

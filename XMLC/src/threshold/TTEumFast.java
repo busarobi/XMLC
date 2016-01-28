@@ -67,8 +67,13 @@ public class TTEumFast extends ThresholdTuning {
 			for(int m = 0; m < data.y[j].length; m++) {
 				trueLabels.add(data.y[j][m]);
 			}
-			
-			HashSet<EstimatePair> sPE = learner.getSparseProbabilityEstimates(data.x[j], minThreshold);
+			HashSet<EstimatePair> sPE = null;
+			if (this.minThresholdArray==null) {
+				sPE = learner.getSparseProbabilityEstimates(data.x[j], minThreshold);
+			} else {
+				learner.setThresholds(this.minThresholdArray);
+				//sPE = learner.getSparseProbabilityEstimates(data.x[j]);
+			}
 			
 			numOfPositives += sPE.size();
 			
