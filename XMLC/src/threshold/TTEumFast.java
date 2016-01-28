@@ -105,7 +105,7 @@ public class TTEumFast extends ThresholdTuning {
 		for(int i = 0; i < posteriors.length; i++) {
 		
 			if(posteriors[i] == null) {
-				thresholds[i] = 0.5;
+				thresholds[i] = 0.05;
 				continue;
 			}
 			
