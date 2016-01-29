@@ -12,11 +12,13 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import Data.AVTable;
+import Data.ComparablePair;
 import Data.EstimatePair;
 import IO.DataReader;
 import IO.Evaluator;
@@ -98,10 +100,77 @@ public class LearnerOutputPosteriors extends LearnerManager {
 		}				
 	}
 	
-	public void outputPosteriors() throws IOException {
-		this.writePosteriorsToFile(this.learner, this.validdata, this.posteriorFileValid, this.threshold);
-		this.writePosteriorsToFile(this.learner, this.testdata, this.posteriorFileTest, this.threshold);
+	public void outputPosteriors() throws Exception {		
+		
+		if (this.threshold < 0.0) {
+			this.readTrainData();
+			int[] numOfPositivesTrain = AVTable.getNumOfLabels(this.traindata);
+			int[] numOfPositivesValid = AVTable.getNumOfLabels(this.testdata);
+			int[] numOfPositivesTest = AVTable.getNumOfLabels(this.validdata);
+	    
+			double N = (double) (this.traindata.n + this.validdata.n + this.testdata.n);
+			double[] thresholds = new double[this.validdata.m];
+			double avgThreshold = 0.0;
+			for(int i = 0; i < this.traindata.m; i++ ) {
+				double a = numOfPositivesTrain[i] + numOfPositivesValid[i] + numOfPositivesTest[i];
+				thresholds[i] = a / (a+N);
+				avgThreshold += thresholds[i];
+			}
+			avgThreshold /= N;
+			logger.info("Avg. threshold = :" + avgThreshold );
+			
+			this.learner.setThresholds(thresholds);
+		
+			this.writePosteriorsToFile(this.learner, this.validdata, this.posteriorFileValid);
+			this.writePosteriorsToFile(this.learner, this.testdata, this.posteriorFileTest);
+		} else {
+			this.writePosteriorsToFile(this.learner, this.validdata, this.posteriorFileValid, this.threshold);
+			this.writePosteriorsToFile(this.learner, this.testdata, this.posteriorFileTest, this.threshold);
+		}
 	}
+	
+	public void writePosteriorsToFile( AbstractLearner learner, AVTable data, String fname ) throws IOException{
+		logger.info("Output posteriors to " + fname );
+		BufferedWriter bf = new BufferedWriter(new FileWriter(fname) );
+		
+		int numOfPositives = 0;
+		for( int i = 0; i<data.n; i++)
+		{
+			PriorityQueue<ComparablePair> sPE = learner.getPositiveLabelsAndPosteriors(data.x[i]);
+			//HashSet<EstimatePair> sPE = learner.getSparseProbabilityEstimates(data.x[i], minThreshold);
+			numOfPositives += sPE.size();
+			
+			List<ComparablePair> sortedList = new ArrayList<>();
+			sortedList.addAll(sPE);
+			Collections.sort(sortedList, new Comparator<ComparablePair>() {
+				@Override
+				public int compare(ComparablePair o1, ComparablePair o2) {
+					return Integer.compare(o1.getValue(), o2.getValue());
+				}
+			});
+			
+			for(ComparablePair pred : sPE) {
+				bf.write(  "" + (pred.getValue()+1) + ":" + pred.getKey() + " "  );
+			}
+			
+			bf.write( "\n" );
+			
+			if ((i % 100000) == 0) {
+				logger.info( "\t --> Instance: " + i +" (" + data.n + ")" );
+				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+				Date date = new Date();
+				logger.info("\t\t" + dateFormat.format(date));
+				logger.info( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double) (i+1) );
+			}
+			
+		}
+		
+		bf.close();
+		
+	}
+	
+	
+	
 	
 	public void writePosteriorsToFile( AbstractLearner learner, AVTable data, String fname, double minThreshold ) throws IOException{
 		logger.info("Output posteriors to " + fname );
@@ -161,12 +230,12 @@ public class LearnerOutputPosteriors extends LearnerManager {
 		}
 
 		LearnerOutputPosteriors lm = new LearnerOutputPosteriors(args[0]);
-		
-	    lm.train();
-
+				
+	    lm.train();	    
 	    lm.readValidData();
 	    lm.readTestData();
 
+	    
 	    //lm.compositeEvaluation();
 	    
 	    lm.outputLabels();

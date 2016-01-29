@@ -102,6 +102,8 @@ public class Evaluator {
 			{
 				macroF += (2.0 * tp[i])/denum;
 				presentedlabels++;
+			} else {
+				macroF += 1.0; // 0.0 / 0.0 = 1
 			}
 		}
 		
