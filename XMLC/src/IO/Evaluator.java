@@ -24,7 +24,8 @@ public class Evaluator {
 		logger.info("--> Computing Hamming loss and F-measure...");
 
 		double macroF = 0.0;
-		int m = learner.getNumberOfLabels();
+		//int m = learner.getNumberOfLabels();
+		int m = data.m;
 		
 		int[] tp = new int[m];
 		int[] yloc = new int[m];
@@ -97,17 +98,17 @@ public class Evaluator {
 		
 		int presentedlabels = 0;
 		for(int i = 0; i < m; i++) {
-			double denum = (double) (yloc[i] + haty[i]);
-			if (( denum>0.0) && (yloc[i]>0))
+			int denum =  (yloc[i] + haty[i]);
+			if ( denum == 0) 
 			{
-				macroF += (2.0 * tp[i])/denum;
-				presentedlabels++;
-			} else {
 				macroF += 1.0; // 0.0 / 0.0 = 1
+			} else {
+				macroF += (2.0 * tp[i])/((double)denum);
+				presentedlabels++;				
 			}
 		}
 		
-		double normalizedmacroF = macroF/(double) presentedlabels;
+		double normalizedmacroF = macroF/(double) data.m;
 		
 		TreeMap<String,Double> arr = new TreeMap<String,Double>();
 		arr.put(" Hamming loss", HL);

@@ -105,8 +105,8 @@ public class LearnerOutputPosteriors extends LearnerManager {
 		if (this.threshold < 0.0) {
 			this.readTrainData();
 			int[] numOfPositivesTrain = AVTable.getNumOfLabels(this.traindata);
-			int[] numOfPositivesValid = AVTable.getNumOfLabels(this.testdata);
-			int[] numOfPositivesTest = AVTable.getNumOfLabels(this.validdata);
+			int[] numOfPositivesValid = AVTable.getNumOfLabels(this.validdata);
+			int[] numOfPositivesTest = AVTable.getNumOfLabels(this.testdata);
 	    
 			double N = (double) (this.traindata.n + this.validdata.n + this.testdata.n);
 			double[] thresholds = new double[this.validdata.m];
@@ -128,6 +128,42 @@ public class LearnerOutputPosteriors extends LearnerManager {
 			this.writePosteriorsToFile(this.learner, this.testdata, this.posteriorFileTest, this.threshold);
 		}
 	}
+
+	
+	public void writeMinThresholdToFile( String fname ) throws Exception{
+		
+		this.readTrainData();
+		this.readTestData();
+		
+		int[] numOfPositivesTrain = AVTable.getNumOfLabels(this.traindata);		
+		int[] numOfPositivesTest = AVTable.getNumOfLabels(this.testdata);
+    
+		double N = (double) (this.traindata.n + this.testdata.n);
+		double[] thresholds = new double[this.testdata.m];
+		double avgThreshold = 0.0;
+		for(int i = 0; i < this.traindata.m; i++ ) {
+			double a = numOfPositivesTrain[i] + numOfPositivesTest[i];
+			thresholds[i] = a / (a+N);
+			avgThreshold += thresholds[i];
+		}
+		avgThreshold /= N;
+		logger.info("Avg. threshold = :" + avgThreshold );
+		
+		logger.info("Output labels to " + fname );
+		BufferedWriter bf = new BufferedWriter(new FileWriter(fname) );
+		
+		
+		for( int i = 0; i<thresholds.length; i++)
+		{		
+			double a = numOfPositivesTrain[i] + numOfPositivesTest[i];
+			bf.write(  "" + ((int)a) + "," + thresholds[i] );
+			bf.write( "\n" );
+		}
+		
+		bf.close();		
+	}
+	
+	
 	
 	public void writePosteriorsToFile( AbstractLearner learner, AVTable data, String fname ) throws IOException{
 		logger.info("Output posteriors to " + fname );
@@ -231,16 +267,18 @@ public class LearnerOutputPosteriors extends LearnerManager {
 
 		LearnerOutputPosteriors lm = new LearnerOutputPosteriors(args[0]);
 				
-	    lm.train();	    
-	    lm.readValidData();
-	    lm.readTestData();
+	    //lm.train();	    
+//	    lm.readValidData();
+//	    lm.readTestData();
 
+	    
+	    lm.writeMinThresholdToFile( "/Users/busarobi/work/XMLC/Posteriors/WikiLSHTC/min_threshold.txt" );
 	    
 	    //lm.compositeEvaluation();
 	    
-	    lm.outputLabels();
+	    //lm.outputLabels();
 	    
-	    lm.outputPosteriors();
+	    //lm.outputPosteriors();
 	    
 	}
 	
