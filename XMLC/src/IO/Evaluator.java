@@ -427,9 +427,9 @@ public class Evaluator {
 			int denum =  (yloc[i] + haty[i]);
 			if ( denum == 0) 
 			{
-				Fscores[i] += 1.0; // 0.0 / 0.0 = 1
+				Fscores[i] = 1.0; // 0.0 / 0.0 = 1
 			} else {
-				Fscores[i] += (2.0 * tp[i])/((double)denum);
+				Fscores[i] = (2.0 * tp[i])/((double)denum);
 				presentedlabels++;				
 			}
 		}				
