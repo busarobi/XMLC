@@ -102,31 +102,38 @@ public class LearnerOutputPosteriors extends LearnerManager {
 	
 	public void outputPosteriors() throws Exception {		
 		
-		if (this.threshold < 0.0) {
+//		if (this.threshold < 0.0) {
 			this.readTrainData();
 			int[] numOfPositivesTrain = AVTable.getNumOfLabels(this.traindata);
 			int[] numOfPositivesValid = AVTable.getNumOfLabels(this.validdata);
 			int[] numOfPositivesTest = AVTable.getNumOfLabels(this.testdata);
-	    
-			double N = (double) (this.traindata.n + this.validdata.n + this.testdata.n);
 			double[] thresholds = new double[this.validdata.m];
-			double avgThreshold = 0.0;
+			
+			
+			double N = (double) (this.traindata.n + this.validdata.n + this.testdata.n);
+			
+//			double avgThreshold = 0.0;
+//			for(int i = 0; i < this.traindata.m; i++ ) {
+//				double a = numOfPositivesTrain[i] + numOfPositivesValid[i] + numOfPositivesTest[i];
+//				thresholds[i] = a / (a+N);
+//				avgThreshold += thresholds[i];
+//			}
+//			avgThreshold /= N;
+//			logger.info("Avg. threshold = :" + avgThreshold );
+
 			for(int i = 0; i < this.traindata.m; i++ ) {
 				double a = numOfPositivesTrain[i] + numOfPositivesValid[i] + numOfPositivesTest[i];
-				thresholds[i] = a / (a+N);
-				avgThreshold += thresholds[i];
+				thresholds[i] = Math.max(this.threshold, a / (a+N) ); 
 			}
-			avgThreshold /= N;
-			logger.info("Avg. threshold = :" + avgThreshold );
 			
 			this.learner.setThresholds(thresholds);
 		
 			this.writePosteriorsToFile(this.learner, this.validdata, this.posteriorFileValid);
 			this.writePosteriorsToFile(this.learner, this.testdata, this.posteriorFileTest);
-		} else {
-			this.writePosteriorsToFile(this.learner, this.validdata, this.posteriorFileValid, this.threshold);
-			this.writePosteriorsToFile(this.learner, this.testdata, this.posteriorFileTest, this.threshold);
-		}
+//		} else {
+//			this.writePosteriorsToFile(this.learner, this.validdata, this.posteriorFileValid, this.threshold);
+//			this.writePosteriorsToFile(this.learner, this.testdata, this.posteriorFileTest, this.threshold);
+//		}
 	}
 
 	
@@ -267,18 +274,18 @@ public class LearnerOutputPosteriors extends LearnerManager {
 
 		LearnerOutputPosteriors lm = new LearnerOutputPosteriors(args[0]);
 				
-	    //lm.train();	    
-//	    lm.readValidData();
-//	    lm.readTestData();
+	    lm.train();	    
+	    lm.readValidData();
+	    lm.readTestData();
 
 	    
-	    lm.writeMinThresholdToFile( "/Users/busarobi/work/XMLC/Posteriors/WikiLSHTC/min_threshold.txt" );
+//	    lm.writeMinThresholdToFile( "/Users/busarobi/work/XMLC/Posteriors/WikiLSHTC/min_threshold.txt" );
 	    
 	    //lm.compositeEvaluation();
 	    
-	    //lm.outputLabels();
+	    lm.outputLabels();
 	    
-	    //lm.outputPosteriors();
+	    lm.outputPosteriors();
 	    
 	}
 	

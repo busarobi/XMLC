@@ -265,7 +265,177 @@ public class Evaluator {
 //		
 //	}
 	
+
 	
+    public static Map<String,Double> computePerformanceMetrics(HashSet<Integer>[] positiveLabelsArray, AVTable data) {
+		logger.info("--> Computing Hamming loss and F-measure...");
+
+		double macroF = 0.0;
+		
+		
+		int[] tp = new int[data.m];
+		int[] yloc = new int[data.m];
+		int[] haty = new int[data.m];
+		
+		double HL = 0.0;
+		
+		
+		int numOfPositives = 0;
+		
+		for(int i = 0; i < data.n; i++ ) {
+			
+			HashSet<Integer> predictedLabels = positiveLabelsArray[i];
+			//HashSet<Integer> predictedLabels = learner.getPositiveLabels(data.x[i]);
+			
+			//logger.info("Predicted labels: " + predictedLabels.toString());
+			
+			int predpositloc = predictedLabels.size(); 
+			numOfPositives += predpositloc;
+			// Hamming
+			int tploc = 0, fnloc = 0, fploc = 0;
+						
+			if ((data.y[i] != null) || (data.y[i].length >= 0) ) {				
+				for(int trueLabel: data.y[i]) {
+					if (trueLabel < data.m ) { // this label was seen in the training
+						if(predictedLabels.contains(trueLabel)) {
+							tploc++;
+						} else {
+							fnloc++;
+						}
+					}
+				}			
+			}
+			fploc = predpositloc - tploc;
+			HL += (fnloc + fploc);
+			
+			
+			// F-score
+			if ((data.y[i] != null) && (data.y[i].length > 0) ) {
+				for(int trueLabel: data.y[i]) {
+					if (trueLabel>= data.m) continue; // this label is not seen in the training
+					
+					if(predictedLabels.contains(trueLabel)) {
+						tp[trueLabel]++;
+					}
+					yloc[trueLabel]++;
+				}				
+			} 
+				
+
+			for(int predictedLabel: predictedLabels) {
+				haty[predictedLabel]++;
+			}
+			
+			
+			if ((i % 100000) == 0) {
+				logger.info( "----->\t Evaluation Sample: "+ i +" (" + data.n + ")" );
+				
+				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+				Date date = new Date();
+				logger.info("\t\t" + dateFormat.format(date));
+				logger.info( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double) (i+1) );				
+			}
+			
+		}
+				
+		HL = HL / ((double)data.n);
+		double normalizedHL = (HL / (double)data.m);
+		
+
+		int presentedlabels = 0;
+		for(int i = 0; i < data.m; i++) {
+			int denum =  (yloc[i] + haty[i]);
+			if ( denum == 0) 
+			{
+				macroF += 1.0; // 0.0 / 0.0 = 1
+			} else {
+				macroF += (2.0 * tp[i])/((double)denum);
+				presentedlabels++;				
+			}
+		}
+						
+		double normalizedmacroF = macroF/data.m;
+		
+		TreeMap<String,Double> arr = new TreeMap<String,Double>();
+		arr.put(" Hamming loss", HL);
+		arr.put(" macro F-measure", macroF);
+		//arr.put( " learner.m", (double) this.m);
+		//arr.put( " Num of presented labels", (double) presentedlabels);
+		
+
+		arr.put(" Normalized macro F-measue (with m)", normalizedmacroF);
+		arr.put(" Normalized Hamming loss (with m)", normalizedHL );
+		arr.put(" num. of predicted positives", (double)numOfPositives );
+		arr.put(" avg. num. of predicted positives", (double)numOfPositives/ (double) data.n );
+		
+		return arr;
+
+    }
+    
+    public static double[] computeFscores(HashSet<Integer>[] positiveLabelsArray, AVTable data) {
+		logger.info("--> Computing Hamming loss and F-measure...");
+
+		double[] Fscores = new double[data.m];
+		
+		
+		int[] tp = new int[data.m];
+		int[] yloc = new int[data.m];
+		int[] haty = new int[data.m];
+		
+		int numOfPositives = 0;
+		
+		for(int i = 0; i < data.n; i++ ) {
+			
+			HashSet<Integer> predictedLabels = positiveLabelsArray[i];
+			//HashSet<Integer> predictedLabels = learner.getPositiveLabels(data.x[i]);
+			
+			
+			
+			// F-score
+			if ((data.y[i] != null) && (data.y[i].length > 0) ) {
+				for(int trueLabel: data.y[i]) {
+					if (trueLabel>= data.m) continue; // this label is not seen in the training
+					
+					if(predictedLabels.contains(trueLabel)) {
+						tp[trueLabel]++;
+					}
+					yloc[trueLabel]++;
+				}				
+			} 
+				
+
+			for(int predictedLabel: predictedLabels) {
+				haty[predictedLabel]++;
+			}
+			
+			
+			if ((i % 100000) == 0) {
+				logger.info( "----->\t Evaluation Sample: "+ i +" (" + data.n + ")" );
+				
+				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+				Date date = new Date();
+				logger.info("\t\t" + dateFormat.format(date));
+				logger.info( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double) (i+1) );				
+			}
+			
+		}
+				
+		int presentedlabels = 0;
+		for(int i = 0; i < data.m; i++) {
+			int denum =  (yloc[i] + haty[i]);
+			if ( denum == 0) 
+			{
+				Fscores[i] += 1.0; // 0.0 / 0.0 = 1
+			} else {
+				Fscores[i] += (2.0 * tp[i])/((double)denum);
+				presentedlabels++;				
+			}
+		}				
+		
+		return Fscores;
+
+    }
+    
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 

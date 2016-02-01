@@ -136,7 +136,7 @@ public class TTEumFast extends ThresholdTuning {
 				
 				if (maxFmeasure < Fmeasure ) {
 					maxFmeasure = Fmeasure;
-					maxthreshold = triplet.getKey();
+					maxthreshold = triplet.getKey() - 0.000000001;
 				}
 			}
 			
@@ -150,7 +150,7 @@ public class TTEumFast extends ThresholdTuning {
 			}
 				
 			//logger.info(maxthreshold + " " + maxFmeasure);
-			thresholds[i] = Math.min(1.0, maxthreshold);
+			thresholds[i] = Math.min(0.5, maxthreshold);
 			avgFmeasure += maxFmeasure;
 		
 			//logger.info("Label: " + i + " threshold: " + thresholds[i] + " F: " + maxFmeasure);
@@ -274,7 +274,7 @@ public class TTEumFast extends ThresholdTuning {
 				
 				if (maxFmeasure < Fmeasure ) {
 					maxFmeasure = Fmeasure;
-					maxthreshold = triplet.getKey();
+					maxthreshold = triplet.getKey() - 0.0000001;
 				}
 			}
 			
@@ -288,7 +288,7 @@ public class TTEumFast extends ThresholdTuning {
 			}
 				
 			//logger.info(maxthreshold + " " + maxFmeasure);
-			thresholds[i] = Math.min(1.0, maxthreshold);
+			thresholds[i] = Math.min(0.5, maxthreshold);
 			avgFmeasure += maxFmeasure;
 		
 			//logger.info("Label: " + i + " threshold: " + thresholds[i] + " F: " + maxFmeasure);

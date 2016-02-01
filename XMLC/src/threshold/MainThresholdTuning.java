@@ -40,9 +40,10 @@ public class MainThresholdTuning {
 	protected AVTable testposteriors =null;
 	protected AVTable validposteriors =null;
 	
-	private double[] thresholdForEUM = {0.0001, 0.001, 0.005,
-										0.01,0.05,0.1,0.15,0.2,0.25,0.3,0.4,0.5};
-	private int[] barray = {10000,1000,200,
+	protected double[] thresholdForEUM = null;
+//	protected double[] thresholdForEUM = {0.0001, 0.001, 0.005,
+//										0.01,0.05,0.1,0.15,0.2,0.25,0.3,0.4,0.5};
+	protected int[] barray = {10000,1000,200,
 							100,50,20,10,7,5,4,3,2};
 	
 	protected int m = 0;
@@ -115,6 +116,11 @@ public class MainThresholdTuning {
 	    logger.info("#### Num. of labels: " + this.m );
 	    
 	    logger.info("#####################################################" );
+	    
+	    this.thresholdForEUM = new double[this.barray.length];
+	    for(int i = 0; i < this.barray.length; i++ ){
+	    	this.thresholdForEUM[i] = 1.0 / ((double)this.barray[i]);
+	    }	    
 	}
 	
 	
@@ -214,7 +220,7 @@ public class MainThresholdTuning {
 			// compute the positive labels
 			HashSet<Integer>[] positiveLabelsArray = getPositiveLabels(this.validlabels, this.validposteriors, thresholds );
 			// compute F-measure
-			Map<String,Double> perf = this.computePerformanceMetrics(positiveLabelsArray, this.validlabels );
+			Map<String,Double> perf = Evaluator.computePerformanceMetrics(positiveLabelsArray, this.validlabels );
 
 			for ( String perfName : perf.keySet() ) {
 				logger.info("##### EUM valid " + perfName + ": "  + fmt(perf.get(perfName)));
@@ -225,7 +231,7 @@ public class MainThresholdTuning {
 			// compute the positive labels
 			positiveLabelsArray = getPositiveLabels(this.testlabels, this.testposteriors, thresholds );
 			// compute F-measure
-			perf = this.computePerformanceMetrics(positiveLabelsArray, this.testlabels );
+			perf = Evaluator.computePerformanceMetrics(positiveLabelsArray, this.testlabels );
 
 			for ( String perfName : perf.keySet() ) {
 				logger.info("##### EUM " + perfName + ": "  + fmt(perf.get(perfName)));
@@ -254,7 +260,7 @@ public class MainThresholdTuning {
 			// compute the positive labels
 			HashSet<Integer>[] positiveLabelsArray = getPositiveLabels(this.validlabels, this.validposteriors, thresholds );
 			// compute F-measure
-			Map<String,Double> perf = this.computePerformanceMetrics(positiveLabelsArray, this.validlabels );
+			Map<String,Double> perf = Evaluator.computePerformanceMetrics(positiveLabelsArray, this.validlabels );
 
 			for ( String perfName : perf.keySet() ) {
 				logger.info("##### FTA valid " + perfName + ": "  + fmt(perf.get(perfName)));
@@ -265,7 +271,7 @@ public class MainThresholdTuning {
 			// compute the positive labels
 			positiveLabelsArray = getPositiveLabels(this.testlabels, this.testposteriors, thresholds );
 			// compute F-measure
-			perf = this.computePerformanceMetrics(positiveLabelsArray, this.testlabels );
+			perf = Evaluator.computePerformanceMetrics(positiveLabelsArray, this.testlabels );
 
 			for ( String perfName : perf.keySet() ) {
 				logger.info("##### FTA test" + perfName + ": "  + fmt(perf.get(perfName)));
@@ -302,7 +308,7 @@ public class MainThresholdTuning {
 			// compute the positive labels
 			HashSet<Integer>[] positiveLabelsArray = getPositiveLabels(this.validlabels, this.validposteriors, thresholds );
 			// compute F-measure
-			Map<String,Double> perf = this.computePerformanceMetrics(positiveLabelsArray, this.validlabels );
+			Map<String,Double> perf = Evaluator.computePerformanceMetrics(positiveLabelsArray, this.validlabels );
 
 			for ( String perfName : perf.keySet() ) {
 				logger.info("##### OFO valid " + perfName + ": "  + fmt(perf.get(perfName)));
@@ -313,7 +319,7 @@ public class MainThresholdTuning {
 			// compute the positive labels
 			positiveLabelsArray = getPositiveLabels(this.testlabels, this.testposteriors, thresholds );
 			// compute F-measure
-			perf = this.computePerformanceMetrics(positiveLabelsArray, this.testlabels );
+			perf = Evaluator.computePerformanceMetrics(positiveLabelsArray, this.testlabels );
 
 			for ( String perfName : perf.keySet() ) {
 				logger.info("##### OFO test" + perfName + ": "  + fmt(perf.get(perfName)));
@@ -347,7 +353,7 @@ public class MainThresholdTuning {
 			// compute the positive labels
 			HashSet<Integer>[] positiveLabelsArray = getPositiveLabels(this.validlabels, this.validposteriors, thresholds );
 			// compute F-measure
-			Map<String,Double> perf = this.computePerformanceMetrics(positiveLabelsArray, this.validlabels );
+			Map<String,Double> perf = Evaluator.computePerformanceMetrics(positiveLabelsArray, this.validlabels );
 
 			for ( String perfName : perf.keySet() ) {
 				logger.info("##### EXU valid " + perfName + ": "  + fmt(perf.get(perfName)));
@@ -359,7 +365,7 @@ public class MainThresholdTuning {
 			// compute the positive labels
 			positiveLabelsArray = getPositiveLabels(this.testlabels, this.testposteriors, thresholds );
 			// compute F-measure
-			perf = this.computePerformanceMetrics(positiveLabelsArray, this.testlabels );
+			perf = Evaluator.computePerformanceMetrics(positiveLabelsArray, this.testlabels );
 
 			for ( String perfName : perf.keySet() ) {
 				logger.info("##### EXU test" + perfName + ": "  + fmt(perf.get(perfName)));
@@ -394,109 +400,6 @@ public class MainThresholdTuning {
 	}
 	
 	
-	
-    public Map<String,Double> computePerformanceMetrics(HashSet<Integer>[] positiveLabelsArray, AVTable data) {
-		logger.info("--> Computing Hamming loss and F-measure...");
-
-		double macroF = 0.0;
-		
-		
-		int[] tp = new int[this.m];
-		int[] yloc = new int[this.m];
-		int[] haty = new int[this.m];
-		
-		double HL = 0.0;
-		
-		
-		int numOfPositives = 0;
-		
-		for(int i = 0; i < data.n; i++ ) {
-			
-			HashSet<Integer> predictedLabels = positiveLabelsArray[i];
-			//HashSet<Integer> predictedLabels = learner.getPositiveLabels(data.x[i]);
-			
-			//logger.info("Predicted labels: " + predictedLabels.toString());
-			
-			int predpositloc = predictedLabels.size(); 
-			numOfPositives += predpositloc;
-			// Hamming
-			int tploc = 0, fnloc = 0, fploc = 0;
-						
-			if ((data.y[i] != null) || (data.y[i].length >= 0) ) {				
-				for(int trueLabel: data.y[i]) {
-					if (trueLabel < this.m ) { // this label was seen in the training
-						if(predictedLabels.contains(trueLabel)) {
-							tploc++;
-						} else {
-							fnloc++;
-						}
-					}
-				}			
-			}
-			fploc = predpositloc - tploc;
-			HL += (fnloc + fploc);
-			
-			
-			// F-score
-			if ((data.y[i] != null) && (data.y[i].length > 0) ) {
-				for(int trueLabel: data.y[i]) {
-					if (trueLabel>= this.m) continue; // this label is not seen in the training
-					
-					if(predictedLabels.contains(trueLabel)) {
-						tp[trueLabel]++;
-					}
-					yloc[trueLabel]++;
-				}				
-			} 
-				
-
-			for(int predictedLabel: predictedLabels) {
-				haty[predictedLabel]++;
-			}
-			
-			
-			if ((i % 100000) == 0) {
-				logger.info( "----->\t Evaluation Sample: "+ i +" (" + data.n + ")" );
-				
-				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-				Date date = new Date();
-				logger.info("\t\t" + dateFormat.format(date));
-				logger.info( "\t\t Avg. num. of predicted positives: " + numOfPositives / (double) (i+1) );				
-			}
-			
-		}
-				
-		HL = HL / ((double)data.n);
-		double normalizedHL = (HL / (double)this.m);
-		
-		
-		int presentedlabels = 0;
-		for(int i = 0; i < this.m; i++) {
-			double denum = (double) (yloc[i] + haty[i]);
-			if (( denum>0.0) && (yloc[i]>0))
-			{
-				macroF += (2.0 * tp[i])/denum;
-				presentedlabels++;
-			}
-		}
-		
-		double normalizedmacroF = macroF/this.m;
-		
-		TreeMap<String,Double> arr = new TreeMap<String,Double>();
-		arr.put(" Hamming loss", HL);
-		arr.put(" macro F-measure", macroF);
-		//arr.put( " learner.m", (double) this.m);
-		//arr.put( " Num of presented labels", (double) presentedlabels);
-		
-
-		arr.put(" Normalized macro F-measue (with m)", normalizedmacroF);
-		arr.put(" Normalized Hamming loss (with m)", normalizedHL );
-		arr.put(" num. of predicted positives", (double)numOfPositives );
-		arr.put(" avg. num. of predicted positives", (double)numOfPositives/ (double) data.n );
-		
-		return arr;
-
-    }
 
 	
 	

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import Data.AVTable;
+import IO.Evaluator;
 
 public class MainThresholdTuningWithInit extends MainThresholdTuning {
 	private static Logger logger = LoggerFactory.getLogger(MainThresholdTuningWithInit.class);
@@ -63,7 +64,7 @@ public class MainThresholdTuningWithInit extends MainThresholdTuning {
 		// compute the positive labels
 		HashSet<Integer>[] positiveLabelsArray = getPositiveLabels(this.validlabels, this.validposteriors, thresholds);
 		// compute F-measure
-		Map<String, Double> perf = this.computePerformanceMetrics(positiveLabelsArray, this.validlabels);
+		Map<String, Double> perf = Evaluator.computePerformanceMetrics(positiveLabelsArray, this.validlabels);
 
 		for (String perfName : perf.keySet()) {
 			logger.info("##### " + method +" valid " + perfName + ": " + fmt(perf.get(perfName)));
@@ -73,7 +74,7 @@ public class MainThresholdTuningWithInit extends MainThresholdTuning {
 		// compute the positive labels
 		positiveLabelsArray = getPositiveLabels(this.testlabels, this.testposteriors, thresholds);
 		// compute F-measure
-		perf = this.computePerformanceMetrics(positiveLabelsArray, this.testlabels);
+		perf = Evaluator.computePerformanceMetrics(positiveLabelsArray, this.testlabels);
 
 		for (String perfName : perf.keySet()) {
 			logger.info("##### "+ method +" " + perfName + ": " + fmt(perf.get(perfName)));
