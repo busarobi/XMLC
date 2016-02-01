@@ -422,7 +422,7 @@ public class MainThresholdTuning {
 		th.tuneThresholdFTA();
 		th.tuneThresholdEUM();
 		th.tuneThresholdOFO();
-		th.tuneThresholdEXU();
+		//th.tuneThresholdEXU();
 		
 		th.writeOutResult();
 	}

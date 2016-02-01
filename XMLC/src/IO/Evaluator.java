@@ -389,6 +389,8 @@ public class Evaluator {
 			HashSet<Integer> predictedLabels = positiveLabelsArray[i];
 			//HashSet<Integer> predictedLabels = learner.getPositiveLabels(data.x[i]);
 			
+			int predpositloc = predictedLabels.size(); 
+			numOfPositives += predpositloc;
 			
 			
 			// F-score
