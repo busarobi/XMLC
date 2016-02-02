@@ -97,28 +97,48 @@ public class Evaluator {
 		
 		
 		int presentedlabels = 0;
-		for(int i = 0; i < m; i++) {
+		int presentedOrForecasted = 0;		
+		for(int i = 0; i < data.m; i++) {			
 			int denum =  (yloc[i] + haty[i]);
+			
+			if (yloc[i]>0)
+				presentedlabels++;
+			
 			if ( denum == 0) 
 			{
 				macroF += 1.0; // 0.0 / 0.0 = 1
 			} else {
 				macroF += (2.0 * tp[i])/((double)denum);
-				presentedlabels++;				
+				presentedOrForecasted++;								
 			}
 		}
-		
-		double normalizedmacroF = macroF/(double) data.m;
+						
+		double normalizedmacroF = macroF/data.m;
 		
 		TreeMap<String,Double> arr = new TreeMap<String,Double>();
 		arr.put(" Hamming loss", HL);
 		arr.put(" macro F-measure", macroF);
-		arr.put( " learner.m", (double) m);
-		arr.put( " Num of presented labels", (double) presentedlabels);
+		arr.put(" Presented Label", macroF);
 		
+		arr.put( " m (d1)", (double) data.m);
+		arr.put( " presented (d2)", (double) presentedlabels);
+		arr.put( " presented and forecasted (d3)", (double) presentedOrForecasted);
+		
+		arr.put( " unormalized Fscore with 1 (e1)", macroF);
+		arr.put( " unormalized Fscore with 0 (e2)", macroF-presentedOrForecasted );
+		
+		arr.put( " e1/d1", macroF / data.m );
+		arr.put( " e1/d2", macroF / presentedlabels );
+		arr.put( " e1/d3", macroF / presentedOrForecasted );
 
-		arr.put(" Normalized macro F-measue (with presented labels)", normalizedmacroF);
-		arr.put(" Normalized Hamming loss (with learner.m)", normalizedHL );
+		arr.put( " e2/d1", ( macroF - presentedOrForecasted) / data.m );
+		arr.put( " e2/d2", ( macroF - presentedOrForecasted) / presentedlabels );
+		arr.put( " e2/d3", ( macroF - presentedOrForecasted) / presentedOrForecasted );
+		
+				
+
+		arr.put(" Normalized macro F-measue (with m)", normalizedmacroF);
+		arr.put(" Normalized Hamming loss (with m)", normalizedHL );
 
 		
 		return arr;
@@ -343,23 +363,47 @@ public class Evaluator {
 		
 
 		int presentedlabels = 0;
-		for(int i = 0; i < data.m; i++) {
+		int presentedOrForecasted = 0;		
+		for(int i = 0; i < data.m; i++) {			
 			int denum =  (yloc[i] + haty[i]);
+			
+			if (yloc[i]>0)
+				presentedlabels++;
+			
 			if ( denum == 0) 
 			{
 				macroF += 1.0; // 0.0 / 0.0 = 1
 			} else {
 				macroF += (2.0 * tp[i])/((double)denum);
-				presentedlabels++;				
+				presentedOrForecasted++;								
 			}
 		}
 						
 		double normalizedmacroF = macroF/data.m;
+		double normalizedmacroFPL = macroF/presentedlabels;
+		double normalizedmacroFPresOrF = macroF/presentedOrForecasted;
 		
 		TreeMap<String,Double> arr = new TreeMap<String,Double>();
 		arr.put(" Hamming loss", HL);
 		arr.put(" macro F-measure", macroF);
-		//arr.put( " learner.m", (double) this.m);
+		arr.put(" Presented Label", macroF);
+		
+		arr.put( " m (d1)", (double) data.m);
+		arr.put( " presented (d2)", (double) presentedlabels);
+		arr.put( " presented and forecasted (d3)", (double) presentedOrForecasted);
+		
+		arr.put( " unormalized Fscore with 1 (e1)", macroF);
+		arr.put( " unormalized Fscore with 0 (e2)", macroF-presentedOrForecasted );
+		
+		arr.put( " e1/d1", macroF / data.m );
+		arr.put( " e1/d2", macroF / presentedlabels );
+		arr.put( " e1/d3", macroF / presentedOrForecasted );
+
+		arr.put( " e2/d1", ( macroF - presentedOrForecasted) / data.m );
+		arr.put( " e2/d2", ( macroF - presentedOrForecasted) / presentedlabels );
+		arr.put( " e2/d3", ( macroF - presentedOrForecasted) / presentedOrForecasted );
+		
+		
 		//arr.put( " Num of presented labels", (double) presentedlabels);
 		
 
