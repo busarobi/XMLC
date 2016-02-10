@@ -26,12 +26,12 @@ import IO.Evaluator;
 public class LearnerOutputPosteriors extends LearnerManager {
 	private static Logger logger = LoggerFactory.getLogger(LearnerOutputPosteriors.class);
 
-	private String posteriorFileValid = null;
-	private String posteriorFileTest = null;
-	private String lableFileValid = null;
-	private String labelFileTest = null;
+	protected String posteriorFileValid = null;
+	protected String posteriorFileTest = null;
+	protected String lableFileValid = null;
+	protected String labelFileTest = null;
 	
-	private double threshold = 0.01;
+	protected double threshold = 0.01;
 	
 	public LearnerOutputPosteriors(String fname) {
 		super(fname);

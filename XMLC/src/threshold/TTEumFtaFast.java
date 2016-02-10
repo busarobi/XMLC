@@ -45,9 +45,12 @@ public class TTEumFtaFast extends TTEumFast {
 		Date date1 = new Date();
 		logger.info("\t\t" + dateFormat1.format(date1));
 		
-		thresholds = new double[this.m];
+		thresholds = new double[this.m];		
 		double[] Fscores = new double[this.m];
-		for( int i = 0; i < this.m; i++ ) Fscores[i] = 0.0;
+		for( int i = 0; i < this.m; i++ ) { 
+			Fscores[i] = 0.0;
+			thresholds[i] = this.setOfThresholds[0];
+		}
 		
 		double[] tmpThresholds= new double[this.m];
 		
