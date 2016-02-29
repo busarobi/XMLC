@@ -157,7 +157,8 @@ public class TuneHyperParameters extends LearnerManager {
 			
 
 			// number of leaves
-			List<String> kArray = Arrays.asList("2","4","8","16","32","64");
+			//List<String> kArray = Arrays.asList("2","4","8","16","32","64");
+			List<String> kArray = Arrays.asList("2","3","4");
 			//List<String> kArray = Arrays.asList("2","4","8");
 			//List<String> lambdaArray = Arrays.asList("0.0001","0.00001","0.000001","0.0000001");
 			hyperparameters.put("k", kArray);
@@ -168,9 +169,9 @@ public class TuneHyperParameters extends LearnerManager {
 //			hyperparameters.put("step", stepArray);
 //
 //			// epochs
-			//List<String> epochArray = Arrays.asList("10","20","30","50","100");
+			List<String> epochArray = Arrays.asList("10","20","30","50","100");
 			//List<String> epochArray = Arrays.asList("10","50","100");
-			List<String> epochArray = Arrays.asList("5","10","15","20");
+			//List<String> epochArray = Arrays.asList("5","10","15","20");
 			//List<String> epochArray = Arrays.asList("1");
 			//List<String> epochArray = Arrays.asList("1");
 			hyperparameters.put("epochs", epochArray);			
