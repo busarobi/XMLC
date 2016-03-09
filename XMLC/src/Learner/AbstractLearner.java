@@ -91,6 +91,10 @@ public abstract class AbstractLearner implements Serializable{
 			learner = new PLT(properties, stepfunction);
 		else if (learnerName.compareTo("BRTFHR") == 0)
 			learner = new BRTFHR(properties, stepfunction);
+		else if (learnerName.compareTo("BRTFHRNS") == 0)
+			learner = new BRTFHRNS(properties, stepfunction);
+		else if (learnerName.compareTo("BRTreeFHRNS") == 0)
+			learner = new BRTreeFHRNS(properties, stepfunction);
 		else {
 			System.err.println("Unknown learner");
 			System.exit(-1);
