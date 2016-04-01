@@ -160,8 +160,7 @@ public class Evaluator {
 				trueLabels.add(data.y[i][m]);
 				//numLabels[data.y[i][m]]++;
 			}
-			
-    		
+			    		
     		//Hashtable<Integer,Integer> topklabel = new Hashtable<>();
     		//for( int j = 0; j < k; j++ ){
     		//	if ( predictedLabels.isEmpty() ) break;
@@ -201,7 +200,7 @@ public class Evaluator {
 				precisionatK[j] += (nunmofcorrectpredictionuptok[j] / ((double) (j+1)));
 			}			
 
-			if ((i % 100000) == 0) {
+			if ((i % 10000) == 0) {
 				logger.info( "----->\t Prec@ computation: "+ i +" (" + data.n + ")" );
 				
 				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
@@ -231,6 +230,86 @@ public class Evaluator {
 		
     	return arr;
     }
+    
+    
+    public static TreeMap<String,Double> computeRecallAtk(AbstractLearner learner, AVTable data, int k) {
+    	double[] recallatK = new double[k];
+    	
+    	//int [] numLabels = new int [data.m];
+    	
+    	for(int i = 0; i < data.n; i++ ) {
+    		TreeSet<EstimatePair> predictedLabels = learner.getTopKEstimates(data.x[i], k); //.getPositiveLabelsAndPosteriors(data.x[i]);
+    		
+    		
+    		HashSet<Integer> trueLabels = new HashSet<Integer>();
+			
+			for(int m = 0; m < data.y[i].length; m++) {
+				trueLabels.add(data.y[i][m]);
+			}
+
+			int[] iscorrectprediction = new int[k];
+	    	int[] nunmofcorrectpredictionuptok = new int[k];
+	    	
+			int index = 0;
+			while(!predictedLabels.isEmpty()) {
+				
+				EstimatePair eP = predictedLabels.pollFirst();
+				
+				int label = eP.getLabel();
+				double p = eP.getP();
+				
+				//logger.info(index + " label: " + label + " p: " + p);
+				
+				if(trueLabels.contains(label)) {
+					iscorrectprediction[index]++;
+				}
+				
+				index++;
+				
+			}
+			
+			nunmofcorrectpredictionuptok[0] = iscorrectprediction[0];
+			for( int j = 1; j < k; j++ ) {
+				nunmofcorrectpredictionuptok[j] = nunmofcorrectpredictionuptok[j-1] + iscorrectprediction[j];
+			}
+			
+			for( int j = 0; j < k; j++ ) {
+				recallatK[j] += (nunmofcorrectpredictionuptok[j] / trueLabels.size());
+			}			
+
+			if ((i % 10000) == 0) {
+				logger.info( "----->\t Prec@ computation: "+ i +" (" + data.n + ")" );
+				
+				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+				Date date = new Date();
+				logger.info("\t\t" + dateFormat.format(date));								
+			}
+			
+			
+    	}
+		
+		
+    	
+		for( int j = 0; j < k; j++ ) {
+			recallatK[j] /= ((double) data.n);
+		}
+    	
+    	
+		//for(int i = 0; i < numLabels.length; i++) {
+		//	logger.info("Label: " + i + " num: " + numLabels[i]);
+		//}
+		//logger.info("Num instances: " + data.n);
+		
+		TreeMap<String,Double> arr = new TreeMap<String,Double>();
+		for(int i=0; i < k; i++){
+			arr.put( "RecallAtK["+(i+1)+"]", recallatK[i] );
+		}
+		
+    	return arr;
+    }
+    
+    
+    
 
     /* 
     public static double[] computePrecisionAtk(AbstractLearner learner, AVTable data, int k) {
