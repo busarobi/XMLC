@@ -48,6 +48,17 @@ public class PCT extends MLLRFH {
 	transient protected int[] Tarray = null;	
 	protected double[] scalararray = null;
 	
+	
+	public void setEpsilon(double epsilon) {
+		this.epsilon = epsilon;
+	}
+	
+	public double getEpsilon() {
+		return this.epsilon;
+	}
+	
+	
+	
 	public PCT(Properties properties, StepFunction stepfunction) {
 		super(properties, stepfunction);
 

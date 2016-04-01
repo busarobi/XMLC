@@ -143,31 +143,72 @@ public class LearnerManager {
 //
 //		}
 		
-		Map<String,Double> perfvalidpreck = Evaluator.computePrecisionAtk(this.learner, this.validdata, 5);
-		Map<String,Double> perftestpreck = Evaluator.computePrecisionAtk(this.learner, this.testdata, 5);
+
+		if(this.learner instanceof PCT) {
 		
-		Map<String,Double> perfvalidracallk = Evaluator.computeRecallAtk(this.learner, this.validdata, 5);
-		Map<String,Double> perftestrecallk = Evaluator.computeRecallAtk(this.learner, this.testdata, 5);
+			double [] epsilon = {0.0, 0.25, 0.5};
+			int [] innerProducts = new int[epsilon.length];
+			Map<String,Double> [] perf = new Map[epsilon.length];
+		
+			for(int t = 0; t < epsilon.length ; t++){
+
+				((PCT) this.learner).setEpsilon(epsilon[t]);
+				
+				this.learner.numberOfInnerProducts = 0;
+				
+				perf[t] = Evaluator.computeRecallAtk(this.learner, this.testdata, 5);
+
+				innerProducts[t] = this.learner.numberOfInnerProducts;
+			}	
+
+		
+			for(int t = 0; t < epsilon.length; t++) {
+				System.out.println("##########-----  Epsilon: " + epsilon[t]);
+				for ( String perfName : perf[t].keySet() ) {
+					logger.info("##### Test " + perfName + ": "  + perf[t].get(perfName));
+				}
+				logger.info("##### Inner products: " + innerProducts[t]);
+			}
+		} else {
+			
+			this.learner.numberOfInnerProducts = 0;
+			
+			Map<String,Double> perftestrecallk = Evaluator.computeRecallAtk(this.learner, this.testdata, 5);
+			
+			
+			for ( String perfName : perftestrecallk.keySet() ) {
+				logger.info("##### Test " + perfName + ": "  + perftestrecallk.get(perfName));			
+			}
+			
+			logger.info("##### Inner products: " + this.learner.numberOfInnerProducts);
+		}
+		
+		
+		//Map<String,Double> perfvalidpreck = Evaluator.computePrecisionAtk(this.learner, this.validdata, 5);
+		//Map<String,Double> perftestpreck = Evaluator.computePrecisionAtk(this.learner, this.testdata, 5);
+		
+		//Map<String,Double> perfvalidracallk = Evaluator.computeRecallAtk(this.learner, this.validdata, 5);
+		//Map<String,Double> perftestrecallk = Evaluator.computeRecallAtk(this.learner, this.testdata, 5);
 		
 		
 		//Map<String,Double> perfpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);
 		
-		for ( String perfName : perfvalidpreck.keySet() ) {
-			logger.info("##### Valid " + perfName + ": "  + perfvalidpreck.get(perfName) );			
-		}
+		//for ( String perfName : perfvalidpreck.keySet() ) {
+		//	logger.info("##### Valid " + perfName + ": "  + perfvalidpreck.get(perfName) );			
+		//}
 
-		for ( String perfName : perftestpreck.keySet() ) {
-			logger.info("##### Test " + perfName + ": "  + perftestpreck.get(perfName));			
-		}
+		//for ( String perfName : perftestpreck.keySet() ) {
+		//	logger.info("##### Test " + perfName + ": "  + perftestpreck.get(perfName));			
+		//}
 
 		
-		for ( String perfName : perfvalidracallk.keySet() ) {
-			logger.info("##### Valid " + perfName + ": "  + perfvalidracallk.get(perfName) );			
-		}
+		//for ( String perfName : perfvalidracallk.keySet() ) {
+		//	logger.info("##### Valid " + perfName + ": "  + perfvalidracallk.get(perfName) );			
+		//}
 
-		for ( String perfName : perftestrecallk.keySet() ) {
-			logger.info("##### Test " + perfName + ": "  + perftestrecallk.get(perfName));			
-		}
+		//for ( String perfName : perftestrecallk.keySet() ) {
+		//	logger.info("##### Test " + perfName + ": "  + perftestrecallk.get(perfName));			
+		//}
 
 		
 //		// evaluate (EUM)
