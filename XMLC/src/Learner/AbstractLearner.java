@@ -35,6 +35,8 @@ public abstract class AbstractLearner implements Serializable{
 	protected int d = 0; // number of features
 
 
+	static public int numberOfInnerProducts = 0;
+	
 	transient protected Properties properties = null;
 	protected double[] thresholds = null;
 	transient protected StepFunction stepFunction;
@@ -95,6 +97,10 @@ public abstract class AbstractLearner implements Serializable{
 			learner = new BRTFHRNS(properties, stepfunction);
 		else if (learnerName.compareTo("BRTreeFHRNS") == 0)
 			learner = new BRTreeFHRNS(properties, stepfunction);
+		else if (learnerName.compareTo("PCT") == 0)
+			learner = new PCT(properties, stepfunction);
+		else if (learnerName.compareTo("FT") == 0)
+			learner = new FT(properties, stepfunction);
 		else {
 			System.err.println("Unknown learner");
 			System.exit(-1);
