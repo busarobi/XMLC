@@ -30,9 +30,10 @@ public class MainThresholdTuning {
 	protected String resultString = "";
 	protected String outFileName = "";
 	
-	private String posteriorFileValid = null;
+	
+	protected String posteriorFileValid = null;
 	private String posteriorFileTest = null;
-	private String lableFileValid = null;
+	protected String lableFileValid = null;
 	private String labelFileTest = null;
 
 	protected AVTable testlabels =null;
