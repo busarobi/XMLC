@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
+import java.util.TreeMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -63,9 +64,12 @@ public class TuneHyperParameters extends LearnerManager {
 			learner.allocateClassifiers(traindata);
 			learner.train(traindata);
 			
-			
 			Map<String,Double> perfvalidpreck = Evaluator.computePrecisionAtk(learner, validdata, 5);
 			Map<String,Double> perftestpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);
+			
+			Map<String,Double> loglossValid = Evaluator.computeLogLoss(learner, validdata);
+			Map<String,Double> loglossTest = Evaluator.computeLogLoss(learner, testdata);
+			
 			
 			// valid			
 //			ThresholdTuning th = new TTEumFast( learner.m, properties );
@@ -77,34 +81,29 @@ public class TuneHyperParameters extends LearnerManager {
 			// generate result
 			this.info += "#### Valid:\n";
 			
-//			for ( String perfName : perfv.keySet() ) {
-//				logger.info("##### Valid " + perfName + ": "  + perfv.get(perfName));
-//				this.info += "##### Valid" + perfName + ": "  + perfv.get(perfName) + "\n";
-//			}
-//			
-//			
 			for ( String perfName : perfvalidpreck.keySet() ) {
 				logger.info("##### Valid " + perfName + ": "  + perfvalidpreck.get(perfName) );
 				this.info += "##### Valid " + perfName + ": "  + perfvalidpreck.get(perfName) + "\n";
 			}
 			
+			for ( String perfName : loglossValid.keySet() ) {
+				logger.info("##### Valid " + perfName + ": "  + loglossValid.get(perfName) );
+				this.info += "##### Valid " + perfName + ": "  + loglossValid.get(perfName) + "\n";
+			}
+			
 			
 			this.info += "#### Test:\n";
-			
-//			Map<String,Double> perf = Evaluator.computePerformanceMetrics(learner, testdata);
-//
-//			// generate result
-//			for ( String perfName : perf.keySet() ) {
-//				logger.info("##### Test " + perfName + ": "  + perf.get(perfName));
-//				this.info += "##### Test" + perfName + ": "  + perf.get(perfName) + "\n";
-//			}
-			
-			
 			
 			for ( String perfName : perftestpreck.keySet() ) {
 				logger.info("##### Test " + perfName + ": "  + perftestpreck.get(perfName));
 				this.info += "##### Test " + perfName + ": "  + perftestpreck.get(perfName) + "\n";
 			}
+
+			for ( String perfName : loglossTest.keySet() ) {
+				logger.info("##### Valid " + perfName + ": "  + loglossTest.get(perfName) );
+				this.info += "##### Valid " + perfName + ": "  + loglossTest.get(perfName) + "\n";
+			}
+			
 			
 			
 			learner = null;
@@ -157,10 +156,10 @@ public class TuneHyperParameters extends LearnerManager {
 			
 
 			// number of leaves
-			List<String> kArray = Arrays.asList("2","4","8","16","32","64");
+			//List<String> kArray = Arrays.asList("2","4","8","16","32","64");
 			//List<String> kArray = Arrays.asList("2","4","8");
 			//List<String> lambdaArray = Arrays.asList("0.0001","0.00001","0.000001","0.0000001");
-			hyperparameters.put("k", kArray);
+			//hyperparameters.put("k", kArray);
 			
 			
 //			// step
@@ -170,9 +169,8 @@ public class TuneHyperParameters extends LearnerManager {
 //			// epochs
 			//List<String> epochArray = Arrays.asList("10","20","30","50","100");
 			//List<String> epochArray = Arrays.asList("10","50","100");
-			List<String> epochArray = Arrays.asList("5","10","15","20");
-			//List<String> epochArray = Arrays.asList("1");
-			//List<String> epochArray = Arrays.asList("1");
+			//List<String> epochArray = Arrays.asList("5","10","15","20");
+			List<String> epochArray = Arrays.asList("5");			
 			hyperparameters.put("epochs", epochArray);			
 			
 			
