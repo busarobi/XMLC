@@ -181,6 +181,27 @@ public class FT extends MLLRFH {
 		return posterior;
 	}
 	
+	@Override
+	public double estimateProbability(AVPair[] x, int label) {
+		
+		double estimate = 1;
+		
+		int treeIndex = this.tree.getTreeIndex(label); 
+		int node = treeIndex;
+		treeIndex = (int) this.tree.getParent(treeIndex); 
+
+		while(treeIndex >= 0) {
+			double p = getPartialPosteriors(x,treeIndex);
+			
+			int z = node % 2;
+			estimate *= (z == 1?  p : 1-p);
+			node = treeIndex;
+			treeIndex = (int) this.tree.getParent(treeIndex); 
+			
+		}
+		return estimate;
+	}
+
 	
 	public TreeSet<EstimatePair> getTopKEstimates(AVPair[] x, int k) {
 
