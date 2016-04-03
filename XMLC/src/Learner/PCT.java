@@ -1,25 +1,14 @@
 package Learner;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Properties;
 import java.util.TreeSet;
 
-import org.apache.commons.math3.analysis.function.Sigmoid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +19,6 @@ import Data.NodeComparatorPLT;
 import Data.NodePLT;
 import Learner.step.StepFunction;
 import preprocessing.FeatureHasherFactory;
-import preprocessing.UniversalHasher;
 import util.CompleteTree;
 
 public class PCT extends MLLRFH {
@@ -217,6 +205,27 @@ public class PCT extends MLLRFH {
 		return posterior;
 	}
 	
+	@Override
+	public double estimateProbability(AVPair[] x, int label) {
+		
+		double estimate = 1;
+		
+		int treeIndex = this.tree.getTreeIndex(label); 
+		int node = treeIndex;
+		treeIndex = (int) this.tree.getParent(treeIndex); 
+
+		while(treeIndex >= 0) {
+			double p = getPartialPosteriors(x,treeIndex);
+			
+			int z = node % 2;
+			estimate *= (z == 1?  p : 1-p);
+			node = treeIndex;
+			treeIndex = (int) this.tree.getParent(treeIndex); 
+			
+		}
+		return estimate;
+	}
+	
 	
 	public TreeSet<EstimatePair> getTopKEstimates(AVPair[] x, int k) {
 
@@ -239,7 +248,7 @@ public class PCT extends MLLRFH {
 
 			if(!this.tree.isLeaf(node.treeIndex)) {
 			
-				this.numberOfInnerProducts++;
+				AbstractLearner.numberOfInnerProducts++;
 				double currentP = getPartialPosteriors(x, node.treeIndex);
 				
 				double p = 0;
@@ -247,11 +256,11 @@ public class PCT extends MLLRFH {
 				boolean survived = false;
 				
 				if((p = node.p * (currentP)) >= eps) {
-					queue.add(new NodePLT(this.tree.getChildNodes(node.treeIndex).get(0), node.p * (currentP)));
+					queue.add(new NodePLT(this.tree.getChildNodes(node.treeIndex).get(0), p));
 					survived = true;
 				}
 				if((p = node.p * (1 - currentP)) >= eps) {
-					queue.add(new NodePLT(this.tree.getChildNodes(node.treeIndex).get(1), node.p * (1 - currentP)));
+					queue.add(new NodePLT(this.tree.getChildNodes(node.treeIndex).get(1), p));
 					survived = true;
 				}
 				if(survived == false) {
@@ -274,7 +283,7 @@ public class PCT extends MLLRFH {
 			
 			while(!this.tree.isLeaf(treeIndex)) {
 				
-				this.numberOfInnerProducts++;
+				AbstractLearner.numberOfInnerProducts++;
 				double currentP = getPartialPosteriors(x, treeIndex);
 				
 				if(currentP < 0.5) {

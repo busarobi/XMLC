@@ -20,6 +20,7 @@ import Data.AVPair;
 import Data.AVTable;
 import Data.ComparablePair;
 import Data.EstimatePair;
+import Data.LabelCombination;
 import Learner.step.StepFunction;
 import Learner.step.StepFunctionFactory;
 import threshold.ThresholdTuning;
@@ -101,6 +102,10 @@ public abstract class AbstractLearner implements Serializable{
 			learner = new PCT(properties, stepfunction);
 		else if (learnerName.compareTo("FT") == 0)
 			learner = new FT(properties, stepfunction);
+		else if (learnerName.compareTo("PCC") == 0)
+			learner = new PCC(properties, stepfunction);
+		else if (learnerName.compareTo("FC") == 0)
+			learner = new FC(properties, stepfunction);
 		else {
 			System.err.println("Unknown learner");
 			System.exit(-1);
@@ -185,6 +190,23 @@ public abstract class AbstractLearner implements Serializable{
 		return labels;
 	}
 	
+	public double estimateProbability(AVPair[] x, int label) {
+		
+		return this.getPosteriors(x, label);	
+		
+	}
+	
+	
+	public double estimateLabelCombinationProbability(AVPair[] x, int[] y) {
+		
+		double estimate = 1.0;
+		for(int j = 0; j < this.m; j++) {
+			estimate *= this.getPosteriors(x, j);
+		}
+		return estimate;
+		
+	}
+	
 	
 	public void outputPosteriors( String fname, AVTable data )
 	{
@@ -241,6 +263,11 @@ public abstract class AbstractLearner implements Serializable{
 		
 	}
 		
+	
+	public TreeSet<LabelCombination> getTopKLabelCombinations(AVPair[] x, int k) {
+		return null;
+	}
+	
 	public Properties getProperties() {
 		return properties;
 	}

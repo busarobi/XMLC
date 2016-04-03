@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Properties;
 import java.util.TreeSet;
 
@@ -13,29 +14,24 @@ import org.slf4j.LoggerFactory;
 
 import Data.AVPair;
 import Data.AVTable;
-import Data.EstimatePair;
+import Data.LabelCombination;
 import Learner.step.StepFunction;
 import preprocessing.FeatureHasherFactory;
-import util.CompleteTree;
 
-public class FT extends MLLRFH {
+public class FC extends MLLRFH {
 
 	private static final long serialVersionUID = 1468223396740995671L;
 
-	private static Logger logger = LoggerFactory.getLogger(FT.class);
-
-	transient protected int t = 0;
-	
-	transient CompleteTree tree = null;
+	private static Logger logger = LoggerFactory.getLogger(FC.class);
 	
 	transient protected int[] Tarray = null;	
 	protected double[] scalararray = null;
 	
-	public FT(Properties properties, StepFunction stepfunction) {
+	public FC(Properties properties, StepFunction stepfunction) {
 		super(properties, stepfunction);
 
 		logger.info("#####################################################" );
-		logger.info("#### Learner: FT" );
+		logger.info("#### Learner: FC" );
 		logger.info("#####################################################" );
 	}
 
@@ -45,39 +41,29 @@ public class FT extends MLLRFH {
 		this.m = data.m;
 		this.d = data.d;
 		
-		
-		this.tree = new CompleteTree(2, this.m);
-		
-		this.t = this.tree.getSize(); 
-
 		logger.info( "#### Num. of labels: " + this.m + " Dim: " + this.d );
-		logger.info( "#### Num. of inner node of the trees: " + this.t  );
 		logger.info("#####################################################" );
 			
-		this.fh = FeatureHasherFactory.createFeatureHasher(this.hasher, fhseed, this.hd, this.t);
+		this.fh = FeatureHasherFactory.createFeatureHasher(this.hasher, fhseed, this.hd, this.m);
 		
 		logger.info( "Allocate the learners..." );
 
 		this.w = new double[this.hd];
-		this.thresholds = new double[this.t];
-		this.bias = new double[this.t];
-		
-		for (int i = 0; i < this.t; i++) {
-			this.thresholds[i] = 0.5;
-		}
+		this.bias = new double[this.m];
 		
 		logger.info( "Done." );
-		this.Tarray = new int[this.t];
-		this.scalararray = new double[this.t];
+		this.Tarray = new int[this.m];
+		this.scalararray = new double[this.m];
 		Arrays.fill(this.Tarray, 1);
 		Arrays.fill(this.scalararray, 1.0);
-		
-		//logger.info( "Done." );
+
 	}
 	
 		
 	@Override
 	public void train(AVTable data) {
+		
+		
 				
 		for (int ep = 0; ep < this.epochs; ep++) {
 
@@ -88,26 +74,21 @@ public class FT extends MLLRFH {
 			for (int i = 0; i < traindata.n; i++) {
 
 				int currIdx = indirectIdx.get(i);
-
-				int treeIndex = this.tree.getTreeIndex(traindata.y[currIdx][0]); 
-				int node = treeIndex;
-				treeIndex = (int) this.tree.getParent(treeIndex); 
+				HashSet<Integer> positiveLabels = new HashSet<Integer>();
 				
-				while(treeIndex >= 0) {
-
-					double posterior = getPartialPosteriors(traindata.x[currIdx],treeIndex);
-					double inc = -((node % 2) - posterior); 
-
-					updatedPosteriors(currIdx, treeIndex, inc);
-					
-					if(Math.abs(inc) >= 0.5) break;
-					
-					node = treeIndex;
-					treeIndex = (int) this.tree.getParent(treeIndex); 
-				
+				for (int j = 0; j < traindata.y[currIdx].length; j++) {
+					positiveLabels.add(traindata.y[currIdx][j]);
 				}
 				
-				//logger.info("Negative tree indices: " + negativeTreeIndices.toString());
+				for(int j = m - 1; j >= 0; j--) {
+					
+					double y = positiveLabels.remove(j)? 1.0 : 0.0;
+					double posterior = getPartialPosteriors(traindata.x[currIdx], positiveLabels, j);
+					double inc = -(y - posterior); 
+					updatedPosteriors(currIdx, positiveLabels, j, inc);
+					if(Math.abs(inc) >= 0.5) break;
+					
+				}
 
 				this.T++;
 
@@ -138,7 +119,7 @@ public class FT extends MLLRFH {
 	}
 
 
-	protected void updatedPosteriors( int currIdx, int label, double inc) {
+	protected void updatedPosteriors( int currIdx,  HashSet<Integer> labelFeatures, int label, double inc) {
 			
 		this.learningRate = this.gamma / (1 + this.gamma * this.lambda * this.Tarray[label]);
 		this.Tarray[label]++;
@@ -157,52 +138,95 @@ public class FT extends MLLRFH {
 			
 		}
 		
+		for(int l : labelFeatures) {
+		
+			int hi = fh.getIndex(label,  this.d + l); 
+			int sign = fh.getSign(label, this.d + l);
+			
+			double gradient = this.scalararray[label] * inc * (sign);
+			double update = (this.learningRate * gradient);// / this.scalar;		
+			this.w[hi] -= update;
+			
+		}
+		
 		double gradient = this.scalararray[label] * inc;
 		double update = (this.learningRate * gradient);//  / this.scalar;		
 		this.bias[label] -= update;
 		//logger.info("bias -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
 	}
 	
-	
-	public double getPartialPosteriors(AVPair[] x, int label) {
+	public double getFeatureScore(AVPair[] x, int label) {
 		
-		double posterior = 0.0;
+		double score = 0.0;
 		
 		for (int i = 0; i < x.length; i++) {
 			
 			int hi = fh.getIndex(label,  x[i].index); 
 			int sign = fh.getSign(label, x[i].index);
-			posterior += (x[i].value *sign) * (1/this.scalararray[label]) * this.w[hi];
+			score += (x[i].value *sign) * (1/this.scalararray[label]) * this.w[hi];
 		}
 		
-		posterior += (1/this.scalararray[label]) * this.bias[label]; 
+		score += (1/this.scalararray[label]) * this.bias[label]; 
+		
+		return score;
+	}
+	
+	public double getLabelScore( HashSet<Integer> labelFeatures, int label) {
+		
+		double score = 0.0;
+		
+		for(int l : labelFeatures) {
+			
+			
+			int hi = fh.getIndex(label,  this.d + l); 
+			int sign = fh.getSign(label, this.d + l);
+			score += (sign) * (1/this.scalararray[label]) * (this.w[hi]);
+		}
+		
+		return score;
+		
+	}
+	
+	
+	public double getPartialPosteriors(AVPair[] x, HashSet<Integer> labelFeatures, int label) {
+		
+		double posterior = getFeatureScore(x, label);
+		
+		posterior += getLabelScore(labelFeatures, label);
+		
 		posterior = s.value(posterior);		
 		
 		return posterior;
 	}
 	
-	
-	public TreeSet<EstimatePair> getTopKEstimates(AVPair[] x, int k) {
+	@Override
+	public TreeSet<LabelCombination> getTopKLabelCombinations(AVPair[] x, int k) {
 
-		TreeSet<EstimatePair> positiveLabels = new TreeSet<EstimatePair>();
+		double[] scores = new double[this.m];
+		for(int j = 0; j < m; j++) {
+			scores[j] = getFeatureScore(x,j);
+		}
+		TreeSet<LabelCombination> positiveLabelCombinations = new TreeSet<LabelCombination>();
+		HashSet<Integer> labelCombination = new HashSet<Integer>();
 		
-		int treeIndex = 0;
+		int label = 0;
 		
-		while(!this.tree.isLeaf(treeIndex)) {
-
+		while(label < this.m) {
+				
 			AbstractLearner.numberOfInnerProducts++;
-			double p = getPartialPosteriors(x, treeIndex);
-			
-			if(p < 0.5) {
-				treeIndex = this.tree.getChildNodes(treeIndex).get(1);
+			double f = scores[label] + this.getLabelScore(labelCombination, label); 
+			double currentP = s.value(f); 
+
+			if(currentP < 0.5) {
+					label++;
 			} else {
-				treeIndex = this.tree.getChildNodes(treeIndex).get(0);
+				labelCombination.add(label);
+				label++;
 			}
 		}
-
-		positiveLabels.add(new EstimatePair(this.tree.getLabelIndex(treeIndex), 1.0));
 		
-		return positiveLabels;
+		positiveLabelCombinations.add(new LabelCombination(labelCombination, 1.0));
+		return positiveLabelCombinations;
 	}
 
 	

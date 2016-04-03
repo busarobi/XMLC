@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import Data.AVTable;
 import Data.EstimatePair;
+import Data.LabelCombination;
 import Learner.AbstractLearner;
 
 public class Evaluator {
@@ -232,6 +233,66 @@ public class Evaluator {
     }
     
     
+    public static TreeMap<String,Double> computeLogLoss(AbstractLearner learner, AVTable data) {
+    	
+    	double logloss = 0;
+    	
+    	for(int i = 0; i < data.n; i++ ) {
+    		
+    		double p = learner.estimateProbability(data.x[i], data.y[i][0]);
+    		
+    		logloss -= Math.log(p);
+    		TreeSet<EstimatePair> predictedLabels = learner.getTopKEstimates(data.x[i], 1);
+    		//System.out.println(p + ", " + Math.log(p) + ", " + predictedLabels.first().getP());
+    	
+			if ((i % 10000) == 0) {
+				logger.info( "----->\t Prec@ computation: "+ i +" (" + data.n + ")" );
+				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+				Date date = new Date();
+				logger.info("\t\t" + dateFormat.format(date));								
+			}
+    	}
+		
+    	logloss /= data.n;
+		
+		TreeMap<String,Double> arr = new TreeMap<String,Double>();
+		arr.put( "Log loss", logloss);
+		
+    	return arr;
+    }
+    
+    public static TreeMap<String,Double> computeMLCLogLoss(AbstractLearner learner, AVTable data) {
+    	
+    	double logloss = 0;
+    	
+    	for(int i = 0; i < data.n; i++ ) {
+    		
+    		double p = learner.estimateLabelCombinationProbability(data.x[i], data.y[i]);
+    		
+    		logloss -= Math.log(p);
+    	
+    		TreeSet<LabelCombination> predictedLabelCombinations = learner.getTopKLabelCombinations(data.x[i], 1); //.getPositiveLabelsAndPosteriors(data.x[i]);
+    	
+    		//System.out.println(p + ", " + Math.log(p) + ", " + predictedLabelCombinations.first().getP());
+    		
+			if ((i % 10000) == 0) {
+				logger.info( "----->\t Prec@ computation: "+ i +" (" + data.n + ")" );
+				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+				Date date = new Date();
+				logger.info("\t\t" + dateFormat.format(date));								
+			}
+    	}
+		
+    	logloss /= data.n;
+		
+		TreeMap<String,Double> arr = new TreeMap<String,Double>();
+		arr.put( "Log loss", logloss);
+		
+    	return arr;
+    }
+    
+
+    
     public static TreeMap<String,Double> computeRecallAtk(AbstractLearner learner, AVTable data, int k) {
     	double[] recallatK = new double[k];
     	
@@ -308,6 +369,83 @@ public class Evaluator {
     	return arr;
     }
     
+
+    public static TreeMap<String,Double> computeMLCRecallAtk(AbstractLearner learner, AVTable data, int k) {
+    	double[] recallatK = new double[k];
+    	
+    	//int [] numLabels = new int [data.m];
+    	
+    	for(int i = 0; i < data.n; i++ ) {
+    		TreeSet<LabelCombination> predictedLabelCombinations = learner.getTopKLabelCombinations(data.x[i], k); //.getPositiveLabelsAndPosteriors(data.x[i]);
+    		
+    		
+    		HashSet<Integer> trueLabels = new HashSet<Integer>();
+			
+			for(int m = 0; m < data.y[i].length; m++) {
+				trueLabels.add(data.y[i][m]);
+			}
+
+			int[] iscorrectprediction = new int[k];
+	    	int[] nunmofcorrectpredictionuptok = new int[k];
+	    	
+			int index = 0;
+			while(!predictedLabelCombinations.isEmpty()) {
+				
+				LabelCombination lc = predictedLabelCombinations.pollFirst();
+				
+				HashSet<Integer> labels = lc.getLabelCombination();
+				double p = lc.getP();
+				
+				//logger.info(index + " label: " + label + " p: " + p);
+				
+				if(trueLabels.equals(labels)) {
+					iscorrectprediction[index]++;
+				}
+				
+				index++;
+				
+			}
+			
+			nunmofcorrectpredictionuptok[0] = iscorrectprediction[0];
+			for( int j = 1; j < k; j++ ) {
+				nunmofcorrectpredictionuptok[j] = nunmofcorrectpredictionuptok[j-1] + iscorrectprediction[j];
+			}
+			
+			for( int j = 0; j < k; j++ ) {
+				recallatK[j] += (nunmofcorrectpredictionuptok[j]);
+			}			
+
+			if ((i % 10000) == 0) {
+				logger.info( "----->\t Prec@ computation: "+ i +" (" + data.n + ")" );
+				
+				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+				Date date = new Date();
+				logger.info("\t\t" + dateFormat.format(date));								
+			}
+			
+			
+    	}
+		
+		
+    	
+		for( int j = 0; j < k; j++ ) {
+			recallatK[j] /= ((double) data.n);
+		}
+    	
+    	
+		//for(int i = 0; i < numLabels.length; i++) {
+		//	logger.info("Label: " + i + " num: " + numLabels[i]);
+		//}
+		//logger.info("Num instances: " + data.n);
+		
+		TreeMap<String,Double> arr = new TreeMap<String,Double>();
+		for(int i=0; i < k; i++){
+			arr.put( "RecallAtK["+(i+1)+"]", recallatK[i] );
+		}
+		
+    	return arr;
+    }
+
     
     
 

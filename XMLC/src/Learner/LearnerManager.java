@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -143,23 +144,25 @@ public class LearnerManager {
 //
 //		}
 		
-
+		
 		if(this.learner instanceof PCT) {
 		
 			double [] epsilon = {0.0, 0.25, 0.5};
 			int [] innerProducts = new int[epsilon.length];
 			Map<String,Double> [] perf = new Map[epsilon.length];
-		
+			
 			for(int t = 0; t < epsilon.length ; t++){
 
 				((PCT) this.learner).setEpsilon(epsilon[t]);
 				
-				this.learner.numberOfInnerProducts = 0;
+				AbstractLearner.numberOfInnerProducts = 0;
 				
 				perf[t] = Evaluator.computeRecallAtk(this.learner, this.testdata, 5);
-
-				innerProducts[t] = this.learner.numberOfInnerProducts;
+			
+				innerProducts[t] = AbstractLearner.numberOfInnerProducts;
 			}	
+
+			TreeMap<String,Double> logloss = Evaluator.computeLogLoss(this.learner, this.testdata);
 
 		
 			for(int t = 0; t < epsilon.length; t++) {
@@ -169,9 +172,15 @@ public class LearnerManager {
 				}
 				logger.info("##### Inner products: " + innerProducts[t]);
 			}
-		} else {
+			for ( String perfName : logloss.keySet() ) {
+				logger.info("##### Test: " + perfName + ": " + logloss.get(perfName));
+			}
 			
-			this.learner.numberOfInnerProducts = 0;
+		} 
+		
+		if (this.learner instanceof FT) {
+			
+			AbstractLearner.numberOfInnerProducts = 0;
 			
 			Map<String,Double> perftestrecallk = Evaluator.computeRecallAtk(this.learner, this.testdata, 5);
 			
@@ -180,7 +189,58 @@ public class LearnerManager {
 				logger.info("##### Test " + perfName + ": "  + perftestrecallk.get(perfName));			
 			}
 			
-			logger.info("##### Inner products: " + this.learner.numberOfInnerProducts);
+			logger.info("##### Inner products: " + AbstractLearner.numberOfInnerProducts);
+		}
+		
+		
+		
+		
+		if(this.learner instanceof PCC) {
+			
+			double [] epsilon = {0.0, 0.25, 0.5};
+			int [] innerProducts = new int[epsilon.length];
+			Map<String,Double> [] perf = new Map[epsilon.length];
+		
+			for(int t = 0; t < epsilon.length ; t++){
+
+				((PCC) this.learner).setEpsilon(epsilon[t]);
+				
+				AbstractLearner.numberOfInnerProducts = 0;
+				
+				perf[t] = Evaluator.computeMLCRecallAtk(this.learner, this.testdata, 5);
+
+				innerProducts[t] = AbstractLearner.numberOfInnerProducts;
+			}	
+
+			TreeMap<String,Double> logloss = Evaluator.computeMLCLogLoss(this.learner, this.testdata);
+		
+			for(int t = 0; t < epsilon.length; t++) {
+				System.out.println("##########-----  Epsilon: " + epsilon[t]);
+				for ( String perfName : perf[t].keySet() ) {
+					logger.info("##### Test " + perfName + ": "  + perf[t].get(perfName));
+				}
+				logger.info("##### Inner products: " + innerProducts[t]);
+				
+			}
+
+			for ( String perfName : logloss.keySet() ) {
+				logger.info("##### Test: " + perfName + ": " + logloss.get(perfName));
+			}
+
+		} 
+		
+		if(this.learner instanceof FC) {
+			
+			AbstractLearner.numberOfInnerProducts = 0;
+			
+			Map<String,Double> perftestrecallk = Evaluator.computeMLCRecallAtk(this.learner, this.testdata, 5);
+			
+			
+			for ( String perfName : perftestrecallk.keySet() ) {
+				logger.info("##### Test " + perfName + ": "  + perftestrecallk.get(perfName));			
+			}
+			
+			logger.info("##### Inner products: " + AbstractLearner.numberOfInnerProducts);
 		}
 		
 		
