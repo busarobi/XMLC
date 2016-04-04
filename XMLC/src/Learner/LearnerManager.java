@@ -143,12 +143,14 @@ public class LearnerManager {
 //			perf[t] = Evaluator.computePerformanceMetrics(learner, testdata);
 //
 //		}
-		
+		int topk = Integer.parseInt(properties.getProperty("topk"),5);
 		
 		if(this.learner instanceof PCT) {
 		
 			double [] epsilon = {0.0, 0.25, 0.5};
 			int [] innerProducts = new int[epsilon.length];
+			
+			
 			Map<String,Double> [] perf = new Map[epsilon.length];
 			
 			for(int t = 0; t < epsilon.length ; t++){
@@ -157,7 +159,7 @@ public class LearnerManager {
 				
 				AbstractLearner.numberOfInnerProducts = 0;
 				
-				perf[t] = Evaluator.computeRecallAtk(this.learner, this.testdata, 5);
+				perf[t] = Evaluator.computeRecallAtk(this.learner, this.testdata, topk);
 			
 				innerProducts[t] = AbstractLearner.numberOfInnerProducts;
 			}	
@@ -182,7 +184,7 @@ public class LearnerManager {
 			
 			AbstractLearner.numberOfInnerProducts = 0;
 			
-			Map<String,Double> perftestrecallk = Evaluator.computeRecallAtk(this.learner, this.testdata, 5);
+			Map<String,Double> perftestrecallk = Evaluator.computeRecallAtk(this.learner, this.testdata, topk);
 			
 			
 			for ( String perfName : perftestrecallk.keySet() ) {
@@ -207,7 +209,7 @@ public class LearnerManager {
 				
 				AbstractLearner.numberOfInnerProducts = 0;
 				
-				perf[t] = Evaluator.computeMLCRecallAtk(this.learner, this.testdata, 5);
+				perf[t] = Evaluator.computeMLCRecallAtk(this.learner, this.testdata, topk);
 
 				innerProducts[t] = AbstractLearner.numberOfInnerProducts;
 			}	
@@ -233,7 +235,7 @@ public class LearnerManager {
 			
 			AbstractLearner.numberOfInnerProducts = 0;
 			
-			Map<String,Double> perftestrecallk = Evaluator.computeMLCRecallAtk(this.learner, this.testdata, 5);
+			Map<String,Double> perftestrecallk = Evaluator.computeMLCRecallAtk(this.learner, this.testdata, topk);
 			
 			
 			for ( String perfName : perftestrecallk.keySet() ) {
