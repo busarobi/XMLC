@@ -54,6 +54,12 @@ public class TuneHyperParameters extends LearnerManager {
 		@Override
 		public void run() {
 			this.learner = AbstractLearner.learnerFactory(properties);
+
+			Map<String,Double> perfvalidrecallk;
+			Map<String,Double> perftestrecall;
+			
+			Map<String,Double> loglossValid;
+			Map<String,Double> loglossTest;
 			
 			if (properties.containsKey("seed")) {
 				long seed = Long.parseLong(properties.getProperty("seed"));
@@ -63,27 +69,28 @@ public class TuneHyperParameters extends LearnerManager {
 			// train
 			learner.allocateClassifiers(traindata);
 			learner.train(traindata);
-			
-			Map<String,Double> perfvalidpreck = Evaluator.computePrecisionAtk(learner, validdata, 5);
-			Map<String,Double> perftestpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);
-			
-			Map<String,Double> loglossValid = Evaluator.computeLogLoss(learner, validdata);
-			Map<String,Double> loglossTest = Evaluator.computeLogLoss(learner, testdata);
-			
-			
-			// valid			
-//			ThresholdTuning th = new TTEumFast( learner.m, properties );
-//			learner.tuneThreshold(th, validdata);
-//
-//			Map<String,Double> perfv = Evaluator.computePerformanceMetrics(learner, validdata);
-//
+
+			if ( (learner instanceof PCC ) ||  (learner instanceof FC ) ) {
+				perfvalidrecallk = Evaluator.computeMLCRecallAtk(learner, validdata, 5);						
+				perftestrecall = Evaluator.computeMLCRecallAtk(learner, testdata, 5);
+				
+				loglossValid = Evaluator.computeMLCLogLoss(learner, validdata);
+				loglossTest = Evaluator.computeMLCLogLoss(learner, testdata);
+			} else {
+				perfvalidrecallk = Evaluator.computeRecallAtk(learner, validdata, 5);
+				perftestrecall = Evaluator.computeRecallAtk(learner, testdata, 5);
+				
+				loglossValid = Evaluator.computeLogLoss(learner, validdata);
+				loglossTest = Evaluator.computeLogLoss(learner, testdata);
+			}				
+
 			
 			// generate result
 			this.info += "#### Valid:\n";
 			
-			for ( String perfName : perfvalidpreck.keySet() ) {
-				logger.info("##### Valid " + perfName + ": "  + perfvalidpreck.get(perfName) );
-				this.info += "##### Valid " + perfName + ": "  + perfvalidpreck.get(perfName) + "\n";
+			for ( String perfName : perfvalidrecallk.keySet() ) {
+				logger.info("##### Valid " + perfName + ": "  + perfvalidrecallk.get(perfName) );
+				this.info += "##### Valid " + perfName + ": "  + perfvalidrecallk.get(perfName) + "\n";
 			}
 			
 			for ( String perfName : loglossValid.keySet() ) {
@@ -94,17 +101,16 @@ public class TuneHyperParameters extends LearnerManager {
 			
 			this.info += "#### Test:\n";
 			
-			for ( String perfName : perftestpreck.keySet() ) {
-				logger.info("##### Test " + perfName + ": "  + perftestpreck.get(perfName));
-				this.info += "##### Test " + perfName + ": "  + perftestpreck.get(perfName) + "\n";
+			for ( String perfName : perftestrecall.keySet() ) {
+				logger.info("##### Test " + perfName + ": "  + perftestrecall.get(perfName));
+				this.info += "##### Test " + perfName + ": "  + perftestrecall.get(perfName) + "\n";
 			}
 
 			for ( String perfName : loglossTest.keySet() ) {
 				logger.info("##### Test " + perfName + ": "  + loglossTest.get(perfName) );
 				this.info += "##### Test " + perfName + ": "  + loglossTest.get(perfName) + "\n";
 			}
-			
-			
+				
 			
 			learner = null;
 			ready = true;
