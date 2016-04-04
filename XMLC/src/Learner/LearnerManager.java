@@ -143,7 +143,7 @@ public class LearnerManager {
 //			perf[t] = Evaluator.computePerformanceMetrics(learner, testdata);
 //
 //		}
-		int topk = Integer.parseInt(properties.getProperty("topk"),5);
+		int topk = Integer.parseInt(properties.getProperty("topk","5"));
 		
 		if(this.learner instanceof PCT) {
 		
