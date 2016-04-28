@@ -3,7 +3,6 @@ package util;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -12,26 +11,24 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.sourceforge.olduvai.treejuxtaposer.TreeParser;
+import net.sourceforge.olduvai.treejuxtaposer.drawer.TreeNode;
+
 public class OfflineTree extends Tree implements Serializable {
 	private static final long serialVersionUID = 5656121729850759773L;
 	private static Logger logger = LoggerFactory.getLogger(OfflineTree.class);
 	
-	public static final int INTERNAL = 1;
-	public static final int LEAF = 2;
-	public static final int NONE = 0;
-	
-	private ArrayList<Integer> labels;
-	private ArrayList<Integer> tree;
-	private HashMap<Integer, Integer> leafIndexToLabel; 
-	private HashMap<Integer, Integer> labelToLeafIndex; 
+	net.sourceforge.olduvai.treejuxtaposer.drawer.Tree newickTree = null;
 	
 	public OfflineTree(int k, int m) {
-		logger.info("Invalid OfflineTree constructor!");
+		logger.info("Invalid NewickOfflineTree constructor!");
 		System.exit(-1);		
 	}
 	
 	public OfflineTree(String treeFileName) {
-		initialize(treeFileName);			
+		initialize(treeFileName);
+		this.size = this.newickTree.nodes.size();
+		this.numberOfInternalNodes = (int)this.newickTree.nodes.size()/2;
 	}
 
 	public void initialize(String treeFileName) {
@@ -42,104 +39,64 @@ public class OfflineTree extends Tree implements Serializable {
 	private void readTreeFile(String treeFileName){
 		FileInputStream fstream = null;
 		BufferedReader br = null;
-		String line;
-		this.labels = new ArrayList<Integer>();
-		this.tree = new ArrayList<Integer>();
-		this.leafIndexToLabel = new HashMap<Integer, Integer>(); 
-		this.labelToLeafIndex = new HashMap<Integer, Integer>(); 
-		
-		int numLabels = 0, treeSize = 0, branchingFactor = 0;
 		try {
-			fstream = new FileInputStream(treeFileName);
+			fstream = new FileInputStream(treeFileName);	
 			br = new BufferedReader(new InputStreamReader(fstream));
-			numLabels = Integer.parseInt(br.readLine());
-			treeSize = Integer.parseInt(br.readLine());
-			branchingFactor = Integer.parseInt(br.readLine());
-			
-			for(int i = 0; i<numLabels; i++ ){
-				if((line = br.readLine()) != null){
-					this.labels.add(Integer.parseInt(line));
-				}
-			}
-			for(int i = 0; i<treeSize; i++ ){
-				if((line = br.readLine()) != null){
-					if(line.equals("internal")){
-						this.tree.add(INTERNAL);
-					}else if(line.equals("none")){
-						this.tree.add(NONE);
-					}else{
-						this.tree.add(LEAF);
-						this.leafIndexToLabel.put(i,Integer.parseInt(line));
-						this.labelToLeafIndex.put(Integer.parseInt(line), i);
-					}
-				}
-			}
-			
-		} catch (IOException e) {
+			TreeParser tp = new TreeParser(br);
+	        newickTree = tp.tokenize(1, treeFileName, null);	        
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} finally{
-			if (br != null){
-				try {
-					br.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
-		this.k = branchingFactor;
-		this.m = numLabels;
-		this.size = treeSize;
+		}      
 	}
-	
+
 	@Override
 	public ArrayList<Integer> getChildNodes(int node) {		
-		if(this.tree.get(node) == INTERNAL){
+		TreeNode currNode = this.newickTree.getNodeByKey(node);
+		if(currNode.isLeaf()){
+			return null;
+		}else{
 			ArrayList<Integer> childNodes = new ArrayList<Integer>(this.k);
-			for(int i = 1; i <= k; i++) {
-				int childIdx = k  * node + i;
-				if(this.tree.get(node) != NONE){
-					childNodes.add(childIdx);
-				}
+			for(int i = 0; i<currNode.numberChildren(); i++){
+				childNodes.add(currNode.getChild(i).key);
 			}
 			return childNodes;
-		} else {
-			return null;
 		}
 	}
 
 	@Override
 	public int getParent(int node) {
-		if(node > 0) {
-			return (int) Math.floor((node - 1.0) / (double) this.k);
+		TreeNode currNode = this.newickTree.getNodeByKey(node);
+		if(currNode.isRoot()){
+			return -1;
+		}else{
+			return currNode.parent.key;
 		}
-		return -1;		
 	}
 
 	public int getTreeIndex(int label) {
-		return this.labelToLeafIndex.get(label);		
+		TreeNode currNode = this.newickTree.getNodeByName(Integer.toString(label)); 
+		return currNode.key;
 	}
 	
 	public int getLabelIndex(int treeIndex) {
-		return this.leafIndexToLabel.get(treeIndex);			
+		return Integer.parseInt(this.newickTree.getNodeByKey(treeIndex).getName());			
 	}
 	
 	public int getNodeDepth(int node){
-		int depth = 0;
-		int idx = node;
-		while(idx != 0){
-			idx = getParent(idx);
-			depth += 1;
-		}
-		return depth;
+		TreeNode currNode = (TreeNode) this.newickTree.nodes.get(node); 
+		return currNode.height;
 	}
 	
 	public boolean isBalanced() {
 		ArrayList<Integer> depths = new ArrayList<Integer>();
-		for(int i = 0; i < this.size; i++){
-			if(this.tree.get(i) == LEAF){
-				depths.add(getNodeDepth(i));
+		
+		for(int i = 0; i<this.newickTree.nodes.size(); i++){
+			TreeNode currNode = (TreeNode) this.newickTree.nodes.get(i); 
+			if(currNode.isLeaf()){
+				depths.add(currNode.height);
 			}
-		}	
+		}
 		HashMap<Integer, Integer> frequencymap = new HashMap<Integer, Integer>();
 		for(Integer d : depths) {
 		  if(frequencymap.containsKey(d)) {
@@ -153,23 +110,38 @@ public class OfflineTree extends Tree implements Serializable {
 	}	
 	@Override
 	public boolean isLeaf(int node) {
-		if(this.tree.get(node) == LEAF)
-			return true;
-		return false;
+		return this.newickTree.getNodeByKey(node).isLeaf();		
 	}
 	
 	public static void main(String[] argv) {
-		String treeFile = "/windows/projects/xmlc/data/wiki10/tree/wiki10_train-processed.txt";
+		//String treeFile = "/windows/projects/xmlc/XMLC/trees/newick2";
+		String treeFile = "/windows/projects/xmlc/data/test/trees/test_newick.py";
 		System.out.println(treeFile);
 		OfflineTree ct = new OfflineTree(treeFile);
-		System.out.println(Integer.toString(ct.getSize()));
-		System.out.println(ct.getParent(100));
-		System.out.println(ct.getChildNodes(100));
-		System.out.println(ct.getTreeIndex(20751));
-		System.out.println(ct.isLeaf(10));
-		System.out.println(ct.isLeaf(65534));
-		System.out.println(ct.isBalanced());
+		for(int i = 0; i<ct.newickTree.nodes.size(); i++){
+			System.out.println("-------------------");
+			TreeNode currNode = (TreeNode) ct.newickTree.nodes.get(i); 
+			//	return name + "(" + key + " @ " + height + ")";
+			System.out.println("name: " + currNode.getName());
+			System.out.println("key: " + currNode.key);
+			System.out.println("height: " + currNode.height);
+			System.out.println("label: " + currNode.label);
+			System.out.println("weight: " + currNode.weight);
+			System.out.println("parent: " + ct.getParent(i));
+			System.out.println("children: " + ct.getChildNodes(i));
+			System.out.println("isLeaf: " + ct.isLeaf(i));
+		}
+		System.out.println("-------------------");
+		int treeIndex = 2;
+		System.out.println("Label of tree index " + treeIndex + ": " + ct.getLabelIndex(treeIndex));
+		treeIndex = 5;
+		System.out.println("Label of tree index " + treeIndex + ": " + ct.getLabelIndex(treeIndex));
 		
+		int labelIndex = 3;
+		System.out.println("Tree index of label " + labelIndex + ": " + ct.getTreeIndex(labelIndex));
+		labelIndex = 5;
+		System.out.println("Tree index of label " + labelIndex + ": " + ct.getTreeIndex(labelIndex));
+				
 	}
 	
 }

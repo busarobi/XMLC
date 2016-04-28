@@ -87,12 +87,14 @@ public abstract class AbstractLearner implements Serializable{
 			learner = new PLTFH(properties, stepfunction);		
 		else if (learnerName.compareTo("PLTFHR") == 0)
 			learner = new PLTFHR(properties, stepfunction);		
-		
 		else if (learnerName.compareTo("PLTFHOfflineTree") == 0)
 			learner = new PLTFHOfflineTree(properties, stepfunction);		
 		else if (learnerName.compareTo("PLTFHROfflineTree") == 0)
 			learner = new PLTFHROfflineTree(properties, stepfunction);
-		
+		else if (learnerName.compareTo("PLTFHOfflineTree1") == 0)
+			learner = new PLTFHOfflineTree1(properties, stepfunction);		
+		else if (learnerName.compareTo("PLTFHROfflineTree1") == 0)
+			learner = new PLTFHROfflineTree1(properties, stepfunction);
 		else if (learnerName.compareTo("PLT") == 0)
 			learner = new PLT(properties, stepfunction);
 		else if (learnerName.compareTo("BRTFHR") == 0)

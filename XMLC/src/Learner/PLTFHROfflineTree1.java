@@ -26,21 +26,21 @@ import Data.AVTable;
 import Learner.step.StepFunction;
 import preprocessing.UniversalHasher;
 
-public class PLTFHROfflineTree extends PLTFHOfflineTree {
+public class PLTFHROfflineTree1 extends PLTFHOfflineTree1 {
 	private static final long serialVersionUID = -8118572654228214071L;
 
 
-	private static Logger logger = LoggerFactory.getLogger(PLTFHROfflineTree.class);
+	private static Logger logger = LoggerFactory.getLogger(PLTFHROfflineTree1.class);
 
 	
 	transient protected int[] Tarray = null;	
 	protected double[] scalararray = null;
 	
-	public PLTFHROfflineTree(Properties properties, StepFunction stepfunction) {
+	public PLTFHROfflineTree1(Properties properties, StepFunction stepfunction) {
 		super(properties, stepfunction);
 
 		logger.info("#####################################################" );
-		logger.info("#### Learner: PLTFTHROfflineTree" );
+		logger.info("#### Learner: PLTFTHROfflineTree1" );
 		logger.info("#####################################################" );
 	}
 

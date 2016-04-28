@@ -1,0 +1,43 @@
+
+##############################################################################
+IsHeader = false
+TrainFile = /windows/projects/xmlc/data/rcv1x/rcv1x_train_trn.txt
+ValidFile = /windows/projects/xmlc/data/rcv1x/rcv1x_train_val.txt
+TestFile = /windows/projects/xmlc/data/rcv1x/rcv1x_test.txt
+TreeFile = /windows/projects/xmlc/data/trees/tree_rcv1x_train_newick.txt
+ModelFile = /windows/projects/xmlc/XMLC/model/rcv1x_newick_spectral
+##############################################################################
+hasher = Mask
+
+MLFeatureHashing = 16777216
+
+#Learner = MLLog
+#Learner = MLLogNP
+#Learner = PLT
+#Learner = PLTFH
+#Learner = Constant
+#Learner = PLTFHR
+#Learner = PLTFHRKary
+Learner = PLTFHROfflineTree
+
+StepFunction = SimpleL1
+numWorkers = 1
+
+##############################################################################
+# Logistic Regression
+##############################################################################
+
+gamma = 0.5
+epochs = 30
+lambda = 0.000001
+k = 2
+
+##############################################################################
+
+minThreshold = 0.01
+ThresholdEpochs = 1
+a = 1
+b = 20
+
+#############################################################################
+
