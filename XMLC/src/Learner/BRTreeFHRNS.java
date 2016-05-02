@@ -18,7 +18,11 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.PriorityQueue;
 import java.util.Properties;
@@ -26,6 +30,7 @@ import java.util.Queue;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.analysis.function.Sigmoid;
 
@@ -56,7 +61,7 @@ public class BRTreeFHRNS extends BRTFHRNS {
 		System.out.println("#### Learner: BRTreeFHRNS" );
 		System.out.println("#####################################################" );
 
-		this.threshold = 0.01;
+		this.threshold = 0.1;
 		
 	}
 	
@@ -66,13 +71,15 @@ public class BRTreeFHRNS extends BRTFHRNS {
 		Arrays.fill(this.numOfPositiveUpdates, 1);	
 	}		
 	
+	
 	@Override
 	public void train(AVTable data) {
 						
 		TreeMap<Integer,Integer> nodesToUpdate = new TreeMap<>(); 
 		//HashSet<Integer> negativeLabels = new HashSet<>();
 		
-		
+		HashMap<Integer,Integer> negativeLabelsQueue = new HashMap<>();  
+				
 		Random random = new Random(1);
 		
 		for (int ep = 0; ep < this.epochs; ep++) {
@@ -85,7 +92,7 @@ public class BRTreeFHRNS extends BRTFHRNS {
 				
 				int currIdx = indirectIdx.get(i);
 				
-				int numOfNegToSample = traindata.y[currIdx].length * this.samplingRatio;
+				//int numOfNegToSample = traindata.y[currIdx].length * this.samplingRatio;
 				
 				nodesToUpdate.clear();
 				//negativeLabels.clear();
@@ -95,12 +102,40 @@ public class BRTreeFHRNS extends BRTFHRNS {
 					int treeIndex = this.tree.getTreeIndex(traindata.y[currIdx][j]);
 					nodesToUpdate.put(treeIndex, 1);
 					
+					if(negativeLabelsQueue.containsKey(treeIndex)) {
+						negativeLabelsQueue.put(treeIndex, negativeLabelsQueue.get(treeIndex)+this.samplingRatio);
+					} else {
+						negativeLabelsQueue.put(treeIndex, this.samplingRatio);
+					}
 
 				}
 				
-				int numOfNegativeLabels = 0;
+				LinkedHashMap<Integer, Integer> sortedMap = 
+						negativeLabelsQueue.entrySet().stream().sorted(Entry.<Integer,Integer>comparingByValue().reversed())
+						.collect(Collectors.toMap(Entry::getKey, Entry::getValue,(e1, e2) -> e1, LinkedHashMap::new));
 				
-				while(numOfNegativeLabels< numOfNegToSample && numOfNegativeLabels < this.m - numOfNegToSample ) {
+				//int numOfNegativeLabels = 0;
+
+				Iterator<Entry<Integer, Integer>> it = sortedMap.entrySet().iterator();
+				
+				while (it.hasNext()) {
+				
+					Entry<Integer,Integer> entry = it.next();
+									
+					int treeIndex = entry.getKey(); //....negativeLabelsQueue. ree.getTreeIndex(random.nextInt(this.m));
+					
+					if(!nodesToUpdate.containsKey(treeIndex)) {
+						nodesToUpdate.put(treeIndex, 0);
+						//numOfNegativeLabels++;
+						negativeLabelsQueue.put(treeIndex, entry.getValue()-1);
+						if(negativeLabelsQueue.get(treeIndex) == 0) negativeLabelsQueue.remove(treeIndex);
+					}
+					
+					
+				}
+							
+				
+				/*while(numOfNegativeLabels< numOfNegToSample && numOfNegativeLabels < this.m - numOfNegToSample ) {
 					
 					int treeIndex = this.tree.getTreeIndex(random.nextInt(this.m));
 					
@@ -108,7 +143,7 @@ public class BRTreeFHRNS extends BRTFHRNS {
 						nodesToUpdate.put(treeIndex, 0);
 						numOfNegativeLabels++;
 					}
-				}
+				}*/
 
 				while(!nodesToUpdate.isEmpty()) {
 				

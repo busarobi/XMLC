@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.PriorityQueue;
 import java.util.Properties;
 import java.util.Random;
 
@@ -224,6 +225,8 @@ public class MLLRFHRNS extends MLLRFHR {
 	@Override
 	public double getPosteriors(AVPair[] x, int label) {
 	 
+		
+		if(contextChange[label] == 1) return 1.0;
 		double posterior = getUncalibratedPosteriors(x, label);
 		//System.out.print(label + "\t" + posterior);
 		posterior = (contextChange[label] * posterior) / (contextChange[label] * posterior + (1 - contextChange[label]) * (1 - posterior));

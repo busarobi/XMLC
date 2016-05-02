@@ -50,7 +50,7 @@ public class BRTFHRNS extends MLLRFHRNS {
 	
 	protected int k = 2;
 	
-	double threshold = 0.05;
+	double threshold = 0.5;
 	
 	
 	public BRTFHRNS(Properties properties, StepFunction stepfunction) {
