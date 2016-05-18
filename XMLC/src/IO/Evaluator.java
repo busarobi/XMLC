@@ -242,7 +242,7 @@ public class Evaluator {
     		double p = learner.estimateProbability(data.x[i], data.y[i][0]);
     		
     		//logloss -= Math.log(p);
-    		logloss -= Math.max(-1000, Math.log(p));
+    		logloss -= Math.max(-10, Math.log(p));
     		TreeSet<EstimatePair> predictedLabels = learner.getTopKEstimates(data.x[i], 1);
     		//System.out.println(p + ", " + Math.log(p) + ", " + predictedLabels.first().getP());
     	

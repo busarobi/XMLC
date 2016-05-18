@@ -106,6 +106,12 @@ public abstract class AbstractLearner implements Serializable{
 			learner = new PCC(properties, stepfunction);
 		else if (learnerName.compareTo("FC") == 0)
 			learner = new FC(properties, stepfunction);
+		else if (learnerName.compareTo("SimLomTree") == 0)
+			learner = new SimplifiedLomTree(properties, stepfunction);
+		else if (learnerName.compareTo("LomTree") == 0)
+			learner = new LomTree(properties, stepfunction);
+		else if (learnerName.compareTo("LomTreePlus") == 0)
+			learner = new LomTreePlus(properties, stepfunction);
 		else {
 			System.err.println("Unknown learner");
 			System.exit(-1);

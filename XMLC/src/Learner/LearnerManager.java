@@ -143,6 +143,9 @@ public class LearnerManager {
 //			perf[t] = Evaluator.computePerformanceMetrics(learner, testdata);
 //
 //		}
+		
+		
+		
 		int topk = Integer.parseInt(properties.getProperty("topk","5"));
 		
 		if(this.learner instanceof PCT) {
@@ -180,7 +183,10 @@ public class LearnerManager {
 			
 		} 
 		
-		if (this.learner instanceof FT) {
+		if (this.learner instanceof FT  
+				|| this.learner instanceof SimplifiedLomTree 
+				|| this.learner instanceof LomTree 
+				|| this.learner instanceof LomTreePlus) {
 			
 			AbstractLearner.numberOfInnerProducts = 0;
 			
