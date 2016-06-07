@@ -67,12 +67,9 @@ public abstract class AbstractLearner implements Serializable{
 		
 		String learnerName = properties.getProperty("Learner");
 		logger.info("--> Learner: {}", learnerName);
-		if (learnerName.compareTo("MLLog")==0)
-			learner = new MLLogisticRegression(properties, stepfunction);
-		else if (learnerName.compareTo( "Constant" ) == 0)
+		
+		if (learnerName.compareTo( "Constant" ) == 0)
 			learner = new ConstantLearner(properties, stepfunction);
-		else if (learnerName.compareTo("MLLogNP") == 0)
-			learner = new MLLogisticRegressionNSampling(properties, stepfunction);
 		else if (learnerName.compareTo("MLLRFH") == 0)
 			learner = new MLLRFH(properties, stepfunction);
 		else if (learnerName.compareTo("MLLRFHNS") == 0)
@@ -87,14 +84,6 @@ public abstract class AbstractLearner implements Serializable{
 			learner = new PLTFH(properties, stepfunction);		
 		else if (learnerName.compareTo("PLTFHR") == 0)
 			learner = new PLTFHR(properties, stepfunction);		
-		else if (learnerName.compareTo("PLT") == 0)
-			learner = new PLT(properties, stepfunction);
-		else if (learnerName.compareTo("BRTFHR") == 0)
-			learner = new BRTFHR(properties, stepfunction);
-		else if (learnerName.compareTo("BRTFHRNS") == 0)
-			learner = new BRTFHRNS(properties, stepfunction);
-		else if (learnerName.compareTo("BRTreeFHRNS") == 0)
-			learner = new BRTreeFHRNS(properties, stepfunction);
 		else {
 			System.err.println("Unknown learner");
 			System.exit(-1);

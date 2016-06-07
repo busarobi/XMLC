@@ -294,9 +294,4 @@ public class MLLRFHRNS extends MLLRFHR {
 
 	}
 
-	@Override
-	public void load(String fname) {
-		//to be completed
-	}
-
 }

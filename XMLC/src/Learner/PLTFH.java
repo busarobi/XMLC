@@ -479,15 +479,6 @@ public class PLTFH extends MLLRFH {
 
 		return positiveLabels;
 	}
-	
 		
-	
-	public void load(String fname) {
-		super.load(fname);
-		this.t = 2 * this.m - 1;
-		this.fh = new UniversalHasher(this.fhseed, this.hd, this.t);
-	}
-	
-	
 	
 }
