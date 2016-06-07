@@ -252,46 +252,5 @@ public class MLLRFHRNS extends MLLRFHR {
 
 	
 	
-	@Override
-	public void savemodel(String fname) {
-		// TODO Auto-generated method stub
-		try{
-			System.out.print( "Saving model (" + fname + ")..." );						
-			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
-			          new FileOutputStream(fname)));
-
-			writer.write( "d = "+ this.d + "\n" );
-			writer.write( "hd = "+ this.hd + "\n" );
-			writer.write( "m = "+ this.m + "\n" );
-			
-			// write out weights
-			writer.write( ""+ (1/this.scalar) * this.w[0]/*.get(i)*/ );
-			for(int i = 1; i< this.w.length; i++ ){
-				writer.write( " "+ (1/this.scalar) * this.w[i]/*.get(i)*/ );
-			}
-			writer.write( "\n" );
-
-			// bias
-			writer.write( ""+ (1/this.scalar) * this.bias[0]/*.get(i)*/ );
-			for(int i = 1; i< this.bias.length; i++ ){
-				writer.write( " "+ (1/this.scalar) * this.bias[i]/*.get(i)*/ );
-			}
-			writer.write( "\n" );
-						
-			// write out threshold
-			writer.write( ""+ this.thresholds[0] );
-			for(int i = 1; i< this.thresholds.length; i++ ){
-				writer.write( " "+ this.thresholds[i] );
-			}
-			writer.write( "\n" );
-
-			writer.close();
-			
-			System.out.println( "Done." );
-		} catch (IOException e) {
-			System.out.println(e.getMessage());
-		}
-
-	}
 
 }

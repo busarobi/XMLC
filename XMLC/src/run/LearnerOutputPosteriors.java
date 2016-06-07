@@ -1,4 +1,4 @@
-package Learner;
+package run;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -22,6 +22,7 @@ import Data.ComparablePair;
 import Data.EstimatePair;
 import IO.DataReader;
 import IO.Evaluator;
+import Learner.AbstractLearner;
 
 public class LearnerOutputPosteriors extends LearnerManager {
 	private static Logger logger = LoggerFactory.getLogger(LearnerOutputPosteriors.class);

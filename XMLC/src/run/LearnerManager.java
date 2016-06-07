@@ -1,4 +1,4 @@
-package Learner;
+package run;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import Data.AVTable;
 import IO.DataReader;
 import IO.Evaluator;
+import Learner.AbstractLearner;
 import preprocessing.FeatureHasher;
 import threshold.TTEum;
 import threshold.TTEumFast;
@@ -228,7 +229,7 @@ public class LearnerManager {
 
 	public Map<String,Double> test(){
 		// evaluate (EUM)
-		ThresholdTuning th = new TTEum( learner.m, properties );
+		ThresholdTuning th = new TTEum( learner.getNumberOfLabels(), properties );
 		learner.tuneThreshold(th, validdata);
 		Map<String,Double> perf = Evaluator.computePerformanceMetrics(learner, testdata);
 

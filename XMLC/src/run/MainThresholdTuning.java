@@ -1,4 +1,4 @@
-package threshold;
+package run;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -24,6 +24,10 @@ import Data.EstimatePair;
 import IO.DataReader;
 import IO.Evaluator;
 import Learner.AbstractLearner;
+import threshold.TTEumFast;
+import threshold.TTExuFast;
+import threshold.TTOfoFast;
+import threshold.ThresholdTuning;
 
 public class MainThresholdTuning {
 	private static Logger logger = LoggerFactory.getLogger(MainThresholdTuning.class);
