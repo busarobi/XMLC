@@ -30,23 +30,12 @@ public class LearnerManager {
 	protected AVTable validdata =null;
 	protected boolean isHeader = false;
 	
-	// feature hasher
-	protected FeatureHasher fh = null;
-	protected int featureNum = 0;
-
 	protected AbstractLearner learner = null;
 
 	public LearnerManager( String fname ){
 		properties = readProperty(fname);
 
 		this.isHeader = Boolean.parseBoolean(properties.getProperty("IsHeader"));
-//		featureNum = Integer.parseInt(properties.getProperty("FeatureHashing", "0"));
-
-//		if (featureNum>0){
-//			System.out.print( "Feature hashing (dim: " + featureNum + ")...");
-//			fh = new MurmurHasher(0, featureNum);
-//			System.out.println( "Done.");
-//		}
 	}
 
 
@@ -70,21 +59,14 @@ public class LearnerManager {
 	}
 
 	public void readTrainData() throws Exception {
-		// reading train data
 		DataReader datareader = new DataReader(properties.getProperty("TrainFile"), false, this.isHeader);
 		traindata = datareader.read();
-//		if (fh != null ) {
-//			traindata = fh.transformSparse(traindata);
-//		}
 	}
 
-	public void readTestData() throws Exception {
-		// test
+	
+	public void readTestData() throws Exception {		
 		DataReader testdatareader = new DataReader(properties.getProperty("TestFile"),false, this.isHeader );
 		testdata = testdatareader.read();
-//		if (fh != null ) {
-//			testdata = fh.transformSparse(testdata);
-//		}
 	}
 
 
@@ -96,9 +78,6 @@ public class LearnerManager {
 		} else {
 			DataReader validdatareader = new DataReader(properties.getProperty("ValidFile"), false, this.isHeader);
 			validdata = validdatareader.read();
-//			if (fh != null ) {
-//				validdata = fh.transformSparse(validdata);
-//			}
 		}
 	}
 
@@ -134,15 +113,6 @@ public class LearnerManager {
 	public void compositeEvaluation()
 	{
 
-//		double [] thresholds = {/*0.0, 0.01,*/ 0.05, 0.1, 0.25, 0.5};
-//		Map<String,Double> [] perf = new Map[thresholds.length];
-//		
-//		for(int t = 0; t < thresholds.length ; t++){
-//
-//			this.learner.setThresholds(thresholds[t]);
-//			perf[t] = Evaluator.computePerformanceMetrics(learner, testdata);
-//
-//		}
 		
 		Map<String,Double> perfvalidpreck = Evaluator.computePrecisionAtk(this.learner, this.validdata, 5);
 		Map<String,Double> perftestpreck = Evaluator.computePrecisionAtk(this.learner, this.testdata, 5);
@@ -157,84 +127,8 @@ public class LearnerManager {
 			logger.info("##### Test " + perfName + ": "  + perftestpreck.get(perfName));			
 		}
 		
-		
-//		// evaluate (EUM)
-//		ThresholdTuning theum = new TTEumFast( learner.m, properties );
-//		learner.tuneThreshold(theum, validdata);
-//		Map<String,Double> perfTTEUMFast = Evaluator.computePerformanceMetrics(learner, testdata);
-//							
-//		// evaluate (OFO)
-//		ThresholdTuning th = new TTOfoFast( learner.m, properties );
-//		learner.tuneThreshold(th, validdata);			
-//		Map<String,Double> perfTTOFOFast = Evaluator.computePerformanceMetrics(learner, testdata);
-//		
-//		// evaluate (EXU)
-//		ThresholdTuning thexu = new TTExuFast( learner.m, properties );
-//		learner.tuneThreshold(thexu, validdata);
-//		Map<String,Double> perfTTExu = Evaluator.computePerformanceMetrics(learner, testdata);		
-//		
-//		
-//		for ( String perfName : perfTTEUMFast.keySet() ) {
-//			logger.info("##### EUM " + perfName + ": "  + perfTTEUMFast.get(perfName));
-//		}
-//		
-//		
-//		for ( String perfName : perfTTOFOFast.keySet() ) {
-//			logger.info("##### OFO " + perfName + ": "  + perfTTOFOFast.get(perfName));
-//		}
-//
-//
-//		for ( String perfName : perfTTExu.keySet() ) {
-//			logger.info("##### EXU " + perfName + ": "  + perfTTExu.get(perfName));
-//		}
-		
-		
-//		for(int t = 0; t < thresholds.length; t++){
-//			System.out.println("##########-----  Threshold: " + thresholds[t]);
-//			for ( String perfName : perf[t].keySet() ) {
-//				System.out.println("##### EUM" + perfName + ": "  + perf[t].get(perfName));
-//			}
-//		}
-	
-		
-		
-		
-		
-//		// evaluate (OFO)
-//		th = new TTOfo( learner.m, properties );
-//		learner.tuneThreshold(th, validdata);
-//		Map<String,Double> perfOFO = Evaluator.computePerformanceMetrics(learner, testdata);
-//
-//		// evaluate (EXU)
-//		th = new TTExu( learner.m, properties );
-//		learner.tuneThreshold(th, validdata);
-//		Map<String,Double> perfEXU = Evaluator.computePerformanceMetrics(learner, testdata);
-
-
-
-
-//		for ( String perfName : perfOFO.keySet() ) {
-//			System.out.println("##### OFO" + perfName + ": "  + perfOFO.get(perfName));
-//		}
-//
-//
-//		for ( String perfName : perfEXU.keySet() ) {
-//			System.out.println("##### EXU " + perfName + ": "  + perfEXU.get(perfName));
-//		}
-
-
-		//learner.outputPosteriors("/Users/busarobi/work/XMLC/MLLogReg/valid_post.txt", validdata);
-		//learner.outputPosteriors("/Users/busarobi/work/XMLC/MLLogReg/test_post.txt", testdata);
 	}
 
-	public Map<String,Double> test(){
-		// evaluate (EUM)
-		ThresholdTuning th = new TTEum( learner.getNumberOfLabels(), properties );
-		learner.tuneThreshold(th, validdata);
-		Map<String,Double> perf = Evaluator.computePerformanceMetrics(learner, testdata);
-
-		return perf;
-	}
 
 
 	public static void main(String[] args) throws Exception {
