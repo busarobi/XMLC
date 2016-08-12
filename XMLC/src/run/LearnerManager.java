@@ -23,21 +23,20 @@ import util.MasterSeed;
 
 public class LearnerManager {
 	private static Logger logger = LoggerFactory.getLogger(LearnerManager.class);
-	
+
 	protected Properties properties = null;
-	protected AVTable testdata =null;
-	protected AVTable traindata =null;
-	protected AVTable validdata =null;
+	protected AVTable testdata = null;
+	protected AVTable traindata = null;
+	protected AVTable validdata = null;
 	protected boolean isHeader = false;
-	
+
 	protected AbstractLearner learner = null;
 
-	public LearnerManager( String fname ){
+	public LearnerManager(String fname) {
 		properties = readProperty(fname);
 
 		this.isHeader = Boolean.parseBoolean(properties.getProperty("IsHeader"));
 	}
-
 
 	public Properties readProperty(String fname) {
 		logger.info("Reading property file...");
@@ -63,17 +62,15 @@ public class LearnerManager {
 		traindata = datareader.read();
 	}
 
-	
-	public void readTestData() throws Exception {		
-		DataReader testdatareader = new DataReader(properties.getProperty("TestFile"),false, this.isHeader );
+	public void readTestData() throws Exception {
+		DataReader testdatareader = new DataReader(properties.getProperty("TestFile"), false, this.isHeader);
 		testdata = testdatareader.read();
 	}
-
 
 	public void readValidData() throws Exception {
 		String validFileName = properties.getProperty("ValidFile");
 
-		if (validFileName == null ) {
+		if (validFileName == null) {
 			validdata = traindata;
 		} else {
 			DataReader validdatareader = new DataReader(properties.getProperty("ValidFile"), false, this.isHeader);
@@ -83,7 +80,6 @@ public class LearnerManager {
 
 	public void train() throws Exception {
 		this.learner = AbstractLearner.learnerFactory(properties);
-		
 
 		if (properties.containsKey("seed")) {
 			long seed = Long.parseLong(properties.getProperty("seed"));
@@ -92,13 +88,13 @@ public class LearnerManager {
 
 		// train
 		String inputmodelFile = properties.getProperty("InputModelFile");
-		if (inputmodelFile == null ) {
+		if (inputmodelFile == null) {
 			this.readTrainData();
 			learner.allocateClassifiers(traindata);
 			learner.train(traindata);
 
-			String modelFile = properties.getProperty("ModelFile", null );
-			if (modelFile != null ) {
+			String modelFile = properties.getProperty("ModelFile", null);
+			if (modelFile != null) {
 				learner.savemodel(modelFile);
 			}
 		} else {
@@ -108,32 +104,26 @@ public class LearnerManager {
 
 	}
 
+	public void compositeEvaluation() {
 
+		Map<String, Double> perfvalidpreck = Evaluator.computePrecisionAtk(this.learner, this.validdata, 5);
+		Map<String, Double> perftestpreck = Evaluator.computePrecisionAtk(this.learner, this.testdata, 5);
 
-	public void compositeEvaluation()
-	{
+		// Map<String,Double> perfpreck = Evaluator.computePrecisionAtk(learner,
+		// testdata, 5);
 
-		
-		Map<String,Double> perfvalidpreck = Evaluator.computePrecisionAtk(this.learner, this.validdata, 5);
-		Map<String,Double> perftestpreck = Evaluator.computePrecisionAtk(this.learner, this.testdata, 5);
-		
-		//Map<String,Double> perfpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);
-		
-		for ( String perfName : perfvalidpreck.keySet() ) {
-			logger.info("##### Valid " + perfName + ": "  + perfvalidpreck.get(perfName) );			
+		for (String perfName : perfvalidpreck.keySet()) {
+			logger.info("##### Valid " + perfName + ": " + perfvalidpreck.get(perfName));
 		}
 
-		for ( String perfName : perftestpreck.keySet() ) {
-			logger.info("##### Test " + perfName + ": "  + perftestpreck.get(perfName));			
+		for (String perfName : perftestpreck.keySet()) {
+			logger.info("##### Test " + perfName + ": " + perftestpreck.get(perfName));
 		}
-		
+
 	}
-
-
 
 	public static void main(String[] args) throws Exception {
 		logger.info("Working Directory = " + System.getProperty("user.dir"));
-
 
 		// read properties
 		if (args.length < 1) {
@@ -142,25 +132,22 @@ public class LearnerManager {
 		}
 
 		LearnerManager lm = new LearnerManager(args[0]);
-		//lm.readTrainData();
-	    lm.train();
+		// lm.readTrainData();
+		lm.train();
 
-	    lm.readValidData();
-	    lm.readTestData();
+		lm.readValidData();
+		lm.readTestData();
 
-	    lm.compositeEvaluation();
+		lm.compositeEvaluation();
 
 	}
-
 
 	public Properties getProperties() {
 		return properties;
 	}
 
-
 	public void setProperties(Properties properties) {
 		this.properties = properties;
 	}
-
 
 }

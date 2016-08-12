@@ -102,11 +102,7 @@ public class MainThresholdTuning {
 			
 		this.outFileName = this.properties.getProperty("OutFile");
 		logger.info("### OutFile: " + this.outFileName );
-		
-		
-		//this.threshold = Double.parseDouble(properties.getProperty("minThreshold", "0.001") );		
-		//logger.info("#### Min threshold: " + this.threshold );
-				
+						
 		this.fastxml = Boolean.parseBoolean(this.properties.getProperty("IsFastXML","false"));
 		
 		String trainFile = properties.getProperty("TrainFile");
@@ -162,12 +158,7 @@ public class MainThresholdTuning {
 			}
 		}
 		
-		logger.info("Min. valid value : " + fmt(this.getMinimum(this.validposteriors)));
-		
-//		logger.info("Reading vaild psoteriors");
-//		this.validposteriors = readPosteriors( this.posteriorFileValid, this.validlabels.n );
-//		logger.info("Reading test psoteriors");
-//		this.testposteriors = readPosteriors( this.posteriorFileTest, this.testlabels.n );
+		logger.info("Min. valid value : " + fmt(this.getMinimum(this.validposteriors)));		
 	}
 
 	protected double getMinimum(AVTable data ) {
