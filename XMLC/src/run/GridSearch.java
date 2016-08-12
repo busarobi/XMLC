@@ -283,6 +283,7 @@ public class GridSearch extends LearnerManager {
 		writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(this.outFile), "utf-8"));
 		// output
 		writer.write("Train Filename: " + this.properties.getProperty("TrainFile") + "\n");
+		writer.write("Valid Filename: " + this.properties.getProperty("ValidFile") + "\n");
 		writer.write("Test Filename: " + this.properties.getProperty("TestFile") + "\n");
 		writer.write("Learner: " + this.properties.getProperty("Learner") + "\n");
 		writer.flush();

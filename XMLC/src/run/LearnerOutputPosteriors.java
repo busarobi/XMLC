@@ -23,6 +23,7 @@ import Data.EstimatePair;
 import IO.DataReader;
 import IO.Evaluator;
 import Learner.AbstractLearner;
+import util.MasterSeed;
 
 public class LearnerOutputPosteriors extends LearnerManager {
 	private static Logger logger = LoggerFactory.getLogger(LearnerOutputPosteriors.class);
@@ -126,7 +127,7 @@ public class LearnerOutputPosteriors extends LearnerManager {
 		int[] numOfPositivesTrain = AVTable.getNumOfLabels(this.traindata);
 		int[] numOfPositivesTest = AVTable.getNumOfLabels(this.testdata);
 
-		double N = (double) (this.traindata.n + this.testdata.n);
+		double N = this.traindata.n + this.testdata.n;
 		double[] thresholds = new double[this.testdata.m];
 		double avgThreshold = 0.0;
 		for (int i = 0; i < this.traindata.m; i++) {
@@ -234,6 +235,37 @@ public class LearnerOutputPosteriors extends LearnerManager {
 		DataReader.writeLabels(this.labelFileTest, this.testdata);
 	}
 
+	public void loadModel() throws Exception {
+		this.learner = AbstractLearner.learnerFactory(properties);
+
+		if (properties.containsKey("seed")) {
+			long seed = Long.parseLong(properties.getProperty("seed"));
+			MasterSeed.setSeed(seed);
+		}
+
+		String inputmodelFile = properties.getProperty("InputModelFile");
+		if (inputmodelFile == null) {
+			System.err.println("No model file is given!!!");
+			System.exit(-1);
+		} else {
+			logger.info("Loading model file...");
+			this.learner = AbstractLearner.loadmodel(inputmodelFile);
+		}
+
+	}
+
+	public void readValidData() throws Exception {
+		String validFileName = properties.getProperty("ValidFile");
+
+		if (validFileName == null) {
+			System.err.println("No validation file is given!!!");
+			System.exit(-1);
+		} else {
+			DataReader validdatareader = new DataReader(properties.getProperty("ValidFile"), false, this.isHeader);
+			validdata = validdatareader.read();
+		}
+	}
+
 	public static void main(String[] args) throws Exception {
 		logger.info("Working Directory = " + System.getProperty("user.dir"));
 
@@ -245,12 +277,13 @@ public class LearnerOutputPosteriors extends LearnerManager {
 
 		LearnerOutputPosteriors lm = new LearnerOutputPosteriors(args[0]);
 
-		lm.train();
+		// input
+		lm.loadModel();
 		lm.readValidData();
 		lm.readTestData();
 
+		// output
 		lm.outputLabels();
-
 		lm.outputPosteriors();
 
 	}
