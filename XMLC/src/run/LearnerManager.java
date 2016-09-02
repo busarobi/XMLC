@@ -28,7 +28,7 @@ public class LearnerManager {
 	protected AVTable testdata = null;
 	protected AVTable traindata = null;
 	protected AVTable validdata = null;
-	protected boolean isHeader = false;
+	protected boolean isHeader = true;
 
 	protected AbstractLearner learner = null;
 
