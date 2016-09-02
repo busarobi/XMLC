@@ -20,8 +20,6 @@ import Data.AVPair;
 import Data.AVTable;
 import Data.ComparablePair;
 import Data.EstimatePair;
-import Learner.step.StepFunction;
-import Learner.step.StepFunctionFactory;
 import threshold.ThresholdTuning;
 import util.IoUtils;
 
@@ -37,7 +35,7 @@ public abstract class AbstractLearner implements Serializable{
 
 	transient protected Properties properties = null;
 	protected double[] thresholds = null;
-	transient protected StepFunction stepFunction;
+
 	// abstract functions
 	public abstract void allocateClassifiers( AVTable data );
 	public abstract void train( AVTable data );
@@ -63,27 +61,15 @@ public abstract class AbstractLearner implements Serializable{
 	public static AbstractLearner learnerFactory( Properties properties ) {
 		AbstractLearner learner = null;
 		
-		StepFunction stepfunction = StepFunctionFactory.factory(properties);
-		
 		String learnerName = properties.getProperty("Learner");
 		logger.info("--> Learner: {}", learnerName);
 		
 		if (learnerName.compareTo( "Constant" ) == 0)
-			learner = new ConstantLearner(properties, stepfunction);
-		else if (learnerName.compareTo("MLLRFH") == 0)
-			learner = new MLLRFH(properties, stepfunction);
-		else if (learnerName.compareTo("MLLRFHNS") == 0)
-			learner = new MLLRFHNS(properties, stepfunction);
-		else if (learnerName.compareTo("MLLRFHR") == 0)
-			learner = new MLLRFHR(properties, stepfunction);
-		else if (learnerName.compareTo("PLTFHKary") == 0)
-			learner = new PLTFHKary(properties, stepfunction);
-		else if (learnerName.compareTo("PLTFHRKary") == 0)
-			learner = new PLTFHRKary(properties, stepfunction);
-		else if (learnerName.compareTo("PLTFH") == 0)
-			learner = new PLTFH(properties, stepfunction);		
-		else if (learnerName.compareTo("PLTFHR") == 0)
-			learner = new PLTFHR(properties, stepfunction);		
+			learner = new ConstantLearner(properties);
+		else if (learnerName.compareTo("PLT") == 0)
+			learner = new PLT(properties);
+		else if (learnerName.compareTo("MLL") == 0)
+			learner = new MLL(properties);
 		else {
 			System.err.println("Unknown learner");
 			System.exit(-1);
@@ -117,9 +103,8 @@ public abstract class AbstractLearner implements Serializable{
 		this.thresholds[label] = t;
 	}	
 	
-	public AbstractLearner(Properties properties, StepFunction stepfunction){
-		this.properties = properties;
-		this.stepFunction = stepfunction;
+	public AbstractLearner(Properties properties){
+		this.properties = properties;		
 	}
 
 

@@ -8,14 +8,14 @@ import Data.AVPair;
 import Data.AVTable;
 import Data.ComparablePair;
 import Data.EstimatePair;
-import Learner.step.StepFunction;
+
 
 public class ConstantLearner extends AbstractLearner {
 
 	private static final long serialVersionUID = 579975688059937300L;
 
-	public ConstantLearner(Properties properties, StepFunction stepfunction) {
-		super(properties, stepfunction);
+	public ConstantLearner(Properties properties) {
+		super(properties);
 		// TODO Auto-generated constructor stub
 	}
 
