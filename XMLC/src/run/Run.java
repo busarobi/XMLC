@@ -14,7 +14,7 @@ public class Run {
 	public static void main(String[] args) throws Exception {
 		// read properties
 		if (args.length < 2) {
-			logger.info("The nemae of use case and config file should be given!");
+			logger.info("The name of use case and config file should be given!");
 			System.exit(-1);
 		}
 		
@@ -32,6 +32,9 @@ public class Run {
 			LearnerManager lm = new LearnerManager(configFile);
 			lm.test();
 		} else if ( method.equals("-posteriors") ) {
+			ComputePosteriors lm = new ComputePosteriors(configFile);
+			lm.outputLabels();
+			lm.outputPosteriors();
 		} else {
 			logger.error("Unkonw method in run!!!");
 			System.exit(-1);

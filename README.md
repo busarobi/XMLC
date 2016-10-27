@@ -6,6 +6,13 @@ This package implements the F-measure optimization method for Extreme Multi-Labe
 Kalina Jasinska, Krzysztof Dembczynski, Robert Busa-Fekete, Karlson Pfannschmidt, Timo Klerx and Eyke Hullermeier, __Extreme F-measure Maximization using Sparse Probability Estimates__, *Proceedings of the 33nd International Conference on Machine Learning, (ICML'16), New York City, NY, USA, June 19-24,* p.1435-1444, 2016, [pdf](http://jmlr.org/proceedings/papers/v48/jasinska16.html)
 
  
+Download and compile jar
+========================
+
+
+> git clone -b cleanup https://github.com/busarobi/XMLC
+> mvn compile package 
+> java -jar ./target/XMLC-0.0.1-SNAPSHOT-jar-with-dependencies.jar mode configfile 
  
 The package consists of three use cases:
 =========================================
