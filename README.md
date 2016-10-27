@@ -18,27 +18,44 @@ Download and compile jar
 
 > mvn compile package 
 
-Having executed these two commands, you should find a jar called **XMLC_PLT-jar-with-dependencies.jar** in root directory of git project.
+Having executed these two commands, you should find a jar called **XMLC_PLT-jar-with-dependencies.jar** in the root directory of git project.
+ 
  
 The package implements the following use cases:
 =========================================
  
- 1. *-train* Train PLT
- 1. *-eval* Evaluate the model on a given test file
- 2. *-posteriors* Output posteriors based on a model
- 3. *-tune* Tune thresholds for optimizing the Macro F-measure
- 4. Compute the prediction based on a model and corresponding thresholds that were validated for macro F-measure
+ 1. **"-train"** Train PLT
+ 1. **"-eval"** Evaluate the model on a given test file
+ 2. **"-posteriors"** Output posteriors based on a model
+ 3. **"-tune"** Tune thresholds for optimizing the Macro F-measure
+ 4. **"-test"** Compute the prediction based on a model and corresponding thresholds that were validated for macro F-measure
 
 
 
 1. Train PLT
 ============= 
 
-The parameters are taken from config file. There is a sample config file for training PLT on the RCV1 dataset that is available from the [Extreme Classification Repository](http://research.microsoft.com/en-us/um/people/manik/downloads/XC/XMLRepository.html).
+The parameters are taken from a config file. There is a sample config file for training PLT on the RCV1 dataset that is available from the [Extreme Classification Repository](http://research.microsoft.com/en-us/um/people/manik/downloads/XC/XMLRepository.html).
 
-As a fist step, please download this dataset from the repository. Next, set the path to the trainng file in ./examples/rcv1_train.config. And run the training method by 
+As a fist step, please download this dataset from the repository. Next, set the path to the training file in ./examples/rcv1_train.config. And run the training method by 
 
 >java -Xmx12G -jar XMLC_PLT-jar-with-dependencies.jar -train ./examples/rcv1_train.config 
 
-The model file is saved in *./examples/model_ontrain.model*
+The model file is saved to directory which is defined by the parameter called ModelFile.
+
+2. Evaluate a model
+===================
+
+To evaluate a model, call the same jar by using **"-eval'** as second command line parameter. The parameter *TestFile* needs to be set to the path to the test file and the *InputModelFile* to the model file. For example, if one wants to evaualte the model build in the previous step, the following comment should be executed: 
+
+>java -Xmx12G -jar XMLC_PLT-jar-with-dependencies.jar -train ./examples/rcv1_test.config
+
+The model will be evaluated in terms of Precision@K where K = {1,2,3,4,5}. Other evaluation metric can be easily implemented in the class *IO.Evaluator*
+
+
+3. Compute posteriors
+======================
+  
+
+
 

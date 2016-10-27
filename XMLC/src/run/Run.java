@@ -30,7 +30,7 @@ public class Run {
 			lm.train();
 		} else if ( method.equals("-eval") ) {
 			LearnerManager lm = new LearnerManager(configFile);
-			lm.test();
+			lm.eval();
 		} else if ( method.equals("-posteriors") ) {
 			ComputePosteriors lm = new ComputePosteriors(configFile);
 			lm.outputLabels();

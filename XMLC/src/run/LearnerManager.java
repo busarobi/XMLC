@@ -157,9 +157,28 @@ public class LearnerManager {
 	}
 
 	
-	public void test() throws Exception {
+	public void eval() throws Exception {
 		logger.info("Working Directory = " + System.getProperty("user.dir"));
 
+		this.learner = AbstractLearner.learnerFactory(properties);
+
+		if (properties.containsKey("seed")) {
+			long seed = Long.parseLong(properties.getProperty("seed"));
+			MasterSeed.setSeed(seed);
+		}
+
+		// train
+		String inputmodelFile = properties.getProperty("InputModelFile");
+		if (inputmodelFile == null) {
+			logger.info("No model file is given!!!");
+			System.exit(-1);
+		} else {
+			logger.info("Loading model file from " + inputmodelFile);
+			this.learner = AbstractLearner.loadmodel(inputmodelFile);
+		}
+		
+		
+		
 		this.readTestData();
 		Map<String, Double> perftestpreck = Evaluator.computePrecisionAtk(this.learner, this.testdata, 5);
 		
