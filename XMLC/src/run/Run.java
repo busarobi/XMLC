@@ -30,8 +30,7 @@ public class Run {
 			lm.eval();
 		} else if ( method.equals("-posteriors") ) {
 			ComputePosteriors lm = new ComputePosteriors(configFile);
-			lm.outputLabels();
-			lm.outputPosteriors();
+			lm.computePosteriorsAndOutputLabels();
 		} else if ( method.equals("-tune") ) {
 		} else if ( method.equals("-test") ) {			
 		} else {

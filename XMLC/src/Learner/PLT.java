@@ -50,13 +50,13 @@ public class PLT extends AbstractLearner {
 	transient protected int[] Tarray = null;	
 	protected double[] scalararray = null;
 
-	transient protected double gamma = 0; // learning rate
+	protected double gamma = 0; // learning rate
 	transient protected int step = 0;
 	static Sigmoid s = new Sigmoid();
 	transient protected double learningRate = 1.0;
 	protected double scalar = 1.0;
-	transient protected double lambda = 0.00001;
-	transient protected int epochs = 1;	
+	protected double lambda = 0.00001;
+	protected int epochs = 1;	
 	
 	Random shuffleRand = null;	
 	
@@ -95,6 +95,17 @@ public class PLT extends AbstractLearner {
 
 	}
 
+	public void printParameters() {
+		super.printParameters();
+		logger.info("#### gamma: " + this.gamma );
+		logger.info("#### lambda: " + this.lambda );		
+		logger.info("#### epochs: " + this.epochs );
+		logger.info("#### Hasher: " + this.hasher );
+		logger.info("#### Number of ML hashed features: " + this.hd );
+		logger.info("#### k (order of the tree): " + this.k );		
+	}
+	
+	
 	@Override
 	public void allocateClassifiers(AVTable data) {
 		this.traindata = data;

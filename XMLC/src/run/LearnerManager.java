@@ -156,8 +156,7 @@ public class LearnerManager {
 		
 	}
 
-	
-	public void eval() throws Exception {
+	public void loadmodel() throws Exception {
 		logger.info("Working Directory = " + System.getProperty("user.dir"));
 
 		this.learner = AbstractLearner.learnerFactory(properties);
@@ -173,12 +172,22 @@ public class LearnerManager {
 			logger.info("No model file is given!!!");
 			System.exit(-1);
 		} else {
+			logger.info("#################################################### ");
 			logger.info("Loading model file from " + inputmodelFile);
 			this.learner = AbstractLearner.loadmodel(inputmodelFile);
+			logger.info("Parameters of the loaded model ");
+			this.learner.printParameters();
+			logger.info("#################################################### ");
 		}
 		
-		
-		
+	
+	}	
+	
+	
+	
+	
+	public void eval() throws Exception {		
+		this.loadmodel();		
 		this.readTestData();
 		Map<String, Double> perftestpreck = Evaluator.computePrecisionAtk(this.learner, this.testdata, 5);
 		

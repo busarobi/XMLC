@@ -57,6 +57,10 @@ public abstract class AbstractLearner implements Serializable{
 		}
 	}
 
+	public void printParameters() {
+		logger.info("Number of labels: " + this.m);
+		logger.info("Number of features: " + this.d);
+	}
 	
 	public static AbstractLearner learnerFactory( Properties properties ) {
 		AbstractLearner learner = null;

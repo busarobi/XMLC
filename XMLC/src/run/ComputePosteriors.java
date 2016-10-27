@@ -185,24 +185,6 @@ public class ComputePosteriors extends LearnerManager {
 		DataReader.writeLabels(this.labelFileTest, this.testdata);
 	}
 
-	public void loadModel() throws Exception {
-		this.learner = AbstractLearner.learnerFactory(properties);
-
-		if (properties.containsKey("seed")) {
-			long seed = Long.parseLong(properties.getProperty("seed"));
-			MasterSeed.setSeed(seed);
-		}
-
-		String inputmodelFile = properties.getProperty("InputModelFile");
-		if (inputmodelFile == null) {
-			System.err.println("No model file is given!!!");
-			System.exit(-1);
-		} else {
-			logger.info("Loading model file...");
-			this.learner = AbstractLearner.loadmodel(inputmodelFile);
-		}
-
-	}
 
 //	public void readValidData() throws Exception {
 //		String validFileName = properties.getProperty("ValidFile");
@@ -216,6 +198,15 @@ public class ComputePosteriors extends LearnerManager {
 //		}
 //	}
 
+    public void computePosteriorsAndOutputLabels() throws Exception {
+		this.loadmodel();
+		this.readTestData();
+		this.outputLabels();
+		this.outputPosteriors();
+    }
+    
+	
+	
 	public static void main(String[] args) throws Exception {
 		logger.info("Working Directory = " + System.getProperty("user.dir"));
 
@@ -228,7 +219,7 @@ public class ComputePosteriors extends LearnerManager {
 		ComputePosteriors lm = new ComputePosteriors(args[0]);
 
 		// input
-		lm.loadModel();
+		lm.loadmodel();
 		//lm.readValidData();
 		lm.readTestData();
 
