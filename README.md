@@ -1,17 +1,23 @@
 # XMLC [![Build Status](https://travis-ci.org/busarobi/XMLC.svg?branch=master)](https://travis-ci.org/busarobi/XMLC)
-Extreme Classification: Probabilistic Label Tree
+# Extreme Classification: Probabilistic Label Tree for F-measure optimization
 
 This package implements the F-measure optimization method for Extreme Multi-Label Classification by using __Probabilistic Label Tree (PLT)__ proposed by:
 
 Kalina Jasinska, Krzysztof Dembczynski, Robert Busa-Fekete, Karlson Pfannschmidt, Timo Klerx and Eyke Hullermeier, __Extreme F-measure Maximization using Sparse Probability Estimates__, *Proceedings of the 33nd International Conference on Machine Learning, (ICML'16), New York City, NY, USA, June 19-24,* p.1435-1444, 2016, [pdf](http://jmlr.org/proceedings/papers/v48/jasinska16.html)
 
+The package consists of two moduls. The first modul trains the model and outputs the model which implements a PLT. The PLT model is able to provide sparse probability estimates, that is, it is able to compute the posteriors that exceed a predifened threshold in an efficient way. Building on this mechanism, the second modul implements some efficient threshold tuning algorithms for the posterios that optimizes the macro F-measure. For more detail, please read our paper cited above, or contact us! 
+
+Next, we briefly describe how to get started.
+ 
  
 Download and compile jar
 ========================
 
 
 > git clone -b cleanup https://github.com/busarobi/XMLC
+
 > mvn compile package 
+
 > java -jar ./target/XMLC-0.0.1-SNAPSHOT-jar-with-dependencies.jar mode configfile 
  
 The package consists of three use cases:
