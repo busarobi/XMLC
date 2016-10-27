@@ -52,7 +52,7 @@ public class PLT extends AbstractLearner {
 
 	transient protected double gamma = 0; // learning rate
 	transient protected int step = 0;
-	transient Sigmoid s = new Sigmoid();
+	protected Sigmoid s = new Sigmoid();
 	transient protected double learningRate = 1.0;
 	protected double scalar = 1.0;
 	transient protected double lambda = 0.00001;
