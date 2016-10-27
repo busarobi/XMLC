@@ -18,15 +18,16 @@ Download and compile jar
 
 > mvn compile package 
 
-> java -jar ./target/XMLC-0.0.1-SNAPSHOT-jar-with-dependencies.jar mode configfile 
+Having executed these two commands, you should find a jar called **XMLC_PLT-jar-with-dependencies.jar** in root directory of git project.
  
-The package consists of three use cases:
+The package implements the following use cases:
 =========================================
  
- 1. Train PLT
- 2. Output posteriors based the trained model
- 3. Tune thresholds for optimizing the Macro F-measure
- 4. Compute the prediction based on a model and corresponding thresholds that were validated for macro F-measreu
+ 1. *-train* Train PLT
+ 1. *-eval* Evaluate the model on a given test file
+ 2. *-posteriors* Output posteriors based on a model
+ 3. *-tune* Tune thresholds for optimizing the Macro F-measure
+ 4. Compute the prediction based on a model and corresponding thresholds that were validated for macro F-measure
 
 
 
@@ -35,7 +36,7 @@ The package consists of three use cases:
 
 The parameters are taken from config file. There is a sample config file for training PLT on the RCV1 dataset that is available from the [Extreme Classification Repository](http://research.microsoft.com/en-us/um/people/manik/downloads/XC/XMLRepository.html).
 
-As a fist step, please download this dataset from the reopository. Next, set the path to the trainng file in ./examples/rcv1_train.config. And run the training method by 
+As a fist step, please download this dataset from the repository. Next, set the path to the trainng file in ./examples/rcv1_train.config. And run the training method by 
 
 >java -Xmx12G -jar XMLC_PLT-jar-with-dependencies.jar -train ./examples/rcv1_train.config 
 

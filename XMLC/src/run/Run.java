@@ -28,13 +28,15 @@ public class Run {
 		if ( method.equals("-train") ) {
 			LearnerManager lm = new LearnerManager(configFile);
 			lm.train();
-		} else if ( method.equals("-test") ) {
+		} else if ( method.equals("-eval") ) {
 			LearnerManager lm = new LearnerManager(configFile);
 			lm.test();
 		} else if ( method.equals("-posteriors") ) {
 			ComputePosteriors lm = new ComputePosteriors(configFile);
 			lm.outputLabels();
 			lm.outputPosteriors();
+		} else if ( method.equals("-tune") ) {
+		} else if ( method.equals("-test") ) {			
 		} else {
 			logger.error("Unkonw method in run!!!");
 			System.exit(-1);
