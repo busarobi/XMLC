@@ -1,9 +1,11 @@
 # XMLC [![Build Status](https://travis-ci.org/busarobi/XMLC.svg?branch=master)](https://travis-ci.org/busarobi/XMLC)
 Extreme Classification: Probabilistic Label Tree
 
-This package implements the F-measure optimization method for Extreme Multi-Label Classification by using Probabilistic Label Tree (PLT) proposed by:
+This package implements the F-measure optimization method for Extreme Multi-Label Classification by using __Probabilistic Label Tree (PLT)__ proposed by:
 
 @inproceedings{JasinskaDBPKH16,
+
+
   author    = {Kalina Jasinska and
                Krzysztof Dembczynski and
                R{\'{o}}bert Busa{-}Fekete and
@@ -21,9 +23,9 @@ This package implements the F-measure optimization method for Extreme Multi-Labe
  
  The packege consists of three use cases:
  
- 1) Train PLT
- 2) Output posteriors based the trained model
- 3) Tune thresholds for optimizing the Macro F-measure
- 4) Compute the prediction based on a model and corresponding thresholds that were validated for macro F-measreu
+ 1. Train PLT
+ 2. Output posteriors based the trained model
+ 3. Tune thresholds for optimizing the Macro F-measure
+ 4. Compute the prediction based on a model and corresponding thresholds that were validated for macro F-measreu
  
  
