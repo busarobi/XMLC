@@ -413,7 +413,7 @@ public class TuneThresholds {
 		TuneThresholds th = new TuneThresholds(args[0]);
 		
 		th.loadPosteriors();
-		th.addTestDataInforToResult();
+		th.addDataInfoToResult();
 		
 		th.tuneThresholdFTA();
 		th.tuneThresholdEUM();
@@ -423,7 +423,7 @@ public class TuneThresholds {
 		th.writeOutResult();
 	}
 
-	protected void addTestDataInforToResult() {
+	protected void addDataInfoToResult() {
 		this.resultString += "##########################################################################\n";
 		
 		this.resultString += "GEN,Num of labels,"+this.m + "\n";

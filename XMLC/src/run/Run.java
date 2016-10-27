@@ -32,6 +32,18 @@ public class Run {
 			ComputePosteriors lm = new ComputePosteriors(configFile);
 			lm.computePosteriorsAndOutputLabels();
 		} else if ( method.equals("-tune") ) {
+			TuneThresholds th = new TuneThresholds(configFile);
+			
+			th.loadPosteriors();
+			th.addDataInfoToResult();
+			
+			th.tuneThresholdFTA();
+			th.tuneThresholdEUM();
+			th.tuneThresholdOFO();
+			//th.tuneThresholdEXU();
+			
+			th.writeOutResult();
+			
 		} else if ( method.equals("-test") ) {			
 		} else {
 			logger.error("Unkonw method in run!!!");
