@@ -29,8 +29,8 @@ import threshold.TTExuFast;
 import threshold.TTOfoFast;
 import threshold.ThresholdTuning;
 
-public class MainThresholdTuning {
-	private static Logger logger = LoggerFactory.getLogger(MainThresholdTuning.class);
+public class TuneThresholds {
+	private static Logger logger = LoggerFactory.getLogger(TuneThresholds.class);
 	protected String resultString = "";
 	protected String outFileName = "";
 	
@@ -57,7 +57,7 @@ public class MainThresholdTuning {
 	protected boolean fastxml = false;
 	
 	
-	public MainThresholdTuning(String fname) throws IOException {		
+	public TuneThresholds(String fname) throws IOException {		
 		this.properties = this.readProperty(fname);
 		
 		logger.info("#####################################################" );
@@ -410,7 +410,7 @@ public class MainThresholdTuning {
 			System.exit(-1);
 		}
 		
-		MainThresholdTuning th = new MainThresholdTuning(args[0]);
+		TuneThresholds th = new TuneThresholds(args[0]);
 		
 		th.loadPosteriors();
 		th.addTestDataInforToResult();
