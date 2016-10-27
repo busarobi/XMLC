@@ -39,22 +39,28 @@ The parameters are taken from a config file. There is a sample config file for t
 
 As a fist step, please download this dataset from the repository. Next, set the path to the training file in ./examples/rcv1_train.config. And run the training method by 
 
->java -Xmx12G -jar XMLC_PLT-jar-with-dependencies.jar -train ./examples/rcv1_train.config 
+> java -Xmx12G -jar XMLC_PLT-jar-with-dependencies.jar -train ./examples/rcv1_train.config 
 
-The model file is saved to directory which is defined by the parameter called ModelFile.
+The model file is saved to directory which is defined by the parameter called *ModelFile*.
 
 2. Evaluate a model
 ===================
 
-To evaluate a model, call the same jar by using **"-eval'** as second command line parameter. The parameter *TestFile* needs to be set to the path to the test file and the *InputModelFile* to the model file. For example, if one wants to evaualte the model build in the previous step, the following comment should be executed: 
+To evaluate a model, call the same jar by using **"-eval'** as second command line parameter. The parameter *TestFile* needs to be set to the path to the test file and the *InputModelFile* to the model file. For example, if one wants to evaluate the model build in the previous step, the following comment should be executed: 
 
->java -Xmx12G -jar XMLC_PLT-jar-with-dependencies.jar -train ./examples/rcv1_test.config
+> java -Xmx12G -jar XMLC_PLT-jar-with-dependencies.jar -eval ./examples/rcv1_eval.config
 
 The model will be evaluated in terms of Precision@K where K = {1,2,3,4,5}. Other evaluation metric can be easily implemented in the class *IO.Evaluator*
 
 
 3. Compute posteriors
 ======================
+
+To compute the posteriors for a given dataset, one needs give **"-posterios'** as second command line parameter and then the config file as follows:
+
+> java -Xmx12G -jar XMLC_PLT-jar-with-dependencies.jar -posteriors ./examples/rcv1_eval.config
+
+
   
 
 
