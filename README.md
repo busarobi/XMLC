@@ -27,3 +27,11 @@ The package consists of three use cases:
 1. Train PLT
 ============= 
 
+The parameters are taken from config file. There is a sample config file for training PLT on the RCV1 dataset that is available from the [Extreme Classification Repository](http://research.microsoft.com/en-us/um/people/manik/downloads/XC/XMLRepository.html).
+
+As a fist step, please download this dataset from the reopository. Next, set the path to the trainng file in ./examples/rcv1_train.config. And run the training method by 
+
+>java -Xmx12G -jar XMLC_PLT-jar-with-dependencies.jar -train ./examples/rcv1_train.config 
+
+The model file is saved in *./examples/model_ontrain.model*
+
