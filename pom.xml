@@ -42,7 +42,7 @@
 					</descriptorRefs>
 					<archive>
 						<manifest>
-							<mainClass>Learner.TuneHyperParameters</mainClass>
+							<mainClass>run.Run</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

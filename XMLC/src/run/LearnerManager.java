@@ -13,7 +13,6 @@ import Data.AVTable;
 import IO.DataReader;
 import IO.Evaluator;
 import Learner.AbstractLearner;
-import preprocessing.FeatureHasher;
 import threshold.TTEum;
 import threshold.TTEumFast;
 import threshold.TTExuFast;
@@ -78,7 +77,7 @@ public class LearnerManager {
 		}
 	}
 
-	public void train() throws Exception {
+	public void trainorrelod() throws Exception {
 		this.learner = AbstractLearner.learnerFactory(properties);
 
 		if (properties.containsKey("seed")) {
@@ -104,6 +103,28 @@ public class LearnerManager {
 
 	}
 
+	public void train() throws Exception {
+		this.learner = AbstractLearner.learnerFactory(properties);
+
+		if (properties.containsKey("seed")) {
+			long seed = Long.parseLong(properties.getProperty("seed"));
+			MasterSeed.setSeed(seed);
+		}
+
+		// train
+		this.readTrainData();
+		learner.allocateClassifiers(traindata);
+		learner.train(traindata);
+
+		String modelFile = properties.getProperty("ModelFile", null);
+		if (modelFile != null) {
+			logger.info("Saving model file to " + modelFile );
+			learner.savemodel(modelFile);			
+		}
+
+	}
+	
+	
 	public void compositeEvaluation() {
 
 		Map<String, Double> perfvalidpreck = Evaluator.computePrecisionAtk(this.learner, this.validdata, 5);
@@ -122,24 +143,41 @@ public class LearnerManager {
 
 	}
 
-	public static void main(String[] args) throws Exception {
+	public void run() throws Exception {
+		logger.info("Working Directory = " + System.getProperty("user.dir"));
+		
+		// lm.readTrainData();
+		this.trainorrelod();
+
+		this.readValidData();
+		this.readTestData();
+
+		this.compositeEvaluation();
+		
+	}
+
+	
+	public void test() throws Exception {
 		logger.info("Working Directory = " + System.getProperty("user.dir"));
 
+		this.readTestData();
+		Map<String, Double> perftestpreck = Evaluator.computePrecisionAtk(this.learner, this.testdata, 5);
+		
+		for (String perfName : perftestpreck.keySet()) {
+			logger.info("##### Test " + perfName + ": " + perftestpreck.get(perfName));
+		}		
+	}
+	
+	
+	public static void main(String[] args) throws Exception {
 		// read properties
 		if (args.length < 1) {
 			logger.info("No config file given!");
 			System.exit(-1);
 		}
-
+		
 		LearnerManager lm = new LearnerManager(args[0]);
-		// lm.readTrainData();
-		lm.train();
-
-		lm.readValidData();
-		lm.readTestData();
-
-		lm.compositeEvaluation();
-
+		lm.run();
 	}
 
 	public Properties getProperties() {
