@@ -4,9 +4,6 @@ package run;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import Learner.AbstractLearner;
-import util.MasterSeed;
-
 public class Run {
 	private static Logger logger = LoggerFactory.getLogger(Run.class);
 	
@@ -21,7 +18,7 @@ public class Run {
 		String method = args[0];
 		String configFile = args[1];
 		
-		logger.info( "--> Method: " + method );
+		logger.info( "--> Use case: " + method );
 		logger.info( "--> Config file" + configFile );
 		
 		
