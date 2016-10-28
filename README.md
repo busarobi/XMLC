@@ -92,6 +92,8 @@ To tune the threshold and output them into a file please run:
 
 As a last step, one can predict labels by using the trained model and the macro F-measure optimized thresholds. For doing this please run:
 
+>java -Xmx12G -jar XMLC_PLT-jar-with-dependencies.jar -test ./examples/rcv1_test.config
+
 
 
 

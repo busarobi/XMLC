@@ -18,6 +18,9 @@ import Data.AVTable;
 import IO.DataReader;
 import IO.Evaluator;
 import IO.ReadProperty;
+import threshold.TTEumFast;
+import threshold.TTOfoFast;
+import threshold.ThresholdTuning;
 
 public class SimpleTuner {
 	private static Logger logger = LoggerFactory.getLogger(SimpleTuner.class);
@@ -111,7 +114,7 @@ public class SimpleTuner {
 		}
 	}
 
-	protected double[] tuneThresholdFTA() {
+	protected double[] tuneThreshold() {
 
 		double optimalThreshold = 0.0;
 		double optimalScore = -1.0;
@@ -124,20 +127,37 @@ public class SimpleTuner {
 			// properties.setProperty("minThreshold",
 			// Double.toString(this.thresholdForEUM[i]));
 			// ThresholdTuning theum = new TTEumFast( this.m, properties );
-			double[] thresholds = new double[this.m];
-			for (int j = 0; j < this.m; j++)
-				thresholds[j] = this.thresholdForEUM[i];
+			double[] thresholds = null;
+			if (this.method.compareTo("FTA") == 0) {
+				thresholds = new double[this.m];
+				for (int j = 0; j < this.m; j++)
+					thresholds[j] = this.thresholdForEUM[i];				 
+			} else if (this.method.compareTo("STO") == 0) {
+				properties.setProperty("minThreshold", Double.toString(this.thresholdForEUM[i]));
+				ThresholdTuning theum = new TTEumFast( this.m, properties );
+				thresholds = theum.validate(this.validlabels, this.validposteriors);				
+			} else if (this.method.compareTo("STO") == 0) {
+				properties.setProperty("b", Integer.toString(this.barray[i]));
+				ThresholdTuning tofo = new TTOfoFast( this.m, properties );
+				thresholds = tofo.validate(this.validlabels, this.validposteriors);				
+			} else {
+				logger.info("Unknown threshold tuning method.");
+				System.exit(-1);
+			}
 
+			
+			
 			// compute the positive labels
 			HashSet<Integer>[] positiveLabelsArray = getPositiveLabels(this.validlabels, this.validposteriors,
 					thresholds);
 			// compute F-measure
 			Map<String, Double> perf = Evaluator.computePerformanceMetrics(positiveLabelsArray, this.validlabels);
 
-			for (String perfName : perf.keySet()) {
-				logger.info("##### FTA valid " + perfName + ": " + fmt(perf.get(perfName)));
-			}
+//			for (String perfName : perf.keySet()) {
+//				logger.info("##### FTA valid " + perfName + ": " + fmt(perf.get(perfName)));
+//			}
 			double score = perf.get(" macro F-measure");
+			logger.info("##### Macro F-measure: " + score );
 			if (optimalScore < score) {
 				optimalThreshold = this.thresholdForEUM[i];
 				score = optimalScore;
@@ -161,15 +181,7 @@ public class SimpleTuner {
 	public void tune() throws Exception {
 		this.loadPosteriors();
 
-		double[] thresholds = null;
-		if (this.method.compareTo("FTA") == 0) {
-			thresholds = this.tuneThresholdFTA();
-		} else if (this.method.compareTo("STO") == 0) {
-		} else if (this.method.compareTo("STO") == 0) {
-		} else {
-			logger.info("Unknown threshold tuning method.");
-			System.exit(-1);
-		}
+		double[] thresholds = this.tuneThreshold();;
 		writeArrayToFile(this.thresholdFileName, thresholds);
 	}
 
