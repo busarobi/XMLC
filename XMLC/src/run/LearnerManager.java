@@ -1,8 +1,17 @@
 package run;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
 
@@ -122,6 +131,40 @@ public class LearnerManager {
 			learner.savemodel(modelFile);			
 		}
 
+	}
+	
+	
+	public void forecast() throws Exception {
+		this.readTestData();
+		this.loadmodel();
+		double[] thresholds = this.readThreshold();
+		this.learner.setThresholds(thresholds);
+		
+		String outFile = properties.getProperty("OutdFile", null);
+		BufferedWriter bf = new BufferedWriter(new FileWriter(outFile) );
+		for( int i = 0; i < this.testdata.n; i++ ){
+			HashSet<Integer> posLabels = this.learner.getPositiveLabels( this.testdata.x[i]);
+			for( Integer lab : posLabels ){
+				bf.write("" + lab + " " );
+			}
+			bf.write("\n");
+		}
+		bf.close();
+	}
+	
+	
+	public double[] readThreshold() throws Exception {
+		String thresholdFile = properties.getProperty("ThresholdFile", null);
+		double[] thresholds = new double[this.learner.getNumberOfLabels()];
+		
+		
+		BufferedReader fp = new BufferedReader(new FileReader(thresholdFile));
+		for(int i = 0; i < this.learner.getNumberOfLabels(); i++ ) {
+			thresholds[i] = Double.parseDouble(fp.readLine());
+		}		
+		fp.close();
+		
+		return thresholds;
 	}
 	
 	

@@ -31,10 +31,15 @@ public class Run {
 		} else if ( method.equals("-posteriors") ) {
 			ComputePosteriors lm = new ComputePosteriors(configFile);
 			lm.computePosteriorsAndOutputLabels();
+		} else if ( method.equals("-validatethresholds") ) {
+			TuneThresholds th = new TuneThresholds(configFile);
+			th.compositeTuning();
 		} else if ( method.equals("-tune") ) {
 			TuneThresholds th = new TuneThresholds(configFile);
-			th.compositeTuning();				
-		} else if ( method.equals("-test") ) {			
+			th.compositeTuning();							
+		} else if ( method.equals("-test") ) {
+			LearnerManager lm = new LearnerManager(configFile);
+			lm.forecast();
 		} else {
 			logger.error("Unkonw method in run!!!");
 			System.exit(-1);
