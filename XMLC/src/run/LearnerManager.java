@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import Data.AVTable;
 import IO.DataReader;
 import IO.Evaluator;
+import IO.ReadProperty;
 import Learner.AbstractLearner;
 import threshold.TTEum;
 import threshold.TTEumFast;
@@ -41,29 +42,11 @@ public class LearnerManager {
 	protected AbstractLearner learner = null;
 
 	public LearnerManager(String fname) {
-		properties = readProperty(fname);
+		properties = ReadProperty.readProperty(fname);
 
 		this.isHeader = Boolean.parseBoolean(properties.getProperty("IsHeader"));
 	}
 
-	public Properties readProperty(String fname) {
-		logger.info("Reading property file...");
-		Properties properties = new Properties();
-		try {
-			FileInputStream in = new FileInputStream(fname);
-			properties.load(in);
-			in.close();
-		} catch (FileNotFoundException e) {
-			System.err.println(e.getMessage());
-			System.exit(-1);
-		} catch (IOException e) {
-			System.err.println(e.getMessage());
-			System.exit(-1);
-		}
-		logger.info("Done.");
-
-		return properties;
-	}
 
 	public void readTrainData() throws Exception {
 		DataReader datareader = new DataReader(properties.getProperty("TrainFile"), false, this.isHeader);

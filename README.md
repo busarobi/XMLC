@@ -25,10 +25,10 @@ The package implements the following use cases:
 =========================================
  
  1. **"-train"** Train PLT
- 1. **"-eval"** Evaluate the model on a given test file
- 2. **"-posteriors"** Output posteriors based on a model
- 3. **"-tune"** Tune thresholds for optimizing the Macro F-measure
- 4. **"-test"** Compute the prediction based on a model and corresponding thresholds that were validated for macro F-measure
+ 2. **"-eval"** Evaluate the model on a given test file
+ 3. **"-posteriors"** Output posteriors based on a model
+ 4. **"-tune"** Tune thresholds for optimizing the Macro F-measure
+ 5. **"-test"** Compute the prediction based on a model and corresponding thresholds that were validated for macro F-measure
 
 
 
@@ -70,5 +70,22 @@ There are three parameters that are needed to set in the config file:
 4. *InputModelFile* which defines the model files
 
  
+4. Tune the thresholds
+=======================
+
+There are three threshold tuning methods are implemented:
+
+1. Fixed thresholds approach (FTA)
+2. Search-based threshold optimization (STO)
+3. Online F-measure optimization (OFO)
+
+See Section 4 in our paper cited above.
+
+
+
+
+5. Predict labels by using thresholding
+========================================
+
 
 

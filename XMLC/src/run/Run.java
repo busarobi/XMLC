@@ -35,7 +35,7 @@ public class Run {
 			TuneThresholds th = new TuneThresholds(configFile);
 			th.compositeTuning();
 		} else if ( method.equals("-tune") ) {
-			TuneThresholds th = new TuneThresholds(configFile);
+			SimpleTuner th = new SimpleTuner(configFile);
 			th.tune();							
 		} else if ( method.equals("-test") ) {
 			LearnerManager lm = new LearnerManager(configFile);

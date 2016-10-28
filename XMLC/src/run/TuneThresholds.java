@@ -123,11 +123,7 @@ public class TuneThresholds {
 	    	this.thresholdForEUM[i] = 1.0 / ((double)this.barray[i]);
 	    }	    
 	}
-	
-	public void tune() {
-		System.exit(-1);
-	}
-	
+		
 	
 	protected void loadPosteriors() throws Exception {
 		DataReader testdatareader = new DataReader(this.labelFileTest, false, false);
@@ -400,7 +396,7 @@ public class TuneThresholds {
 		return positiveLabelsArray;
 	}
 	
-	
+
 
 	public void compositeTuning() throws Exception {
 		this.loadPosteriors();

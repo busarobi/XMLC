@@ -123,26 +123,6 @@ public class GridSearch extends LearnerManager {
 
 	}
 
-	@Override
-	public Properties readProperty(String fname) {
-		logger.info("Reading property file...");
-		Properties properties = new Properties();
-		try {
-			FileInputStream in = new FileInputStream(fname);
-			properties.load(in);
-			in.close();
-		} catch (FileNotFoundException e) {
-			System.err.println(e.getMessage());
-			System.exit(-1);
-		} catch (IOException e) {
-			System.err.println(e.getMessage());
-			System.exit(-1);
-		}
-		logger.info("Done.");
-
-		return properties;
-	}
-
 	public GridSearch(String pfname) {
 		super(pfname);
 		try {
