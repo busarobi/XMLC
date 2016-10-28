@@ -124,6 +124,10 @@ public class TuneThresholds {
 	    }	    
 	}
 	
+	public void tune() {
+		System.exit(-1);
+	}
+	
 	
 	protected void loadPosteriors() throws Exception {
 		DataReader testdatareader = new DataReader(this.labelFileTest, false, false);
