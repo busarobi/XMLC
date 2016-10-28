@@ -61,7 +61,7 @@ public class TuneThresholds {
 		this.properties = this.readProperty(fname);
 		
 		logger.info("#####################################################" );
-		logger.info("#### LearnerOutputPosteriors" );
+		logger.info("#### Composite tuning" );
 		
 		if (!this.properties.containsKey("ValidPostFile")) {
 			logger.info("No valid posterior file is given!");

@@ -21,8 +21,6 @@ import IO.ReadProperty;
 
 public class SimpleTuner {
 	private static Logger logger = LoggerFactory.getLogger(SimpleTuner.class);
-	// protected String resultString = "";
-	protected String outFileName = "";
 	protected String thresholdFileName = "";
 	protected String method = "";
 
@@ -46,7 +44,7 @@ public class SimpleTuner {
 		this.properties = ReadProperty.readProperty(fname);
 
 		logger.info("#####################################################");
-		logger.info("#### LearnerOutputPosteriors");
+		logger.info("#### Tuning the thresholds ");
 
 		if (!this.properties.containsKey("ValidPostFile")) {
 			logger.info("No valid posterior file is given!");
@@ -63,14 +61,6 @@ public class SimpleTuner {
 
 		this.lableFileValid = this.properties.getProperty("ValidLabelFile");
 		logger.info("### Valid label file: " + this.lableFileValid);
-
-		if (!this.properties.containsKey("OutFile")) {
-			logger.info("OutFile file is not given!");
-			System.exit(-1);
-		}
-
-		this.outFileName = this.properties.getProperty("OutFile");
-		logger.info("### OutFile: " + this.outFileName);
 
 		if (!this.properties.containsKey("ThresholdFile")) {
 			logger.info("OutFile file is not given!");
@@ -180,7 +170,7 @@ public class SimpleTuner {
 			logger.info("Unknown threshold tuning method.");
 			System.exit(-1);
 		}
-		writeArrayToFile(this.outFileName, thresholds);
+		writeArrayToFile(this.thresholdFileName, thresholds);
 	}
 
 	protected void writeArrayToFile(String filename, double[] array) throws IOException {
