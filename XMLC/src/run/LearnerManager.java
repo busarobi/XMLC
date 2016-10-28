@@ -122,8 +122,9 @@ public class LearnerManager {
 		this.loadmodel();
 		double[] thresholds = this.readThreshold();
 		this.learner.setThresholds(thresholds);
-		
-		String outFile = properties.getProperty("OutdFile", null);
+				
+		String outFile = properties.getProperty("OutFile", null);
+		logger.info("Print forecast to " + outFile );
 		BufferedWriter bf = new BufferedWriter(new FileWriter(outFile) );
 		for( int i = 0; i < this.testdata.n; i++ ){
 			HashSet<Integer> posLabels = this.learner.getPositiveLabels( this.testdata.x[i]);

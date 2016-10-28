@@ -79,13 +79,19 @@ There are three threshold tuning methods are implemented:
 2. Search-based threshold optimization (STO)
 3. Online F-measure optimization (OFO)
 
-See Section 4 in our paper cited above.
+See Section 4 in the paper cited above.
 
+To tune the threshold and output them into a file please run:
+
+> java -Xmx12G -jar XMLC_PLT-jar-with-dependencies.jar -tune ./examples/rcv1_threshold_tuning.config 
 
 
 
 5. Predict labels by using thresholding
 ========================================
+
+As a last step, one can predict labels by using the trained model and the macro F-measure optimized thresholds. For doing this please run:
+
 
 
 
