@@ -1,9 +1,11 @@
 package run;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
@@ -119,7 +121,7 @@ public class SimpleTuner {
 		}
 	}
 
-	public double[] tuneThresholdFTA() {
+	protected double[] tuneThresholdFTA() {
 
 		double optimalThreshold = 0.0;
 		double optimalScore = -1.0;
@@ -178,9 +180,18 @@ public class SimpleTuner {
 			logger.info("Unknown threshold tuning method.");
 			System.exit(-1);
 		}
-
+		writeArrayToFile(this.outFileName, thresholds);
 	}
 
+	protected void writeArrayToFile(String filename, double[] array) throws IOException {
+		BufferedWriter bf = new BufferedWriter(new FileWriter(filename) );
+		for(int i = 0; i < array.length; i++ ) {
+			bf.write(array[i] + "\n");
+		}
+		bf.close();
+	}
+	
+	
 	protected HashSet<Integer>[] getPositiveLabels(AVTable labels, AVTable posteriors, double[] thresholds) {
 		HashSet<Integer>[] positiveLabelsArray = new HashSet[labels.n];
 		for (int i = 0; i < labels.n; i++) {
