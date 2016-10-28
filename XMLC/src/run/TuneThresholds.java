@@ -173,7 +173,7 @@ public class TuneThresholds {
 		return min;		
 	}
 	
-	
+/*	
 	private HashSet<EstimatePair>[] readPosteriors( String fname, int n ) throws IOException {
 		BufferedReader fp = new BufferedReader(new FileReader(fname));
 		HashSet<EstimatePair>[] sPE = new HashSet[n];
@@ -194,6 +194,7 @@ public class TuneThresholds {
 		
 		return sPE;
 	}
+*/	
 	
 	public void tuneThresholdEUM() {		
 		for( int i=0; i < this.thresholdForEUM.length; i++ ) {
@@ -397,7 +398,18 @@ public class TuneThresholds {
 	
 	
 
-	
+	public void compositeTuning() throws Exception {
+		this.loadPosteriors();
+		this.addDataInfoToResult();
+		
+		this.tuneThresholdFTA();
+		this.tuneThresholdEUM();
+		this.tuneThresholdOFO();
+		
+		
+		this.writeOutResult();
+
+	}
 	
 
 	public static void main(String[] args) throws Exception {
