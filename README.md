@@ -14,7 +14,7 @@ Download and compile jar
 ========================
 
 
-> git clone -b cleanup https://github.com/busarobi/XMLC
+> git clone https://github.com/busarobi/XMLC
 
 > mvn compile package 
 
