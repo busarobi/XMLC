@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import Data.AVTable;
+import IO.DataManager;
 import IO.Evaluator;
 import Learner.AbstractLearner;
 import util.MasterSeed;
@@ -35,17 +36,17 @@ public class GridSearch extends LearnerManager {
 
 	class SimpleThread implements Runnable {
 		protected Properties properties = null;
-		protected AVTable testdata = null;
-		protected AVTable traindata = null;
-		protected AVTable validdata = null;
+		protected DataManager testdata = null;
+		protected DataManager traindata = null;
+		protected DataManager validdata = null;
 		protected String info = "";
 		protected boolean ready = false;
 
-		public SimpleThread(Properties prop, AVTable train, AVTable valid, AVTable test, String info) {
+		public SimpleThread(Properties prop, DataManager train, DataManager valid, DataManager test, String info) {
 			this.properties = prop;
-			this.traindata = train;
-			this.validdata = valid;
-			this.testdata = test;
+			this.traindata = train.getCopy();
+			this.validdata = valid.getCopy();
+			this.testdata = test.getCopy();
 			this.info = info;
 		}
 
