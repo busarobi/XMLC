@@ -23,10 +23,10 @@ public class OnlineDataManager extends DataManager {
 	protected int processedItem = 0;
 	public OnlineDataManager(String filename) {
 		this.filename = filename;		
-		//this.blockingQueue = new ArrayBlockingQueue<Instance>(this.bufferSize);
+		this.blockingQueue = new ArrayBlockingQueue<Instance>(this.bufferSize);
 		this.readerthread = new ReaderThread(this.blockingQueue, this.filename);
-		//this.rthread = new Thread(this.readerthread);
-		//this.rthread.start();		
+		this.rthread = new Thread(this.readerthread);
+		this.rthread.start();		
 	}
 
 	@Override
