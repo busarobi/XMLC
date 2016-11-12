@@ -20,6 +20,8 @@ import org.slf4j.LoggerFactory;
 import Data.AVTable;
 import Data.ComparablePair;
 import Data.EstimatePair;
+import Data.Instance;
+import IO.DataManager;
 import IO.DataReader;
 import IO.Evaluator;
 import Learner.AbstractLearner;
@@ -100,13 +102,17 @@ public class ComputePosteriors extends LearnerManager {
 //		bf.close();
 //	}
 
-	public void writePosteriorsToFile(AbstractLearner learner, AVTable data, String fname) throws IOException {
+	public void writePosteriorsToFile(AbstractLearner learner, DataManager data, String fname) throws IOException {
 		logger.info("Output posteriors to " + fname);
 		BufferedWriter bf = new BufferedWriter(new FileWriter(fname));
 
 		int numOfPositives = 0;
-		for (int i = 0; i < data.n; i++) {
-			PriorityQueue<ComparablePair> sPE = learner.getPositiveLabelsAndPosteriors(data.x[i]);
+		int counter = 0;
+		while( data.hasNext() == true ) {
+			Instance instance = data.getNextInstance();
+			counter++;
+			
+			PriorityQueue<ComparablePair> sPE = learner.getPositiveLabelsAndPosteriors(instance.x);
 
 			numOfPositives += sPE.size();
 
@@ -125,12 +131,12 @@ public class ComputePosteriors extends LearnerManager {
 
 			bf.write("\n");
 
-			if ((i % 100000) == 0) {
-				logger.info("\t --> Instance: " + i + " (" + data.n + ")");
+			if ((counter % 100000) == 0) {
+				logger.info("\t --> Instance: " + counter );
 				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 				Date date = new Date();
 				logger.info("\t\t" + dateFormat.format(date));
-				logger.info("\t\t Avg. num. of predicted positives: " + numOfPositives / (double) (i + 1));
+				logger.info("\t\t Avg. num. of predicted positives: " + numOfPositives / (double) (counter + 1));
 			}
 
 		}

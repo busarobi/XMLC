@@ -8,6 +8,8 @@ import Data.AVPair;
 import Data.AVTable;
 import Data.ComparablePair;
 import Data.EstimatePair;
+import IO.DataManager;
+import IO.DataReader;
 
 
 public class ConstantLearner extends AbstractLearner {
@@ -36,14 +38,14 @@ public class ConstantLearner extends AbstractLearner {
 
 	
 	@Override
-	public void allocateClassifiers(AVTable data) {
+	public void allocateClassifiers(DataManager data) {
 		// TODO Auto-generated method stub		
-		this.m = data.m;
-		this.d = data.d;
+		this.m = data.getNumberOfLabels();
+		this.d = data.getNumberOfLabels();
 	}
 
 	@Override
-	public void train(AVTable data) {
+	public void train(DataManager data) {
 		// TODO Auto-generated method stub
 
 	}

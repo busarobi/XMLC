@@ -19,6 +19,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import Data.AVTable;
+import Data.Instance;
+import IO.BatchDataManager;
+import IO.DataManager;
 import IO.DataReader;
 import IO.Evaluator;
 import IO.ReadProperty;
@@ -34,9 +37,9 @@ public class LearnerManager {
 	private static Logger logger = LoggerFactory.getLogger(LearnerManager.class);
 
 	protected Properties properties = null;
-	protected AVTable testdata = null;
-	protected AVTable traindata = null;
-	protected AVTable validdata = null;
+	protected DataManager testdata = null;
+	protected DataManager traindata = null;
+	protected DataManager validdata = null;
 	protected boolean isHeader = true;
 
 	protected AbstractLearner learner = null;
@@ -48,14 +51,12 @@ public class LearnerManager {
 	}
 
 
-	public void readTrainData() throws Exception {
-		DataReader datareader = new DataReader(properties.getProperty("TrainFile"), false, this.isHeader);
-		traindata = datareader.read();
+	public void readTrainData() throws Exception {		
+		traindata = new BatchDataManager(properties.getProperty("TrainFile")); 
 	}
 
-	public void readTestData() throws Exception {
-		DataReader testdatareader = new DataReader(properties.getProperty("TestFile"), false, this.isHeader);
-		testdata = testdatareader.read();
+	public void readTestData() throws Exception {		
+		testdata = new BatchDataManager(properties.getProperty("TestFile"));
 	}
 
 	public void readValidData() throws Exception {
@@ -63,9 +64,8 @@ public class LearnerManager {
 
 		if (validFileName == null) {
 			validdata = traindata;
-		} else {
-			DataReader validdatareader = new DataReader(properties.getProperty("ValidFile"), false, this.isHeader);
-			validdata = validdatareader.read();
+		} else {			
+			validdata = new BatchDataManager(properties.getProperty("ValidFile"));
 		}
 	}
 
@@ -126,8 +126,9 @@ public class LearnerManager {
 		String outFile = properties.getProperty("OutFile", null);
 		logger.info("Print forecast to " + outFile );
 		BufferedWriter bf = new BufferedWriter(new FileWriter(outFile) );
-		for( int i = 0; i < this.testdata.n; i++ ){
-			HashSet<Integer> posLabels = this.learner.getPositiveLabels( this.testdata.x[i]);
+		while(this.testdata.hasNext() == true ) {		
+			Instance instance = this.testdata.getNextInstance();
+			HashSet<Integer> posLabels = this.learner.getPositiveLabels( instance.x );
 			for( Integer lab : posLabels ){
 				bf.write("" + lab + " " );
 			}

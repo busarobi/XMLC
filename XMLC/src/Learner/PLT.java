@@ -17,26 +17,30 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import Data.AVPair;
-import Data.AVTable;
+//import Data.AVTable;
 import Data.ComparablePair;
 import Data.EstimatePair;
+import Data.Instance;
 import Data.NodeComparatorPLT;
 import Data.NodePLT;
+import IO.DataManager;
 import preprocessing.FeatureHasher;
 import preprocessing.FeatureHasherFactory;
 import util.CompleteTree;
 import util.MasterSeed;
+import util.Tree;
 
 public class PLT extends AbstractLearner {
 	private static final long serialVersionUID = 1L;
 	private static Logger logger = LoggerFactory.getLogger(PLT.class);
 	transient protected int t = 0;	
-	transient CompleteTree tree = null;
+	transient Tree tree = null;
 	
 	protected int k = 2;
 
 	transient protected int T = 1;
-	transient protected AVTable traindata = null;
+	//transient protected AVTable traindata = null;
+	transient protected DataManager traindata = null;
 	
 	
 	transient protected FeatureHasher fh = null;
@@ -79,7 +83,7 @@ public class PLT extends AbstractLearner {
 		logger.info("#### epochs: " + this.epochs );
 
 		// epochs
-		this.hasher = this.properties.getProperty("hasher", "Universal");
+		this.hasher = this.properties.getProperty("hasher", "Mask");
 		logger.info("#### Hasher: " + this.hasher );
 		
 		
@@ -107,10 +111,10 @@ public class PLT extends AbstractLearner {
 	
 	
 	@Override
-	public void allocateClassifiers(AVTable data) {
+	public void allocateClassifiers(DataManager data) {
 		this.traindata = data;
-		this.m = data.m;
-		this.d = data.d;
+		this.m = data.getNumberOfLabels();
+		this.d = data.getNumberOfFeatures();
 		
 		
 		this.tree = new CompleteTree(this.k, this.m);
@@ -142,37 +146,25 @@ public class PLT extends AbstractLearner {
 		Arrays.fill(this.scalararray, 1.0);
 	}
 
-	protected ArrayList<Integer> shuffleIndex() {
-		ArrayList<Integer> indirectIdx = new ArrayList<Integer>(this.traindata.n);
-		for (int i = 0; i < this.traindata.n; i++) {
-			indirectIdx.add(new Integer(i));
-		}
-		Collections.shuffle(indirectIdx, shuffleRand);
-		return indirectIdx;
-	}
-	
 	
 	@Override
-	public void train(AVTable data) {
-		
-		
-				
+	public void train(DataManager data) {		
 		for (int ep = 0; ep < this.epochs; ep++) {
 
 			logger.info("#############--> BEGIN of Epoch: {} ({})", (ep + 1), this.epochs );
 			// random permutation
-			ArrayList<Integer> indirectIdx = this.shuffleIndex();
+			data.reset();
 			
-			for (int i = 0; i < traindata.n; i++) {
-
-				int currIdx = indirectIdx.get(i);
+			while( data.hasNext() == true ){
+				
+				Instance instance = data.getNextInstance();
 
 				HashSet<Integer> positiveTreeIndices = new HashSet<Integer>();
 				HashSet<Integer> negativeTreeIndices = new HashSet<Integer>();
 
-				for (int j = 0; j < traindata.y[currIdx].length; j++) {
+				for (int j = 0; j < instance.y.length; j++) {
 
-					int treeIndex = this.tree.getTreeIndex(traindata.y[currIdx][j]); // + traindata.m - 1;
+					int treeIndex = this.tree.getTreeIndex(instance.y[j]); // + traindata.m - 1;
 					positiveTreeIndices.add(treeIndex);
 
 					while(treeIndex > 0) {
@@ -211,26 +203,26 @@ public class PLT extends AbstractLearner {
 
 				for(int j:positiveTreeIndices) {
 
-					double posterior = getPartialPosteriors(traindata.x[currIdx],j);
+					double posterior = getPartialPosteriors(instance.x,j);
 					double inc = -(1.0 - posterior); 
 
-					updatedPosteriors(currIdx, j, inc);
+					updatedPosteriors(instance.x, j, inc);
 				}
 
 				for(int j:negativeTreeIndices) {
 
 					if(j >= this.t) logger.info("ALARM");
 
-					double posterior = getPartialPosteriors(traindata.x[currIdx],j);
+					double posterior = getPartialPosteriors(instance.x,j);
 					double inc = -(0.0 - posterior); 
 					
-					updatedPosteriors(currIdx, j, inc);
+					updatedPosteriors(instance.x, j, inc);
 				}
 
 				this.T++;
 
-				if ((i % 100000) == 0) {
-					logger.info( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
+				if ((this.T % 100000) == 0) {
+					logger.info( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ this.T );
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
 					logger.info("\t\t" + dateFormat.format(date));
@@ -256,20 +248,20 @@ public class PLT extends AbstractLearner {
 	}
 
 
-	protected void updatedPosteriors( int currIdx, int label, double inc) {
+	protected void updatedPosteriors( AVPair[] x, int label, double inc) {
 			
 		this.learningRate = this.gamma / (1 + this.gamma * this.lambda * this.Tarray[label]);
 		this.Tarray[label]++;
 		this.scalararray[label] *= (1 + this.learningRate * this.lambda);
 		
-		int n = traindata.x[currIdx].length;
+		int n = x.length;
 		
 		for(int i = 0; i < n; i++) {
 
-			int index = fh.getIndex(label, traindata.x[currIdx][i].index);
-			int sign = fh.getSign(label, traindata.x[currIdx][i].index);
+			int index = fh.getIndex(label, x[i].index);
+			int sign = fh.getSign(label, x[i].index);
 			
-			double gradient = this.scalararray[label] * inc * (traindata.x[currIdx][i].value * sign);
+			double gradient = this.scalararray[label] * inc * (x[i].value * sign);
 			double update = (this.learningRate * gradient);// / this.scalar;		
 			this.w[index] -= update; 
 			

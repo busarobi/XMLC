@@ -17,9 +17,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import Data.AVPair;
-import Data.AVTable;
+//import Data.AVTable;
 import Data.ComparablePair;
 import Data.EstimatePair;
+import IO.DataManager;
 import threshold.ThresholdTuning;
 import util.IoUtils;
 
@@ -37,8 +38,8 @@ public abstract class AbstractLearner implements Serializable{
 	protected double[] thresholds = null;
 
 	// abstract functions
-	public abstract void allocateClassifiers( AVTable data );
-	public abstract void train( AVTable data );
+	public abstract void allocateClassifiers( DataManager data );
+	public abstract void train( DataManager data );
 	//public abstract Evaluator test( AVTable data );
 	public abstract double getPosteriors(AVPair[] x, int label);
 
@@ -82,14 +83,10 @@ public abstract class AbstractLearner implements Serializable{
 		return learner;		
 				
 	}
-	
-	//public void tuneThreshold( ThresholdTuning t, AVTable data ){
-	//	this.thresholds = t.validate(data, this);
-	//}
-	
-	public void tuneThreshold( ThresholdTuning t, AVTable data ){
-		this.setThresholds(t.validate(data, this));
-	}
+		
+//	public void tuneThreshold( ThresholdTuning t, DataManager data ){
+//		this.setThresholds(t.validate(data, this));
+//	}
 
 	public void setThresholds(double[] t) {		
 		for(int j = 0; j < t.length; j++) {
@@ -158,31 +155,27 @@ public abstract class AbstractLearner implements Serializable{
 	}
 	
 	
-	public void outputPosteriors( String fname, AVTable data )
-	{
-		try{
-			logger.info( "Saving posteriors (" + fname + ")..." );
-			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
-			          new FileOutputStream(fname)));
-			    
-			for(int i = 0; i< data.n; i++ ){
-				//HashSet<Integer> predictedLabels = this.getPositiveLabels(data.x[i]);
-				//List<Integer> sortedList = new ArrayList<Integer>(predictedLabels);
-				//Collections.sort(sortedList);
-				//for( int j : sortedList ){
-				for( int j = 0; j < this.m; j++ ){
-					writer.write( j + ":" + this.getPosteriors(data.x[i], j) + " " );
-				}
-				writer.write( "\n" );
-			}
-						
-			writer.close();
-			logger.info( "Done." );
-		} catch (IOException e) {
-			logger.info(e.getMessage());
-		}
-		
-	}
+//	public void outputPosteriors( String fname, DataManager data )
+//	{
+//		try{
+//			logger.info( "Saving posteriors (" + fname + ")..." );
+//			BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(
+//			          new FileOutputStream(fname)));
+//			    
+//			for(int i = 0; i< data.n; i++ ){
+//				for( int j = 0; j < this.m; j++ ){
+//					writer.write( j + ":" + this.getPosteriors(data.x[i], j) + " " );
+//				}
+//				writer.write( "\n" );
+//			}
+//						
+//			writer.close();
+//			logger.info( "Done." );
+//		} catch (IOException e) {
+//			logger.info(e.getMessage());
+//		}
+//		
+//	}
 	
 	public HashSet<EstimatePair> getSparseProbabilityEstimates(AVPair[] x, double threshold) {
 		

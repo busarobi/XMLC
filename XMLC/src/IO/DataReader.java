@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import Data.AVPair;
 import Data.AVTable;
+import Data.Instance;
 
 public class DataReader {
 	private static Logger logger = LoggerFactory.getLogger(DataReader.class);
@@ -42,7 +43,7 @@ public class DataReader {
 		this.initialline = initline;
 	}
 
-	public AVTable read() throws Exception
+	public AVTable read() throws IOException
 	{
 		logger.info( "Reading " + this.fileName + "..." );
 		
@@ -233,17 +234,17 @@ public class DataReader {
 		bf.close();
 	}
 
-	public static void writeLabels( String outfname, AVTable data ) throws IOException
+	public static void writeLabels( String outfname, DataManager data ) throws IOException
 	{
 		BufferedWriter bf = new BufferedWriter(new FileWriter(outfname) );
 		
-		for( int i = 0; i<data.n; i++)
-		{
+		while( data.hasNext() == true ) {
+			Instance instance = data.getNextInstance();
 			// labels
-			for(int j=0; j<data.y[i].length; j++ ) {
+			for(int j=0; j<instance.y.length; j++ ) {
 				//logger.info(data.y[i][j]);
-				bf.write(  "" + data.y[i][j]  );
-				if ( j < data.y[i].length - 1 )
+				bf.write(  "" + instance.y[j]  );
+				if ( j < instance.y.length - 1 )
 					bf.write( "," );
 				else
 					bf.write( "\n" );

@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import Data.AVPair;
 import Data.AVTable;
+import Data.Instance;
+import IO.DataManager;
 import preprocessing.FeatureHasher;
 import preprocessing.FeatureHasherFactory;
 import util.MasterSeed;
@@ -33,7 +35,7 @@ public class MLL extends AbstractLearner {
 	transient Sigmoid s = new Sigmoid();
  
 	transient protected int T = 1;
-	transient protected AVTable traindata = null;
+	transient protected DataManager traindata = null;
 	
 	
 	transient protected FeatureHasher fh = null;
@@ -99,10 +101,10 @@ public class MLL extends AbstractLearner {
 	}
 
 	@Override
-	public void allocateClassifiers(AVTable data) {
+	public void allocateClassifiers(DataManager data) {
 		this.traindata = data;
-		this.m = data.m;
-		this.d = data.d;
+		this.m = data.getNumberOfLabels();
+		this.d = data.getNumberOfFeatures();
 
 				
 		this.fh = FeatureHasherFactory.createFeatureHasher(this.hasher, fhseed, this.hd, this.m);		
@@ -136,20 +138,20 @@ public class MLL extends AbstractLearner {
 	
 	
 
-	protected void updatedPosteriors( int currIdx, int label, double inc) {
+	protected void updatedPosteriors( AVPair[] x, int label, double inc) {
 	
 		this.learningRate = this.gamma / (1 + this.gamma * this.lambda * this.Tarray[label]);
 		this.Tarray[label]++;
 		this.scalararray[label] *= (1 + this.learningRate * this.lambda);
 
-		int n = traindata.x[currIdx].length;
+		int n = x.length;
 		
 		for(int i = 0; i < n; i++) {
 
-			int index = fh.getIndex(label, traindata.x[currIdx][i].index);
-			int sign = fh.getSign(label, traindata.x[currIdx][i].index);
+			int index = fh.getIndex(label, x[i].index);
+			int sign = fh.getSign(label, x[i].index);
 			
-			double gradient = this.scalararray[label] * inc * (traindata.x[currIdx][i].value * sign);
+			double gradient = this.scalararray[label] * inc * (x[i].value * sign);
 			double update = (this.learningRate * gradient);		
 			this.w[index] -= update; 
 		}
@@ -161,17 +163,9 @@ public class MLL extends AbstractLearner {
 
 	}
 
-	protected ArrayList<Integer> shuffleIndex() {
-		ArrayList<Integer> indirectIdx = new ArrayList<Integer>(this.traindata.n);
-		for (int i = 0; i < this.traindata.n; i++) {
-			indirectIdx.add(new Integer(i));
-		}
-		Collections.shuffle(indirectIdx, shuffleRand);
-		return indirectIdx;
-	}
 
 	@Override
-	public void train(AVTable data) {
+	public void train(DataManager data) {
 		
 		HashSet<Integer> positiveLabels = new HashSet<>(); 
 		HashSet<Integer> negativeLabels = new HashSet<>();
@@ -181,20 +175,19 @@ public class MLL extends AbstractLearner {
 		for (int ep = 0; ep < this.epochs; ep++) {
 
 			System.out.println("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
-			// random permutation
-			ArrayList<Integer> indirectIdx = this.shuffleIndex();
-
-			for (int i = 0; i < traindata.n; i++) {
+			data.reset();
+			
+			while( data.hasNext() == true ){
+				Instance instance = data.getNextInstance();				
+				this.T++;
 				
-				int currIdx = indirectIdx.get(i);
-
-				int numOfNegToSample = traindata.y[currIdx].length * this.samplingRatio;
+				int numOfNegToSample = instance.y.length * this.samplingRatio;
 				
 				positiveLabels.clear();
 				negativeLabels.clear();
 				
-				for (int j = 0; j < traindata.y[currIdx].length; j++) {
-					int label = traindata.y[currIdx][j];
+				for (int j = 0; j < instance.y.length; j++) {
+					int label = instance.y[j];
 					positiveLabels.add(label);
 					numOfUpdates[label]++;
 					numOfPositiveUpdates[label]++;
@@ -218,24 +211,24 @@ public class MLL extends AbstractLearner {
 				
 				for(int j:positiveLabels) {
 
-					double posterior = getUncalibratedPosteriors(traindata.x[currIdx],j);
+					double posterior = getUncalibratedPosteriors(instance.x,j);
 					double inc = -(1.0 - posterior); 
 
-					updatedPosteriors(currIdx, j, inc);
+					updatedPosteriors(instance.x, j, inc);
 				}
 
 				for(int j:negativeLabels) {
 
-					double posterior = getUncalibratedPosteriors(traindata.x[currIdx],j);
+					double posterior = getUncalibratedPosteriors(instance.x,j);
 					double inc = -(0.0 - posterior); 
 					
-					updatedPosteriors(currIdx, j, inc);
+					updatedPosteriors(instance.x, j, inc);
 				}	
 				
 				//if(i == 5) System.exit(1);
 				
-				if ((i % 100000) == 0) {
-					System.out.println( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ i +" (" + data.n + ")" );
+				if ((T % 100000) == 0) {
+					System.out.println( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ this.T );
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
 					System.out.println("\t\t" + dateFormat.format(date));
@@ -244,7 +237,7 @@ public class MLL extends AbstractLearner {
 				}
 
 			}
-
+			
 			System.out.println("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 		}
 		
@@ -261,7 +254,7 @@ public class MLL extends AbstractLearner {
 		System.out.println("Hash weights (lenght, zeros, nonzeros, ratio, sumW, last nonzero): " + w.length + ", " + zeroW + ", " + (w.length - zeroW) + ", " + (double) (w.length - zeroW)/(double) w.length + ", " + sumW + ", " + maxNonZero);
 
 		for(int i = 0; i < this.m; i++) {
-			this.contextChange[i] = this.computeContextChange(this.numOfPositiveUpdates[i], this.numOfUpdates[i], (this.traindata.n * this.epochs));
+			this.contextChange[i] = this.computeContextChange(this.numOfPositiveUpdates[i], this.numOfUpdates[i], (this.T * this.epochs));
 //			System.out.println(i + ": " + numOfUpdates[i] + " " + (this.epochs * this.traindata.n) + " " + (((double) this.numOfUpdates[i]/(double) (this.epochs * this.traindata.n))));
 		}
 
