@@ -52,11 +52,13 @@ public class LearnerManager {
 
 
 	public void readTrainData() throws Exception {		
-		traindata = new BatchDataManager(properties.getProperty("TrainFile")); 
+		//traindata = new BatchDataManager(properties.getProperty("TrainFile"));
+		traindata = DataManager.managerFactory(properties.getProperty("TrainFile"), "Online" );
 	}
 
 	public void readTestData() throws Exception {		
-		testdata = new BatchDataManager(properties.getProperty("TestFile"));
+		//testdata = new BatchDataManager(properties.getProperty("TestFile"));
+		testdata = DataManager.managerFactory(properties.getProperty("TestFile"), "Online" );
 	}
 
 	public void readValidData() throws Exception {
@@ -65,7 +67,8 @@ public class LearnerManager {
 		if (validFileName == null) {
 			validdata = traindata;
 		} else {			
-			validdata = new BatchDataManager(properties.getProperty("ValidFile"));
+			//validdata = new BatchDataManager(properties.getProperty("ValidFile"));
+			validdata = DataManager.managerFactory(properties.getProperty("ValidFile"), "Online" );
 		}
 	}
 
