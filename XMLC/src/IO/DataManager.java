@@ -8,18 +8,18 @@ import org.slf4j.LoggerFactory;
 
 import Data.Instance;
 
-public interface DataManager {
+public abstract class DataManager {
 	static Logger logger = LoggerFactory.getLogger(DataManager.class);
 	
-	public boolean hasNext();
-	public Instance getNextInstance();
-	public int getNumberOfFeatures();
-	public int getNumberOfLabels();
-	public void setInputStream( InputStreamReader input );
-	public void reset();
-	public DataManager getCopy();
+	public abstract boolean hasNext();
+	public abstract Instance getNextInstance();
+	public abstract int getNumberOfFeatures();
+	public abstract int getNumberOfLabels();
+	public abstract void setInputStream( InputStreamReader input );
+	public abstract void reset();
+	public abstract DataManager getCopy();
 	
-	static DataManager managerFactory(String filename, String datamanagertype ) {
+	public static DataManager managerFactory(String filename, String datamanagertype ) {
 		DataManager datamanager = null;
 				
 		if (datamanagertype.compareTo( "Batch" ) == 0)

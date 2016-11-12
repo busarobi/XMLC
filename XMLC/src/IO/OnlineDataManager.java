@@ -14,7 +14,7 @@ import java.util.concurrent.BlockingQueue;
 import Data.AVPair;
 import Data.Instance;
 
-public class OnlineDataManager implements DataManager {
+public class OnlineDataManager extends DataManager {
 	protected ReaderThread  readerthread = null;
 	protected String filename = null;
 	protected BlockingQueue<Instance> blockingQueue = null;

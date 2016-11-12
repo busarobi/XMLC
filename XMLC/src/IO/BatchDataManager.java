@@ -7,7 +7,7 @@ import java.util.Properties;
 import Data.AVTable;
 import Data.Instance;
 
-public class BatchDataManager implements DataManager {
+public class BatchDataManager extends DataManager {
 	protected boolean isHeader = true;
 	protected AVTable data = null;
 	protected int currentIndex = 0;
