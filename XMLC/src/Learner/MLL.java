@@ -175,8 +175,7 @@ public class MLL extends AbstractLearner {
 		for (int ep = 0; ep < this.epochs; ep++) {
 
 			System.out.println("#############--> BEGIN of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
-			data.reset();
-			
+						
 			while( data.hasNext() == true ){
 				Instance instance = data.getNextInstance();				
 				this.T++;
@@ -237,6 +236,7 @@ public class MLL extends AbstractLearner {
 				}
 
 			}
+			data.reset();
 			
 			System.out.println("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 		}
