@@ -15,8 +15,11 @@ import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 
 import Data.AVTable;
+import IO.BatchDataManager;
+import IO.DataManager;
 import IO.DataReader;
 import IO.Evaluator;
+import IO.ReadProperty;
 import Learner.AbstractLearner;
 import util.MasterSeed;
 
@@ -50,9 +53,9 @@ public class SmacRun {
 
 	Properties properties = new Properties();
 
-	private AVTable traindata;
+	private DataManager traindata;
 
-	private AVTable testdata;
+	private DataManager testdata;
 
 	public static void main(String[] args) {
 		try {
@@ -60,7 +63,7 @@ public class SmacRun {
 			final JCommander jc = new JCommander(main);
 			jc.parse(args);
 			MasterSeed.setSeed(Long.parseLong(main.mainParams.get(4)));
-			main.properties = main.readProperty(main.mainParams.get(0));
+			main.properties = ReadProperty.readProperty(main.mainParams.get(0));
 			main.readTrainData();
 			main.readTestData();
 			main.run();
@@ -98,34 +101,12 @@ public class SmacRun {
 
 	public void readTrainData() throws Exception {
 		// reading train data
-		DataReader datareader = new DataReader(properties.getProperty("TrainFile"), false,
-				Boolean.parseBoolean(properties.getProperty("IsHeader")));
-		traindata = datareader.read();
+		traindata = new BatchDataManager(properties.getProperty("TrainFile"));
 	}
 
 	public void readTestData() throws Exception {
 		// test
-		DataReader testdatareader = new DataReader(properties.getProperty("TestFile"), false,
-				Boolean.parseBoolean(properties.getProperty("IsHeader")));
-		testdata = testdatareader.read();
+		testdata = new BatchDataManager(properties.getProperty("TestFile"));
 	}
 
-	public Properties readProperty(String fname) {
-		logger.info("Reading property file...");
-		Properties properties = new Properties();
-		try {
-			FileInputStream in = new FileInputStream(fname);
-			properties.load(in);
-			in.close();
-		} catch (FileNotFoundException e) {
-			System.err.println(e.getMessage());
-			System.exit(-1);
-		} catch (IOException e) {
-			System.err.println(e.getMessage());
-			System.exit(-1);
-		}
-		logger.info("Done.");
-
-		return properties;
-	}
 }

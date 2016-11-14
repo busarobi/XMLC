@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import Data.AVTable;
 import Data.EstimatePair;
+import Data.Instance;
 import Learner.AbstractLearner;
 
 public class Evaluator {
@@ -145,19 +146,21 @@ public class Evaluator {
 
     }
 
-    public static TreeMap<String,Double> computePrecisionAtk(AbstractLearner learner, AVTable data, int k) {
+    public static TreeMap<String,Double> computePrecisionAtk(AbstractLearner learner, DataManager data, int k) {
     	double[] precisionatK = new double[k];
-    	
+    	int numOfInstance = 0;
     	//int [] numLabels = new int [data.m];
-    	
-    	for(int i = 0; i < data.n; i++ ) {
-    		TreeSet<EstimatePair> predictedLabels = learner.getTopKEstimates(data.x[i], k); //.getPositiveLabelsAndPosteriors(data.x[i]);
+    	while( data.hasNext() == true ) {    	
+    		Instance instance  = data.getNextInstance();
+    		numOfInstance++;
+    		
+    		TreeSet<EstimatePair> predictedLabels = learner.getTopKEstimates(instance.x, k); //.getPositiveLabelsAndPosteriors(data.x[i]);
     		
     		
     		HashSet<Integer> trueLabels = new HashSet<Integer>();
 			
-			for(int m = 0; m < data.y[i].length; m++) {
-				trueLabels.add(data.y[i][m]);
+			for(int m = 0; m < instance.y.length; m++) {
+				trueLabels.add(instance.y[m]);
 				//numLabels[data.y[i][m]]++;
 			}
 			
@@ -201,8 +204,9 @@ public class Evaluator {
 				precisionatK[j] += (nunmofcorrectpredictionuptok[j] / ((double) (j+1)));
 			}			
 
-			if ((i % 100000) == 0) {
-				logger.info( "----->\t Prec@ computation: "+ i +" (" + data.n + ")" );
+			
+			if ((numOfInstance % 100000) == 0) {
+				logger.info( "----->\t Prec@ computation: "+ numOfInstance  );
 				
 				DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 				Date date = new Date();
@@ -215,7 +219,7 @@ public class Evaluator {
 		
     	
 		for( int j = 0; j < k; j++ ) {
-			precisionatK[j] /= ((double) data.n);
+			precisionatK[j] /= ((double) numOfInstance);
 		}
     	
     	
