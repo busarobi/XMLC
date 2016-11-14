@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 public class CompleteTree extends Tree implements Serializable {
 	private static final long serialVersionUID = 5656121729850759773L;
 	private static Logger logger = LoggerFactory.getLogger(CompleteTree.class);
-
+	final static public String name = "Complete";
 
 	//int[] childNodes = new int[this.k];
 	

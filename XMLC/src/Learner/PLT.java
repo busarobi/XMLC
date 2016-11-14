@@ -26,14 +26,18 @@ import preprocessing.FeatureHasher;
 import preprocessing.FeatureHasherFactory;
 import util.CompleteTree;
 import util.MasterSeed;
+import util.PrecomputedTree;
+import util.Tree;
 
 public class PLT extends AbstractLearner {
 	private static final long serialVersionUID = 1L;
 	private static Logger logger = LoggerFactory.getLogger(PLT.class);
 	transient protected int t = 0;	
-	transient CompleteTree tree = null;
+	transient Tree tree = null;
 	
 	protected int k = 2;
+	protected String treeType = "Complete";
+	protected String treeFile = null;
 
 	transient protected int T = 1;
 	transient protected AVTable traindata = null;
@@ -90,7 +94,15 @@ public class PLT extends AbstractLearner {
 		// k-ary tree
 		this.k = Integer.parseInt(this.properties.getProperty("k", "2"));
 		logger.info("#### k (order of the tree): " + this.k );
-		
+
+		// tree type (Complete, Precomputed)
+		this.treeType = this.properties.getProperty("treeType", "Complete");
+		logger.info("#### tree type " + this.treeType );
+
+		// tree file name
+		this.treeFile = this.properties.getProperty("treeFile", null);
+		logger.info("#### tree file name " + this.treeFile );
+
 		System.out.println("#####################################################" );
 
 	}
@@ -103,6 +115,8 @@ public class PLT extends AbstractLearner {
 		logger.info("#### Hasher: " + this.hasher );
 		logger.info("#### Number of ML hashed features: " + this.hd );
 		logger.info("#### k (order of the tree): " + this.k );		
+		logger.info("#### tree type: " + this.treeType );
+		logger.info("#### tree file: " + this.treeFile );
 	}
 	
 	
@@ -112,9 +126,14 @@ public class PLT extends AbstractLearner {
 		this.m = data.m;
 		this.d = data.d;
 		
-		
-		this.tree = new CompleteTree(this.k, this.m);
-		
+		switch (this.treeType){
+			case CompleteTree.name:
+				this.tree = new CompleteTree(this.k, this.m);
+				break;
+			case PrecomputedTree.name:
+				this.tree = new PrecomputedTree(this.treeFile);
+				break;
+		}
 		this.t = this.tree.getSize(); 
 
 		logger.info( "#### Num. of labels: " + this.m + " Dim: " + this.d );
@@ -301,8 +320,15 @@ public class PLT extends AbstractLearner {
 	}
 
 	protected Object readResolve(){
-		this.tree = new CompleteTree(this.k, this.m);
-		this.t = this.tree.getSize(); 
+		switch (this.treeType){
+			case CompleteTree.name:
+				this.tree = new CompleteTree(this.k, this.m);
+				break;
+			case PrecomputedTree.name:
+				this.tree = new PrecomputedTree(this.treeFile);
+				break;
+		}
+		this.t = this.tree.getSize();
 		this.fh = FeatureHasherFactory.createFeatureHasher(this.hasher, fhseed, this.hd, this.t);
 		return this;
 	}
