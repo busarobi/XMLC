@@ -33,8 +33,8 @@ public class HuffmanTree extends Tree implements Serializable {
 	private static final long serialVersionUID = 5425467548503925653L;
 
 	private static Logger logger = LoggerFactory.getLogger(HuffmanTree.class);
+	public static final String name = "Huffman";
 	protected int nLeaves;
-	protected int nNodes;
 	protected long[] nodes;
 	protected int[] parent;
 	protected DataManager data;
@@ -44,16 +44,17 @@ public class HuffmanTree extends Tree implements Serializable {
 	public HuffmanTree(DataManager data) {
 		this.k = 2;
 		nLeaves = data.getNumberOfLabels();
-		nNodes = 2 * nLeaves - 1;
+		size = 2 * nLeaves - 1;
 		numberOfInternalNodes = nLeaves - 1;
-		nodes = new long[nNodes];
-		parent = new int[nNodes];
+		nodes = new long[size];
+		parent = new int[size];
 		for (int i = 0; i < nLeaves; i++) {
 			nodes[i] = i;
 		}
 		this.data = data;
 		allocateFrequencies();
 		super.initialize(k, nLeaves);
+		this.buildHuffmanTree();
 	}
 
 	protected void allocateFrequencies() {
@@ -61,6 +62,7 @@ public class HuffmanTree extends Tree implements Serializable {
 
 		int[] counts = new int[nLeaves];
 		int nInstances = 0;
+		data.reset();
 		while (data.hasNext()) {
 			Instance instance = data.getNextInstance();
 			for (int j = 0; j < nLeaves; j++) {
@@ -68,6 +70,7 @@ public class HuffmanTree extends Tree implements Serializable {
 			}
 			nInstances++;
 		}
+		data.reset();
 		for (int j = 0; j < nLeaves; j++) {
 			freqheap.add(new FreqTuple(j, ((float) counts[j]) / nInstances));
 		}
@@ -94,13 +97,13 @@ public class HuffmanTree extends Tree implements Serializable {
 	protected long childrenToCode(int c1, int c2) {
 		int lo = Math.min(c1, c2);
 		int hi = Math.max(c1, c2);
-		return lo * (nNodes - 1) - lo * (lo - 1) / 2 + hi;
+		return lo * (size - 1) - lo * (lo - 1) / 2 + hi;
 	}
 
 	protected ArrayList<Integer> codeToChildren(long code) {
-		int i = Math.floorDiv(nNodes, 2);
+		int i = Math.floorDiv(size, 2);
 		int lo = 0;
-		int hi = nNodes;
+		int hi = size;
 		// Use bisection to find the first child:
 		int ind = divideCode(code, i);
 		int indm1 = divideCode(code, i - 1);
@@ -120,12 +123,12 @@ public class HuffmanTree extends Tree implements Serializable {
 		i -= 1;
 		ArrayList<Integer> result = new ArrayList<Integer>(2);
 		result.add(i);
-		result.add((int) (code - i * nNodes + i * (i - 1) / 2 + i));
+		result.add((int) (code - i * size + i * (i - 1) / 2 + i));
 		return result;
 	}
 
 	protected int divideCode(long code, int index) {
-		return (int) (code / (index * nNodes - index * (index - 1) / 2));
+		return (int) (code / (index * size - index * (index - 1) / 2));
 	}
 
 	/**

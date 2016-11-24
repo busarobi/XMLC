@@ -27,6 +27,7 @@ import IO.DataManager;
 import preprocessing.FeatureHasher;
 import preprocessing.FeatureHasherFactory;
 import util.CompleteTree;
+import util.HuffmanTree;
 import util.MasterSeed;
 import util.PrecomputedTree;
 import util.Tree;
@@ -98,7 +99,7 @@ public class PLT extends AbstractLearner {
 		this.k = Integer.parseInt(this.properties.getProperty("k", "2"));
 		logger.info("#### k (order of the tree): " + this.k );
 
-		// tree type (Complete, Precomputed)
+		// tree type (Complete, Precomputed, Huffman)
 		this.treeType = this.properties.getProperty("treeType", "Complete");
 		logger.info("#### tree type " + this.treeType );
 
@@ -135,6 +136,9 @@ public class PLT extends AbstractLearner {
 				break;
 			case PrecomputedTree.name:
 				this.tree = new PrecomputedTree(this.treeFile);
+				break;
+			case HuffmanTree.name:
+				this.tree = new HuffmanTree(data);
 				break;
 		}
 		this.t = this.tree.getSize(); 
@@ -318,6 +322,9 @@ public class PLT extends AbstractLearner {
 				break;
 			case PrecomputedTree.name:
 				this.tree = new PrecomputedTree(this.treeFile);
+				break;
+			case HuffmanTree.name:
+				this.tree = new HuffmanTree(this.traindata);
 				break;
 		}
 		this.t = this.tree.getSize();
