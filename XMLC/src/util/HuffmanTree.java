@@ -42,8 +42,10 @@ public class HuffmanTree extends Tree implements Serializable {
 	protected PriorityQueue<FreqTuple> freqheap;
 
 	public HuffmanTree(DataManager data) {
+		logger.info("Initializing Huffman tree...");
 		this.k = 2;
 		nLeaves = data.getNumberOfLabels();
+		logger.info("Number of tree leaves: " + nLeaves);
 		size = 2 * nLeaves - 1;
 		numberOfInternalNodes = nLeaves - 1;
 		nodes = new long[size];
@@ -65,8 +67,8 @@ public class HuffmanTree extends Tree implements Serializable {
 		data.reset();
 		while (data.hasNext()) {
 			Instance instance = data.getNextInstance();
-			for (int j = 0; j < nLeaves; j++) {
-				counts[j] += instance.y[j];
+			for (int i = 0; i < instance.y.length; i++) {
+				counts[instance.y[i]]++;
 			}
 			nInstances++;
 		}
