@@ -7,7 +7,8 @@ import java.util.PriorityQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import Data.AVTable;
+import Data.Instance;
+import IO.DataManager;
 
 public class HuffmanTree extends Tree implements Serializable {
 	protected class FreqTuple implements Comparable<FreqTuple> {
@@ -36,20 +37,19 @@ public class HuffmanTree extends Tree implements Serializable {
 	protected int nNodes;
 	protected long[] nodes;
 	protected int[] parent;
-	protected AVTable data;
-	protected float[] freq;
+	protected DataManager data;
 
 	protected PriorityQueue<FreqTuple> freqheap;
 
-	public HuffmanTree(AVTable data) {
+	public HuffmanTree(DataManager data) {
 		this.k = 2;
-		nLeaves = data.m;
-		nNodes = 2 * data.m - 1;
-		numberOfInternalNodes = data.m - 1;
+		nLeaves = data.getNumberOfLabels();
+		nNodes = 2 * nLeaves - 1;
+		numberOfInternalNodes = nLeaves - 1;
 		nodes = new long[nNodes];
 		parent = new int[nNodes];
 		for (int i = 0; i < nLeaves; i++) {
-			nodes[i] = (1L << 63);
+			nodes[i] = i;
 		}
 		this.data = data;
 		allocateFrequencies();
@@ -57,15 +57,19 @@ public class HuffmanTree extends Tree implements Serializable {
 	}
 
 	protected void allocateFrequencies() {
-		int nInstances = this.data.n;
-		freq = new float[nLeaves];
-		float div = nInstances;
-		freqheap = new PriorityQueue<FreqTuple>(this.nLeaves);
-		for (int j = 0; j < nLeaves; j++) {
-			for (int i = 0; i < nInstances; i++) {
-				freq[j] += this.data.y[i][j] / div;
+		freqheap = new PriorityQueue<FreqTuple>(nLeaves);
+
+		int[] counts = new int[nLeaves];
+		int nInstances = 0;
+		while (data.hasNext()) {
+			Instance instance = data.getNextInstance();
+			for (int j = 0; j < nLeaves; j++) {
+				counts[j] += instance.y[j];
 			}
-			freqheap.add(new FreqTuple(j, freq[j]));
+			nInstances++;
+		}
+		for (int j = 0; j < nLeaves; j++) {
+			freqheap.add(new FreqTuple(j, ((float) counts[j]) / nInstances));
 		}
 	}
 
@@ -93,15 +97,6 @@ public class HuffmanTree extends Tree implements Serializable {
 		return lo * (nNodes - 1) - lo * (lo - 1) / 2 + hi;
 	}
 
-	/**
-	 * Given a code compute the indeces of the children. The first index is
-	 * determined using bisection. Complexity: O(log n) where n is the size of
-	 * the tree
-	 * 
-	 * @param code
-	 *            of the node
-	 * @return ArrayList containing the indeces of the children with i1 < i2
-	 */
 	protected ArrayList<Integer> codeToChildren(long code) {
 		int i = Math.floorDiv(nNodes, 2);
 		int lo = 0;
@@ -133,10 +128,22 @@ public class HuffmanTree extends Tree implements Serializable {
 		return (int) (code / (index * nNodes - index * (index - 1) / 2));
 	}
 
+	/**
+	 * Given a code compute the indeces of the children. The first index is
+	 * determined using bisection. Complexity: O(log n) where n is the size of
+	 * the tree
+	 * 
+	 * @param code
+	 *            of the node
+	 * @return ArrayList containing the indeces of the children with i1 < i2
+	 */
 	@Override
 	public ArrayList<Integer> getChildNodes(int node) {
+		if (isLeaf(node)) {
+			return new ArrayList<Integer>(0);
+		}
 		long code = nodes[node];
-		return new ArrayList<Integer>(codeToChildren(code));
+		return codeToChildren(code);
 	}
 
 	@Override

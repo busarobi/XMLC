@@ -7,7 +7,10 @@ import java.util.ArrayList;
 import org.junit.Before;
 import org.junit.Test;
 
+import Data.AVPair;
 import Data.AVTable;
+import IO.BatchDataManager;
+import IO.DataManager;
 
 public class TestHuffmanTree {
 
@@ -18,12 +21,14 @@ public class TestHuffmanTree {
 		AVTable data = new AVTable();
 		data.m = 11;
 		data.n = 9;
+		data.x = new AVPair[data.n][];
 		data.y = new int[][] { { 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0 }, { 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0 },
 				{ 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0 }, { 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0 },
 				{ 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0 }, { 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0 },
 				{ 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0 }, { 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0 },
 				{ 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1 } };
-		tree = new HuffmanTree(data);
+		DataManager dm = new BatchDataManager(data);
+		tree = new HuffmanTree(dm);
 	}
 
 	@Test
@@ -50,5 +55,16 @@ public class TestHuffmanTree {
 		result = tree.codeToChildren(229L);
 		assertEquals(19, result.get(0).intValue());
 		assertEquals(20, result.get(1).intValue());
+	}
+	
+	/**
+	 * Test if the nodes array has been set up properly.
+	 */
+	@Test
+	public void testGetChildNodes() {
+		ArrayList<Integer> result;
+		result = tree.getChildNodes(0);
+		assertEquals("The number of child nodes should be 0, because it is a leaf.", 0, result.size());
+		
 	}
 }
