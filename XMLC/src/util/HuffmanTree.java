@@ -134,11 +134,12 @@ public class HuffmanTree extends Tree implements Serializable {
 	/**
 	 * Given a code compute the indeces of the children. The first index is
 	 * determined using bisection. Complexity: O(log n) where n is the size of
-	 * the tree
+	 * the tree.
+	 * If the node is a leaf, return an empty ArrayList.
 	 * 
-	 * @param code
-	 *            of the node
+	 * @param index of the node
 	 * @return ArrayList containing the indeces of the children with i1 < i2
+	 *         or empty, if the node is a leaf node
 	 */
 	@Override
 	public ArrayList<Integer> getChildNodes(int node) {
