@@ -248,7 +248,8 @@ public class PLT extends AbstractLearner {
 					logger.info("Scalar: " + this.scalar);
 				}
 			}
-
+			data.reset();
+			
 			logger.info("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
 		}
 		
