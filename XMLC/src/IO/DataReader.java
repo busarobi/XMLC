@@ -237,7 +237,7 @@ public class DataReader {
 	public static void writeLabels( String outfname, DataManager data ) throws IOException
 	{
 		BufferedWriter bf = new BufferedWriter(new FileWriter(outfname) );
-		
+		data.reset();
 		while( data.hasNext() == true ) {
 			Instance instance = data.getNextInstance();
 			// labels
@@ -250,7 +250,7 @@ public class DataReader {
 					bf.write( "\n" );
 			}		
 		}
-		
+		data.reset();
 		bf.close();
 	}
 	

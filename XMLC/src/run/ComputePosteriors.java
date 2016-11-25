@@ -105,7 +105,8 @@ public class ComputePosteriors extends LearnerManager {
 	public void writePosteriorsToFile(AbstractLearner learner, DataManager data, String fname) throws IOException {
 		logger.info("Output posteriors to " + fname);
 		BufferedWriter bf = new BufferedWriter(new FileWriter(fname));
-
+		
+		data.reset();
 		int numOfPositives = 0;
 		int counter = 0;
 		while( data.hasNext() == true ) {
@@ -140,7 +141,7 @@ public class ComputePosteriors extends LearnerManager {
 			}
 
 		}
-
+		data.reset();
 		bf.close();
 
 	}
