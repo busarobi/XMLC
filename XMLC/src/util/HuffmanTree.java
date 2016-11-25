@@ -37,9 +37,9 @@ public class HuffmanTree extends Tree implements Serializable {
 	protected int nLeaves;
 	protected long[] nodes;
 	protected int[] parent;
-	protected DataManager data;
+	protected transient DataManager data;
 
-	protected PriorityQueue<FreqTuple> freqheap;
+	protected transient PriorityQueue<FreqTuple> freqheap;
 
 	public HuffmanTree(DataManager data) {
 		logger.info("Initializing Huffman tree...");
@@ -115,7 +115,7 @@ public class HuffmanTree extends Tree implements Serializable {
 				i -= Math.ceil((i - lo + 1) / 2.0) - 1;
 			} else {
 				lo = i;
-				i += Math.floorDiv(hi - i + 1, 2);
+				i += (hi - i + 1) / 2;
 			}
 			if (i == 1)
 				break;
