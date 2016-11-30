@@ -103,7 +103,7 @@ public class HuffmanTree extends Tree implements Serializable {
 	}
 
 	protected ArrayList<Integer> codeToChildren(long code) {
-		int i = Math.floorDiv(size, 2);
+		int i = size / 2;
 		int lo = 0;
 		int hi = size;
 		// Use bisection to find the first child:
