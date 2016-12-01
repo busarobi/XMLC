@@ -27,7 +27,7 @@ import IO.DataManager;
 import preprocessing.FeatureHasher;
 import preprocessing.FeatureHasherFactory;
 import util.CompleteTree;
-import util.HuffmanTree;
+import util.HuffmanTreeNew;
 import util.MasterSeed;
 import util.PrecomputedTree;
 import util.Tree;
@@ -36,7 +36,7 @@ public class PLT extends AbstractLearner {
 	private static final long serialVersionUID = 1L;
 	private static Logger logger = LoggerFactory.getLogger(PLT.class);
 	transient protected int t = 0;	
-	transient Tree tree = null;
+	protected Tree tree = null;
 	
 	protected int k = 2;
 	protected String treeType = "Complete";
@@ -137,8 +137,8 @@ public class PLT extends AbstractLearner {
 			case PrecomputedTree.name:
 				this.tree = new PrecomputedTree(this.treeFile);
 				break;
-			case HuffmanTree.name:
-				this.tree = new HuffmanTree(data);
+			case HuffmanTreeNew.name:
+				this.tree = new HuffmanTreeNew(data, this.treeFile);
 				break;
 		}
 		this.t = this.tree.getSize(); 
@@ -323,8 +323,8 @@ public class PLT extends AbstractLearner {
 			case PrecomputedTree.name:
 				this.tree = new PrecomputedTree(this.treeFile);
 				break;
-			case HuffmanTree.name:
-				this.tree = new HuffmanTree(this.traindata);
+			case HuffmanTreeNew.name:
+				this.tree = new HuffmanTreeNew(this.treeFile);
 				break;
 		}
 		this.t = this.tree.getSize();

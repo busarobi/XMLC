@@ -53,12 +53,12 @@ public class LearnerManager {
 
 	public void readTrainData() throws Exception {		
 		//traindata = new BatchDataManager(properties.getProperty("TrainFile"));
-		traindata = DataManager.managerFactory(properties.getProperty("TrainFile"), "Online" );
+		traindata = DataManager.managerFactory(properties.getProperty("TrainFile"), "Batch" );
 	}
 
 	public void readTestData() throws Exception {		
 		//testdata = new BatchDataManager(properties.getProperty("TestFile"));
-		testdata = DataManager.managerFactory(properties.getProperty("TestFile"), "Online" );
+		testdata = DataManager.managerFactory(properties.getProperty("TestFile"), "Batch" );
 	}
 
 	public void readValidData() throws Exception {
