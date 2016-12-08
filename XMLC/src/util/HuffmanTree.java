@@ -2,10 +2,15 @@ package util;
 
 import java.util.PriorityQueue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import Data.Instance;
 import IO.DataManager;
 
 public class HuffmanTree extends PrecomputedTree {
+	private static Logger logger = LoggerFactory.getLogger(HuffmanTree.class);
+	
 	private static final long serialVersionUID = 6677270104977721765L;
 	public static final String name = "HuffmanTree";
 	protected int nLeaves;
@@ -50,7 +55,7 @@ public class HuffmanTree extends PrecomputedTree {
 		int[] counts = new int[nLeaves];
 		int nInstances = 0;
 		data.reset();
-		
+		logger.info( "Building Huffman tree...");
 		while (data.hasNext() == true ) {
 			Instance instance = data.getNextInstance();
 			for (int i = 0; i < instance.y.length; i++) {
@@ -59,6 +64,9 @@ public class HuffmanTree extends PrecomputedTree {
 			nInstances++;
 		}
 		data.reset();
+		
+		logger.info( "Huffman tree is built based on " + nInstances + " instance." );
+		
 		TreeNode node;
 		for (int j = 0; j < nLeaves; j++) {
 			node = new TreeNode(j + 1);
