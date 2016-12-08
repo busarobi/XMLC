@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Scanner;
 
 /**
@@ -21,9 +23,9 @@ public class PrecomputedTree extends Tree implements Serializable {
 	private static Logger logger = LoggerFactory.getLogger(PrecomputedTree.class);
 	final static public String name = "Precomputed";
 
-	TreeNode tree;
-	Map<Integer, TreeNode> indexToNode = new HashMap<Integer, TreeNode>();
-	Map<Integer, Integer> labelToIndex = new HashMap<Integer, Integer>();
+	transient TreeNode tree;
+	transient Map<Integer, TreeNode> indexToNode = new HashMap<Integer, TreeNode>();
+	transient Map<Integer, Integer> labelToIndex = new HashMap<Integer, Integer>();
 
 	public PrecomputedTree(int k, int m) {
 		this.size = 2 * m - 1;
@@ -98,20 +100,25 @@ public class PrecomputedTree extends Tree implements Serializable {
 		}
 	}
 
-	protected String recurseTree(int nodeIndex) {
-		if (isLeaf(nodeIndex)) {
-			return nodeIndex + " " + -this.getLabelIndex(nodeIndex) + "\n";
-		}
-
-		ArrayList<Integer> children = getChildNodes(nodeIndex);
+	protected String bfsTree() {
 		StringBuilder str = new StringBuilder();
-		// Add special entry for root node:
-		if (getParent(nodeIndex) == -1) {
-			str.append(nodeIndex + " " + nodeIndex + "\n");
-		}
-		for (Integer childIndex : children) {
-			str.append(nodeIndex + " " + childIndex.toString() + "\n");
-			str.append(recurseTree(childIndex));
+
+		LinkedList<Integer> indexes = new LinkedList<>();
+		indexes.add(0);
+		str.append(0 + " " + 0 + "\n");
+		int i;
+		ArrayList<Integer> children;
+		while (!indexes.isEmpty()) {
+			i = indexes.poll();
+			if (isLeaf(i)) {
+				str.append(i + " " + -getLabelIndex(i) + "\n");
+			} else {
+				children = getChildNodes(i);
+				for (Integer child : children) {
+					str.append(i + " " + child + "\n");
+				}
+				indexes.addAll(children);
+			}
 		}
 		return str.toString();
 	}
@@ -122,7 +129,7 @@ public class PrecomputedTree extends Tree implements Serializable {
 		try {
 			file = new File(treeFileName);
 			wr = new FileWriter(file);
-			wr.write(recurseTree(this.tree.index));
+			wr.write(bfsTree());
 			wr.close();
 		} catch (java.io.IOException e) {
 			e.printStackTrace();

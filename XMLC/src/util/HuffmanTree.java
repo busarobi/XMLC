@@ -5,9 +5,9 @@ import java.util.PriorityQueue;
 import Data.Instance;
 import IO.DataManager;
 
-public class HuffmanTreeNew extends PrecomputedTree {
+public class HuffmanTree extends PrecomputedTree {
 	private static final long serialVersionUID = 6677270104977721765L;
-	public static final String name = "HuffmanTreeNew";
+	public static final String name = "HuffmanTree";
 	protected int nLeaves;
 	protected transient PriorityQueue<FreqTuple> freqheap;
 	protected transient DataManager data;
@@ -31,8 +31,7 @@ public class HuffmanTreeNew extends PrecomputedTree {
 		}
 	}
 
-
-	public HuffmanTreeNew(DataManager data, String treeFileName) {
+	public HuffmanTree(DataManager data, String treeFileName) {
 		super(2, data.getNumberOfLabels());
 		nLeaves = data.getNumberOfLabels();
 		this.data = data;
@@ -41,7 +40,7 @@ public class HuffmanTreeNew extends PrecomputedTree {
 		writeTree(treeFileName);
 	}
 
-	public HuffmanTreeNew(String treeFile) {
+	public HuffmanTree(String treeFile) {
 		super(treeFile);
 	}
 
@@ -61,12 +60,12 @@ public class HuffmanTreeNew extends PrecomputedTree {
 		data.reset();
 		TreeNode node;
 		for (int j = 0; j < nLeaves; j++) {
-			node = new TreeNode(j);
+			node = new TreeNode(j + 1);
 			node.label = j;
 			freqheap.add(new FreqTuple(((float) counts[j]) / nInstances, node));
 			// Index is j+1 in order to store root of the tree at 0
-			labelToIndex.put(j, j+1);
-			indexToNode.put(j+1, node);
+			labelToIndex.put(j, j + 1);
+			indexToNode.put(j + 1, node);
 		}
 	}
 
