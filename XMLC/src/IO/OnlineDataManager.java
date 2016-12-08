@@ -223,7 +223,7 @@ public class OnlineDataManager extends DataManager {
 	}
 	
 	public void close() {
-		if (this.readerthread != null ){
+		if ( ( this.readerthread != null ) && (this.readerthread.endOfFile==false) ){
 			this.readerthread.flag = false;
 			this.getNextInstance();
 		}

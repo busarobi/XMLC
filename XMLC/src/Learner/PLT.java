@@ -140,6 +140,9 @@ public class PLT extends AbstractLearner {
 			case HuffmanTree.name:
 				this.tree = new HuffmanTree(data, this.treeFile);
 				break;
+			default:
+				System.err.println("Unknown tree type!");
+				System.exit(-1);
 		}
 		this.t = this.tree.getSize(); 
 
@@ -326,6 +329,9 @@ public class PLT extends AbstractLearner {
 			case HuffmanTree.name:
 				this.tree = new HuffmanTree(this.treeFile);
 				break;
+			default:
+				System.err.println("Unknown tree type!");
+				System.exit(-1);				
 		}
 		this.t = this.tree.getSize();
 		this.fh = FeatureHasherFactory.createFeatureHasher(this.hasher, fhseed, this.hd, this.t);

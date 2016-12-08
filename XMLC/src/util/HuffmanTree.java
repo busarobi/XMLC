@@ -50,7 +50,8 @@ public class HuffmanTree extends PrecomputedTree {
 		int[] counts = new int[nLeaves];
 		int nInstances = 0;
 		data.reset();
-		while (data.hasNext()) {
+		
+		while (data.hasNext() == true ) {
 			Instance instance = data.getNextInstance();
 			for (int i = 0; i < instance.y.length; i++) {
 				counts[instance.y[i]]++;
