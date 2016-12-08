@@ -85,7 +85,8 @@ public class OnlineDataManager extends DataManager {
 		  protected int d; 
 		  protected int n;
 		  protected int m;
-		  protected boolean endOfFile = false;
+		  protected int ni = 0;
+		  protected volatile boolean endOfFile = false;
 		  public volatile boolean flag = true;
 		  
 		  BufferedReader br = null;
@@ -103,7 +104,7 @@ public class OnlineDataManager extends DataManager {
 				this.n = Integer.parseInt(tokens[0]);
 				this.d = Integer.parseInt(tokens[1]);
 				this.m = Integer.parseInt(tokens[2]);
-				
+				this.ni = 0;
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -120,9 +121,9 @@ public class OnlineDataManager extends DataManager {
 		            String buffer =null;
 		            while((buffer=br.readLine())!=null){
 		            	if (this.flag == false ) break;
-		            	
+		            	ni++;
 		            	Instance instance = processLine(buffer);
-		                blockingQueue.put(instance);
+		                blockingQueue.put(instance);		                
 		            }
 		            //blockingQueue.put(null);  //When end of file has been reached
 		            this.endOfFile = true;
@@ -171,8 +172,9 @@ public class OnlineDataManager extends DataManager {
 			this.m = m;
 		}
 
-		public boolean isEndOfFile() {
-			return this.endOfFile;
+		synchronized public boolean isEndOfFile() {
+			//return this.endOfFile;
+			return (this.ni >= this.n);
 		}
 		
 		protected Instance processLine(String line ){
