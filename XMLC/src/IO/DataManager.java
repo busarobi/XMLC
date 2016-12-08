@@ -18,6 +18,7 @@ public abstract class DataManager {
 	public abstract void setInputStream( InputStreamReader input );
 	public abstract void reset();
 	public abstract DataManager getCopy();
+	public void close() {};
 	
 	public static DataManager managerFactory(String filename, String datamanagertype ) {
 		DataManager datamanager = null;

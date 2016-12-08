@@ -14,7 +14,7 @@ import java.util.concurrent.BlockingQueue;
 import Data.AVPair;
 import Data.Instance;
 
-public class OnlineDataManager extends DataManager implements AutoCloseable {
+public class OnlineDataManager extends DataManager {
 	protected ReaderThread  readerthread = null;
 	protected String filename = null;
 	protected BlockingQueue<Instance> blockingQueue = null;
@@ -65,6 +65,7 @@ public class OnlineDataManager extends DataManager implements AutoCloseable {
 
 	@Override
 	public void reset() {
+		this.close();
 		this.blockingQueue = new ArrayBlockingQueue<Instance>(this.bufferSize);
 		this.readerthread = new ReaderThread(this.blockingQueue, this.filename);
 		this.rthread = new Thread(this.readerthread);
@@ -85,6 +86,7 @@ public class OnlineDataManager extends DataManager implements AutoCloseable {
 		  protected int n;
 		  protected int m;
 		  protected boolean endOfFile = false;
+		  public volatile boolean flag = true;
 		  
 		  BufferedReader br = null;
 		  
@@ -117,6 +119,8 @@ public class OnlineDataManager extends DataManager implements AutoCloseable {
 		     try {		    	 
 		            String buffer =null;
 		            while((buffer=br.readLine())!=null){
+		            	if (this.flag == false ) break;
+		            	
 		            	Instance instance = processLine(buffer);
 		                blockingQueue.put(instance);
 		            }
@@ -213,12 +217,16 @@ public class OnlineDataManager extends DataManager implements AutoCloseable {
 
 		  }
 		}	
-	
+
+	protected void finalize() {
+		this.close();
+	}
 	
 	public void close() {
-		this.rthread.interrupt();
-		this.readerthread = null;
-		this.blockingQueue = null;
+		if (this.readerthread != null ){
+			this.readerthread.flag = false;
+			this.getNextInstance();
+		}
 	}
 	
 }

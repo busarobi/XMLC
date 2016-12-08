@@ -86,7 +86,8 @@ public class LearnerManager {
 			this.readTrainData();
 			learner.allocateClassifiers(traindata);
 			learner.train(traindata);
-
+			this.traindata.close();
+			
 			String modelFile = properties.getProperty("ModelFile", null);
 			if (modelFile != null) {
 				learner.savemodel(modelFile);
@@ -110,7 +111,8 @@ public class LearnerManager {
 		this.readTrainData();
 		learner.allocateClassifiers(traindata);
 		learner.train(traindata);
-
+		traindata.close();
+		
 		String modelFile = properties.getProperty("ModelFile", null);
 		if (modelFile != null) {
 			logger.info("Saving model file to " + modelFile );
@@ -138,6 +140,7 @@ public class LearnerManager {
 			bf.write("\n");
 		}
 		bf.close();
+		this.testdata.close();
 	}
 	
 	
@@ -224,7 +227,8 @@ public class LearnerManager {
 		
 		for (String perfName : perftestpreck.keySet()) {
 			logger.info("##### Test " + perfName + ": " + perftestpreck.get(perfName));
-		}		
+		}	
+		this.testdata.close();
 	}
 	
 	
