@@ -59,6 +59,7 @@ The model will be evaluated in terms of Precision@K where K = {1,2,3,4,5}. Other
 To compute the posteriors for a given dataset, one needs give **"-posterios'** as second command line parameter and then the config file as follows:
 
 > java -Xmx12G -jar XMLC_PLT-jar-with-dependencies.jar -posteriors ./examples/rcv1_posteriors_test.config 
+
 > java -Xmx12G -jar XMLC_PLT-jar-with-dependencies.jar -posteriors ./examples/rcv1_posteriors_valid.config 
 
 The posteriors are computed for the training data as well. Note that, for demonstration reasons, we compute the posteriors for the training data here, however we used a holdout validation set taken from the training data in the experiments we published in *Jasinska et.al., (2016)*  

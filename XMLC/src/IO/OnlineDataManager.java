@@ -14,7 +14,7 @@ import java.util.concurrent.BlockingQueue;
 import Data.AVPair;
 import Data.Instance;
 
-public class OnlineDataManager extends DataManager {
+public class OnlineDataManager extends DataManager implements AutoCloseable {
 	protected ReaderThread  readerthread = null;
 	protected String filename = null;
 	protected BlockingQueue<Instance> blockingQueue = null;
@@ -214,5 +214,11 @@ public class OnlineDataManager extends DataManager {
 		  }
 		}	
 	
+	
+	public void close() {
+		this.rthread.interrupt();
+		this.readerthread = null;
+		this.blockingQueue = null;
+	}
 	
 }
