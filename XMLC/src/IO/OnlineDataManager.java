@@ -21,10 +21,17 @@ public class OnlineDataManager extends DataManager {
 	protected int bufferSize = 16384;
 	protected Thread rthread = null;
 	protected int processedItem = 0;
+	protected int nFeatures = 0;
+	protected int nLabels = 0;
+	
 	public OnlineDataManager(String filename) {
 		this.filename = filename;		
 		this.blockingQueue = new ArrayBlockingQueue<Instance>(this.bufferSize);
 		this.readerthread = new ReaderThread(this.blockingQueue, this.filename);
+
+		this.nFeatures = this.readerthread.d;
+		this.nLabels = this.readerthread.m;
+		
 		this.rthread = new Thread(this.readerthread);
 		this.rthread.start();		
 	}
@@ -49,12 +56,12 @@ public class OnlineDataManager extends DataManager {
 
 	@Override
 	public int getNumberOfFeatures() {
-		return this.readerthread.getD();
+		return this.nFeatures;
 	}
 
 	@Override
 	public int getNumberOfLabels() {		
-		return this.readerthread.getM();
+		return this.nLabels;
 	}
 
 	@Override
