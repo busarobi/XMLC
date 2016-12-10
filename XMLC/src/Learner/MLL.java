@@ -57,8 +57,6 @@ public class MLL extends AbstractLearner {
 	double [] contextChange = null;
 	
 	int samplingRatio = 1;
-	
-	Random shuffleRand = null;
 
 	protected int[] Tarray = null;	
 	protected double[] scalararray = null;
@@ -67,8 +65,6 @@ public class MLL extends AbstractLearner {
 	
 	public MLL(Properties properties) {
 		super(properties);
-		
-		shuffleRand = MasterSeed.nextRandom();
 		
 		System.out.println("#####################################################" );
 		System.out.println("#### Learner: MLL" );

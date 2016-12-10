@@ -65,12 +65,10 @@ public class PLT extends AbstractLearner {
 	protected double scalar = 1.0;
 	protected double lambda = 0.00001;
 	protected int epochs = 1;	
-	
-	Random shuffleRand = null;	
+		
 	
 	public PLT(Properties properties) {
 		super(properties);
-		shuffleRand = MasterSeed.nextRandom();
 		
 		System.out.println("#####################################################" );
 		System.out.println("#### Learner: PLT" );

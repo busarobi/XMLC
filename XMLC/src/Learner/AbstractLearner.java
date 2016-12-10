@@ -71,6 +71,8 @@ public abstract class AbstractLearner implements Serializable{
 			learner = new PLT(properties);
 		else if (learnerName.compareTo("MLL") == 0)
 			learner = new MLL(properties);
+		else if (learnerName.compareTo("DeepPLT") == 0)
+			learner = new DeepPLT(properties);		
 		else {
 			System.err.println("Unknown learner");
 			System.exit(-1);
