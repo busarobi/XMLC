@@ -159,14 +159,11 @@ public class PLT extends AbstractLearner {
 		for (int i = 0; i < this.t; i++) {
 			this.thresholds[i] = 0.5;
 		}
-		
-		logger.info( "Done." );
-		
-		
+
 		this.Tarray = new int[this.t];
 		this.scalararray = new double[this.t];
 		Arrays.fill(this.Tarray, 1);
-		Arrays.fill(this.scalararray, 1.0);
+		Arrays.fill(this.scalararray, 1.0);		
 	}
 
 	
@@ -347,7 +344,7 @@ public class PLT extends AbstractLearner {
 
 		while(treeIndex > 0) {
 
-			treeIndex = (int) this.tree.getParent(treeIndex); //Math.floor((treeIndex - 1)/2);
+			treeIndex = this.tree.getParent(treeIndex); //Math.floor((treeIndex - 1)/2);
 			posterior *= getPartialPosteriors(x, treeIndex);
 
 		}
