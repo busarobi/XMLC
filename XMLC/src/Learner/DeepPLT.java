@@ -2,6 +2,7 @@ package Learner;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -190,7 +191,7 @@ public class DeepPLT extends PLT {
 						
 					}
 				}
-
+				
 				//logger.info("Negative tree indices: " + negativeTreeIndices.toString());
 				for(int j:positiveTreeIndices) {
 
@@ -198,6 +199,7 @@ public class DeepPLT extends PLT {
 					double inc = -(1.0 - posterior); 
 
 					updatedTreePosteriors(hiddenRepresentation, j, inc);
+					updateHiddenRepresentation( instance, posterior, inc, j );
 				}
 
 				for(int j:negativeTreeIndices) {
@@ -208,9 +210,9 @@ public class DeepPLT extends PLT {
 					double inc = -(0.0 - posterior); 
 					
 					updatedTreePosteriors(hiddenRepresentation, j, inc);
+					updateHiddenRepresentation( instance, posterior, inc, j );
 				}
-
-				updateHiddenRepresentation( instance );
+				
 				
 				this.T++;
 
@@ -230,15 +232,32 @@ public class DeepPLT extends PLT {
 		
 	}
 
-	protected void updateHiddenRepresentation( Instance instance ) {
+	protected void updateHiddenRepresentation( Instance instance, double posterior, double inc, int ind ) {
+		double sigder = posterior * ( 1 - posterior);
 		for( int i = 0; i < instance.x.length; i++ ) {
 			int hi = fh.getIndex(1,  instance.x[i].index); 
-			int sign = fh.getSign(1, instance.x[i].index);
+			//int sign = fh.getSign(1, instance.x[i].index);
 			
 			for(int j = 0; j < this.hiddendim; j++ ){
-				this.hiddenWeights[hi][j] += sign * instance.x[i].value;  
+				this.hiddenWeights[hi][j] -= sigder * this.w[ind][j] * instance.x[i].value;  
 			}
 		}
+	}
+
+	
+	protected double[] getHiddenRepresentation( AVPair[] x ) {
+		double[] hiddenRepresentation = new double[this.hiddendim];
+		// aggregate the the word2vec representation
+		for (int i = 0; i < x.length; i++) {
+			int hi = fh.getIndex(1,  x[i].index); 
+			//int sign = fh.getSign(1, x[i].index);
+			
+			for(int j = 0; j < this.hiddendim; j++ ){
+				hiddenRepresentation[ j ] += x[i].value * this.hiddenWeights[hi][j];  
+			}
+		}
+		
+		return hiddenRepresentation;
 	}
 	
 	
@@ -260,22 +279,6 @@ public class DeepPLT extends PLT {
 		double gradient = this.scalararray[label] * inc;
 		double update = (this.learningRate * gradient);//  / this.scalar;		
 		this.bias[label] -= update;		
-	}
-
-	
-	protected double[] getHiddenRepresentation( AVPair[] x ) {
-		double[] hiddenRepresentation = new double[this.hiddendim];
-		// aggregate the the word2vec representation
-		for (int i = 0; i < x.length; i++) {
-			int hi = fh.getIndex(1,  x[i].index); 
-			int sign = fh.getSign(1, x[i].index);
-			
-			for(int j = 0; j < this.hiddendim; j++ ){
-				hiddenRepresentation[ j ] += sign * x[i].value * this.hiddenWeights[hi][j];  
-			}
-		}
-		
-		return hiddenRepresentation;
 	}
 	
 	
