@@ -217,7 +217,28 @@ public class LearnerManager {
 	
 	}	
 	
-	
+	public void traineval() throws Exception{
+		this.learner = AbstractLearner.learnerFactory(properties);
+
+		if (properties.containsKey("seed")) {
+			long seed = Long.parseLong(properties.getProperty("seed"));
+			MasterSeed.setSeed(seed);
+		}
+
+		// train
+		this.readTrainData();
+		learner.allocateClassifiers(traindata);
+		learner.train(traindata);
+		traindata.close();
+
+		this.readTestData();
+		Map<String, Double> perftestpreck = Evaluator.computePrecisionAtk(this.learner, this.testdata, 5);
+		
+		for (String perfName : perftestpreck.keySet()) {
+			logger.info("##### Test " + perfName + ": " + perftestpreck.get(perfName));
+		}	
+		this.testdata.close();		
+	}
 	
 	
 	public void eval() throws Exception {		

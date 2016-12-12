@@ -5,14 +5,19 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.PriorityQueue;
 import java.util.Properties;
+import java.util.TreeSet;
 
 import org.apache.commons.math3.analysis.function.Sigmoid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import Data.AVPair;
+import Data.EstimatePair;
 import Data.Instance;
+import Data.NodeComparatorPLT;
+import Data.NodePLT;
 import IO.DataManager;
 import preprocessing.FeatureHasher;
 import preprocessing.FeatureHasherFactory;
@@ -226,7 +231,14 @@ public class DeepPLT extends PLT {
 	}
 
 	protected void updateHiddenRepresentation( Instance instance ) {
-		
+		for( int i = 0; i < instance.x.length; i++ ) {
+			int hi = fh.getIndex(1,  instance.x[i].index); 
+			int sign = fh.getSign(1, instance.x[i].index);
+			
+			for(int j = 0; j < this.hiddendim; j++ ){
+				this.hiddenWeights[hi][j] += sign * instance.x[i].value;  
+			}
+		}
 	}
 	
 	
@@ -302,6 +314,42 @@ public class DeepPLT extends PLT {
 
 	}
 	
-	
-	
+	public TreeSet<EstimatePair> getTopKEstimates(AVPair[] x, int k) {
+		double[] hiddenRepresentation = this.getHiddenRepresentation(x);
+		
+		TreeSet<EstimatePair> positiveLabels = new TreeSet<EstimatePair>();
+
+	    int foundTop = 0;
+	    
+	    NodeComparatorPLT nodeComparator = new NodeComparatorPLT();
+
+		PriorityQueue<NodePLT> queue = new PriorityQueue<NodePLT>(11, nodeComparator);
+
+		queue.add(new NodePLT(0,1.0));
+		
+		while(!queue.isEmpty() && (foundTop < k)) {
+
+			NodePLT node = queue.poll();
+
+			double currentP = node.p;
+			
+			if(!this.tree.isLeaf(node.treeIndex)) {
+				
+				for(int childNode: this.tree.getChildNodes(node.treeIndex)) {
+					queue.add(new NodePLT(childNode, currentP * getPartialPosteriors(hiddenRepresentation, childNode)));
+				}
+				
+			} else {
+				
+				positiveLabels.add(new EstimatePair(this.tree.getLabelIndex(node.treeIndex), currentP));
+				foundTop++;
+				
+			}
+		}
+
+		return positiveLabels;
+	}
+
 }
+	
+	

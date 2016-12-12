@@ -28,6 +28,9 @@ public class Run {
 		} else if ( method.equals("-eval") ) {
 			LearnerManager lm = new LearnerManager(configFile);
 			lm.eval();
+		} else if ( method.equals("-traineval") ) {
+			LearnerManager lm = new LearnerManager(configFile);
+			lm.traineval();			
 		} else if ( method.equals("-posteriors") ) {
 			ComputePosteriors lm = new ComputePosteriors(configFile);
 			lm.computePosteriorsAndOutputLabels();
