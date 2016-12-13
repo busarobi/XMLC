@@ -129,7 +129,7 @@ public class DeepPLT extends PLT {
 		for(int i = 0; i < this.hd; i++ ) {
 			this.hiddenWeights[i] = new double[this.hiddendim];
 			for(int j = 0; j < this.hiddendim; j++ ){
-				this.hiddenWeights[i][j] = r.nextDouble(); 
+				this.hiddenWeights[i][j] = r.nextDouble() / this.d; 
 			}
 		}
 		
@@ -137,7 +137,7 @@ public class DeepPLT extends PLT {
 		for(int i = 0; i < this.t; i++ ) {
 			this.w[i] = new double[this.hiddendim];
 			for(int j = 0; j < this.hiddendim; j++ ){
-				this.w[i][j] =  r.nextDouble();
+				this.w[i][j] =  r.nextDouble() / this.d;
 			}
 		}
 		
@@ -298,7 +298,7 @@ public class DeepPLT extends PLT {
 			//int sign = fh.getSign(1, x[i].index);
 			
 			for(int j = 0; j < this.hiddendim; j++ ){
-				hiddenRepresentation[ j ] += x[i].value * this.hiddenWeights[hi][j];
+				hiddenRepresentation[ j ] +=  x[i].value * (1.0 / this.scalararrayhidden[hi]) * this.hiddenWeights[hi][j];
 				sum += x[i].value;
 			}
 			
@@ -360,10 +360,10 @@ public class DeepPLT extends PLT {
 		
 		
 		for (int i = 0; i < this.hiddendim; i++) {			
-			posterior += x[i] * (1/this.scalar) * this.w[label][i];
+			posterior += x[i] * (1.0/this.scalararray[label]) * this.w[label][i];
 		}
 		
-		posterior += (1/this.scalar) * this.bias[label]; 
+		posterior += (1.0/this.scalararray[label]) * this.bias[label]; 
 		posterior = s.value(posterior);		
 		
 		return posterior;
