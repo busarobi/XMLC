@@ -45,6 +45,8 @@ public class DeepPLT extends PLT {
 	protected double[] scalararrayhidden = null;
 	protected double[] updatevec = null;
 	
+	protected String hiddenVectorsFile = null;
+	
 	public DeepPLT(Properties properties) {
 		super(properties);
 		
@@ -84,7 +86,10 @@ public class DeepPLT extends PLT {
 		// tree file name
 		this.treeFile = this.properties.getProperty("treeFile", null);
 		logger.info("#### tree file name " + this.treeFile );
-
+		
+		this.hiddenVectorsFile = this.properties.getProperty("hiddenvectorsFile", null);
+		logger.info("#### hidden vectors file name " + this.hiddenVectorsFile );
+		
 		System.out.println("#####################################################" );
 
 	}
@@ -255,7 +260,8 @@ public class DeepPLT extends PLT {
 			data.reset();
 			
 			logger.info("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
-			this.writeHiddenVectors("./examples/hidden.txt");
+			if (this.hiddenVectorsFile != null )
+				this.writeHiddenVectors(this.hiddenVectorsFile);
 		}
 		
 	}
