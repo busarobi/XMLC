@@ -242,8 +242,6 @@ public class PLT extends AbstractLearner {
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
 					logger.info("\t\t" + dateFormat.format(date));
-					//logger.info("Weight: " + this.w[0].get(0) );
-					logger.info("Scalar: " + this.scalar);
 				}
 			}
 			data.reset();
@@ -299,10 +297,10 @@ public class PLT extends AbstractLearner {
 			
 			int hi = fh.getIndex(label,  x[i].index); 
 			int sign = fh.getSign(label, x[i].index);
-			posterior += (x[i].value *sign) * (1/this.scalar) * this.w[hi];
+			posterior += (x[i].value *sign) * (1/this.scalararray[label]) * this.w[hi];
 		}
 		
-		posterior += (1/this.scalar) * this.bias[label]; 
+		posterior += (1/this.scalararray[label]) * this.bias[label]; 
 		posterior = s.value(posterior);		
 		
 		return posterior;

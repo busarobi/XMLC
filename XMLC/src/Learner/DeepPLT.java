@@ -253,8 +253,6 @@ public class DeepPLT extends PLT {
 					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 					Date date = new Date();
 					logger.info("\t\t" + dateFormat.format(date));
-					//logger.info("Weight: " + this.w[0].get(0) );
-					logger.info("Scalar: " + this.scalar);
 				}
 			}
 			data.reset();
