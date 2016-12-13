@@ -43,6 +43,7 @@ public class DeepPLT extends PLT {
 	
 	transient protected int[] Tarrayhidden = null;
 	protected double[] scalararrayhidden = null;
+	protected double[] updatevec = null;
 	
 	public DeepPLT(Properties properties) {
 		super(properties);
@@ -159,6 +160,7 @@ public class DeepPLT extends PLT {
 		Arrays.fill(this.Tarrayhidden, 1);
 		Arrays.fill(this.scalararrayhidden, 1.0);		
 
+		this.updatevec = new double[this.hiddendim];
 		
 		logger.info( "Done." );
 	}
@@ -216,14 +218,15 @@ public class DeepPLT extends PLT {
 					}
 				}
 				
+				Arrays.fill( this.updatevec, 0.0 );
+				
 				//logger.info("Negative tree indices: " + negativeTreeIndices.toString());
 				for(int j:positiveTreeIndices) {
 
 					double posterior = getPartialPosteriors(hiddenRepresentation,j);
 					double inc = -(1.0 - posterior); 
 
-					updatedTreePosteriors(hiddenRepresentation, j, inc);
-					updateHiddenRepresentation( instance, posterior, inc, j );
+					updatedTreePosteriors(hiddenRepresentation, j, inc);					
 				}
 
 				for(int j:negativeTreeIndices) {
@@ -233,10 +236,10 @@ public class DeepPLT extends PLT {
 					double posterior = getPartialPosteriors(hiddenRepresentation,j);
 					double inc = -(0.0 - posterior); 
 					
-					updatedTreePosteriors(hiddenRepresentation, j, inc);
-					updateHiddenRepresentation( instance, posterior, inc, j );
+					updatedTreePosteriors(hiddenRepresentation, j, inc);					
 				}
 				
+				updateHiddenRepresentation( instance );
 				
 				this.T++;
 
@@ -257,8 +260,7 @@ public class DeepPLT extends PLT {
 		
 	}
 
-	protected void updateHiddenRepresentation( Instance instance, double posterior, double inc, int ind ) {
-		//double sigder = posterior * ( 1 - posterior);
+	protected void updateHiddenRepresentation( Instance instance ) {		
 
 		double sum = 0.0;
 		for(int j = 0; j < instance.x.length; j++ ){
@@ -280,7 +282,8 @@ public class DeepPLT extends PLT {
 			
 			
 			for(int j = 0; j < this.hiddendim; j++ ){
-				double gradient = this.scalararrayhidden[hi] * inc * this.w[ind][j] * sum * instance.x[i].value;
+				//double gradient = this.scalararrayhidden[hi] * inc * this.w[ind][j] * sum * instance.x[i].value;
+				double gradient = this.scalararrayhidden[hi] * this.updatevec[j] * sum * instance.x[i].value;
 				double update = (this.learningRate * gradient);// / this.scalar;		
 				this.hiddenWeights[hi][j] -= update; 				
 			}
@@ -322,11 +325,12 @@ public class DeepPLT extends PLT {
 		
 		int n = x.length;
 		
-		for(int i = 0; i < n; i++) {
+		for(int i = 0; i < this.hiddendim; i++) {
 			double gradient = this.scalararray[label] * inc * x[i];
 			double update = (this.learningRate * gradient);// / this.scalar;		
 			this.w[label][i] -= update; 
 			
+			this.updatevec[i] += inc * this.w[label][i];
 		}
 		
 		double gradient = this.scalararray[label] * inc;
