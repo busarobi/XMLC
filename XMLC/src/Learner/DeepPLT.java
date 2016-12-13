@@ -1,5 +1,8 @@
 package Learner;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -8,6 +11,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Properties;
+import java.util.Random;
 import java.util.TreeSet;
 
 import org.apache.commons.math3.analysis.function.Sigmoid;
@@ -15,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import Data.AVPair;
+import Data.AVTable;
 import Data.EstimatePair;
 import Data.Instance;
 import Data.NodeComparatorPLT;
@@ -35,6 +40,9 @@ public class DeepPLT extends PLT {
 	protected double[][] w = null;
 	protected double[][] hiddenWeights = null;	
 	protected int hiddendim = 100;
+	
+	transient protected int[] Tarrayhidden = null;
+	protected double[] scalararrayhidden = null;
 	
 	public DeepPLT(Properties properties) {
 		super(properties);
@@ -116,11 +124,22 @@ public class DeepPLT extends PLT {
 		
 		logger.info( "Allocate the learners..." );
 
+		Random r = new Random();
 		this.hiddenWeights = new double[this.hd][];
-		for(int i = 0; i < this.hd; i++ ) this.hiddenWeights[i] = new double[this.hiddendim];
+		for(int i = 0; i < this.hd; i++ ) {
+			this.hiddenWeights[i] = new double[this.hiddendim];
+			for(int j = 0; j < this.hiddendim; j++ ){
+				this.hiddenWeights[i][j] = r.nextDouble(); 
+			}
+		}
 		
 		this.w = new double[this.t][];
-		for(int i = 0; i < this.t; i++ ) this.w[i] = new double[this.hiddendim];
+		for(int i = 0; i < this.t; i++ ) {
+			this.w[i] = new double[this.hiddendim];
+			for(int j = 0; j < this.hiddendim; j++ ){
+				this.w[i][j] =  r.nextDouble();
+			}
+		}
 		
 		
 		this.thresholds = new double[this.t];
@@ -134,7 +153,12 @@ public class DeepPLT extends PLT {
 		this.scalararray = new double[this.t];
 		Arrays.fill(this.Tarray, 1);
 		Arrays.fill(this.scalararray, 1.0);
-		
+
+		this.Tarrayhidden = new int[this.hd];
+		this.scalararrayhidden = new double[this.hd];
+		Arrays.fill(this.Tarrayhidden, 1);
+		Arrays.fill(this.scalararrayhidden, 1.0);		
+
 		
 		logger.info( "Done." );
 	}
@@ -228,29 +252,39 @@ public class DeepPLT extends PLT {
 			data.reset();
 			
 			logger.info("--> END of Epoch: " + (ep + 1) + " (" + this.epochs + ")" );
+			this.writeHiddenVectors("./examples/hidden.txt");
 		}
 		
 	}
 
 	protected void updateHiddenRepresentation( Instance instance, double posterior, double inc, int ind ) {
-		double sigder = posterior * ( 1 - posterior);
+		//double sigder = posterior * ( 1 - posterior);
 
 		double sum = 0.0;
 		for(int j = 0; j < instance.x.length; j++ ){
 			sum += instance.x[j].value;
 		}
 		if (sum > 0.000001) {
-			sum = 1/sum;
+			sum = 1.0/sum;
 		}
 		
-		
+				
 		for( int i = 0; i < instance.x.length; i++ ) {
 			int hi = fh.getIndex(1,  instance.x[i].index); 
 			//int sign = fh.getSign(1, instance.x[i].index);
+		
+			
+			this.learningRate = this.gamma / (1 + this.gamma * this.lambda * this.Tarrayhidden[hi]);
+			this.Tarrayhidden[hi]++;
+			this.scalararrayhidden[hi] *= (1 + this.learningRate * this.lambda);
+			
 			
 			for(int j = 0; j < this.hiddendim; j++ ){
-				this.hiddenWeights[hi][j] -= sigder * this.w[ind][j] * sum * instance.x[i].value;  
+				double gradient = this.scalararrayhidden[hi] * inc * this.w[ind][j] * sum * instance.x[i].value;
+				double update = (this.learningRate * gradient);// / this.scalar;		
+				this.hiddenWeights[hi][j] -= update; 				
 			}
+			
 		}
 	}
 
@@ -267,6 +301,7 @@ public class DeepPLT extends PLT {
 				hiddenRepresentation[ j ] += x[i].value * this.hiddenWeights[hi][j];
 				sum += x[i].value;
 			}
+			
 		}
 		
 		if (sum > 0.0000001 ) {
@@ -371,6 +406,32 @@ public class DeepPLT extends PLT {
 		return positiveLabels;
 	}
 
+	public void writeHiddenVectors( String outfname ) 
+	{
+		try{
+			BufferedWriter bf = new BufferedWriter(new FileWriter(outfname) );
+			
+			for( int i = 0; i<this.m; i++)
+			{
+				int hi = fh.getIndex(1,  i);
+				
+				bf.write( i + "," +  hi );
+				// labels
+				for(int j=0; j< this.hiddendim; j++ ) {
+					//logger.info(data.y[i][j]);
+					bf.write(  "," + this.hiddenWeights[hi][j]  );
+				}		
+				
+				bf.write( "\n" );
+			}
+			
+			bf.close();
+		} catch ( IOException e ) {
+			System.out.println(e.getMessage());
+		}
+	}
+	
+	
 }
 	
 	

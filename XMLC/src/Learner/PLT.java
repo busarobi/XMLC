@@ -2,14 +2,11 @@ package Learner;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Properties;
-import java.util.Random;
 import java.util.TreeSet;
 
 import org.apache.commons.math3.analysis.function.Sigmoid;
@@ -28,7 +25,6 @@ import preprocessing.FeatureHasher;
 import preprocessing.FeatureHasherFactory;
 import util.CompleteTree;
 import util.HuffmanTree;
-import util.MasterSeed;
 import util.PrecomputedTree;
 import util.Tree;
 
