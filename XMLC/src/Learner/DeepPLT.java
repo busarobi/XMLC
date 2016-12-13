@@ -234,12 +234,22 @@ public class DeepPLT extends PLT {
 
 	protected void updateHiddenRepresentation( Instance instance, double posterior, double inc, int ind ) {
 		double sigder = posterior * ( 1 - posterior);
+
+		double sum = 0.0;
+		for(int j = 0; j < instance.x.length; j++ ){
+			sum += instance.x[j].value;
+		}
+		if (sum > 0.000001) {
+			sum = 1/sum;
+		}
+		
+		
 		for( int i = 0; i < instance.x.length; i++ ) {
 			int hi = fh.getIndex(1,  instance.x[i].index); 
 			//int sign = fh.getSign(1, instance.x[i].index);
 			
 			for(int j = 0; j < this.hiddendim; j++ ){
-				this.hiddenWeights[hi][j] -= sigder * this.w[ind][j] * instance.x[i].value;  
+				this.hiddenWeights[hi][j] -= sigder * this.w[ind][j] * sum * instance.x[i].value;  
 			}
 		}
 	}
@@ -248,12 +258,20 @@ public class DeepPLT extends PLT {
 	protected double[] getHiddenRepresentation( AVPair[] x ) {
 		double[] hiddenRepresentation = new double[this.hiddendim];
 		// aggregate the the word2vec representation
+		double sum = 0;
 		for (int i = 0; i < x.length; i++) {
 			int hi = fh.getIndex(1,  x[i].index); 
 			//int sign = fh.getSign(1, x[i].index);
 			
 			for(int j = 0; j < this.hiddendim; j++ ){
-				hiddenRepresentation[ j ] += x[i].value * this.hiddenWeights[hi][j];  
+				hiddenRepresentation[ j ] += x[i].value * this.hiddenWeights[hi][j];
+				sum += x[i].value;
+			}
+		}
+		
+		if (sum > 0.0000001 ) {
+			for(int j = 0; j < this.hiddendim; j++ ){
+				hiddenRepresentation[ j ] /= sum;			
 			}
 		}
 		
