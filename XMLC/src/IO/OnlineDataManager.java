@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.StringTokenizer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Semaphore;
 
 import Data.AVPair;
 import Data.Instance;
@@ -88,6 +89,7 @@ public class OnlineDataManager extends DataManager {
 	public class ReaderThread implements Runnable{
 
 		  protected BlockingQueue<Instance> blockingQueue = null;
+		  private final Semaphore available = new Semaphore(1);
 		  protected String filename = null;
 		  protected int d; 
 		  protected int n;
@@ -125,15 +127,25 @@ public class OnlineDataManager extends DataManager {
 		  @Override
 		  public void run() {		    
 		     try {		    	 
-		            String buffer =null;
-		            while((buffer=br.readLine())!=null){
-		            	if (this.flag == false ) break;
-		            	ni++;
-		            	Instance instance = processLine(buffer);
-		                blockingQueue.put(instance);		                
-		            }
-		            //blockingQueue.put(null);  //When end of file has been reached
-		            this.endOfFile = true;
+		            String buffer = br.readLine();
+		            if (buffer == null ) {
+	            		this.endOfFile = true;
+	            	} else {     			            
+			            while(true){		            	
+			            	available.acquire();
+			            	ni++;
+			            	Instance instance = processLine(buffer);
+			            	blockingQueue.put(instance);
+			            	
+			            	buffer = br.readLine();
+			            	if (buffer == null ) {
+			            		this.endOfFile = true;
+			            		break;
+			            	}		            	
+			                available.release();		                
+			            }
+		            
+	            	}		            
 
 		        } catch (FileNotFoundException e) {
 

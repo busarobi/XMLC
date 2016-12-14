@@ -250,9 +250,6 @@ public class DeepPLT extends PLT {
 
 				if ((this.T % 100000) == 0) {
 					logger.info( "\t --> Epoch: " + (ep+1) + " (" + this.epochs + ")" + "\tSample: "+ this.T );
-					DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-					Date date = new Date();
-					logger.info("\t\t" + dateFormat.format(date));
 				}
 			}
 			data.reset();
