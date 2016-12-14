@@ -39,17 +39,7 @@ public class OnlineDataManager extends DataManager {
 
 	@Override
 	public boolean hasNext() {
-		boolean retVal = (this.blockingQueue.size() > 0);
-		if (retVal) return true;
-		
-		try {
-			this.readerthread.available.acquire();
-			retVal = ! this.readerthread.isEndOfFile();
-			this.readerthread.available.release();
-		} catch (InterruptedException e) {			
-			e.printStackTrace();
-		}		
-		return retVal;
+		return ((this.blockingQueue.size() > 0) || (! this.readerthread.isEndOfFile() ));
 	}
 
 	@Override
@@ -104,7 +94,7 @@ public class OnlineDataManager extends DataManager {
 		  protected int d; 
 		  protected int n;
 		  protected int m;
-		  protected int ni = 0;
+		  
 		  protected volatile boolean endOfFile = false;
 		  public volatile boolean flag = true;
 		  
@@ -122,8 +112,7 @@ public class OnlineDataManager extends DataManager {
 				
 				this.n = Integer.parseInt(tokens[0]);
 				this.d = Integer.parseInt(tokens[1]);
-				this.m = Integer.parseInt(tokens[2]);
-				this.ni = 0;
+				this.m = Integer.parseInt(tokens[2]);				
 			} catch (FileNotFoundException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -137,20 +126,23 @@ public class OnlineDataManager extends DataManager {
 		  @Override
 		  public void run() {		    
 		     try {		    	 
+		    	 	available.acquire();
 		            String buffer = br.readLine();
 		            if (buffer == null ) {
-	            		this.endOfFile = true;
-	            	} else {     			            
+		            	this.endOfFile = true;
+		            }
+		            available.release();
+	            		
+	            	if (this.endOfFile == false ) {     			            
 			            while(true){		            	
-			            	
-			            	ni++;
 			            	Instance instance = processLine(buffer);			            	
-			            	available.acquire();
-			            	blockingQueue.put(instance);
 			            	
+			            	available.acquire();
+			            	blockingQueue.put(instance);			            	
 			            	buffer = br.readLine();
 			            	if (buffer == null ) {
 			            		this.endOfFile = true;
+			            		available.release();
 			            		break;
 			            	}		            	
 			                available.release();		                
@@ -158,14 +150,8 @@ public class OnlineDataManager extends DataManager {
 		            
 	            	}		            
 
-		        } catch (FileNotFoundException e) {
-
+		        } catch (Exception e) {
 		            e.printStackTrace();
-		        } catch (IOException e) {
-
-		            e.printStackTrace();
-		        } catch(InterruptedException e){
-
 		        }finally{
 		            try {
 		                br.close();
@@ -203,8 +189,7 @@ public class OnlineDataManager extends DataManager {
 		}
 
 		synchronized public boolean isEndOfFile() {
-			//return this.endOfFile;
-			return (this.ni >= this.n);
+			return this.endOfFile;			
 		}
 		
 		protected Instance processLine(String line ){
