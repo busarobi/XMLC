@@ -38,8 +38,16 @@ public class OnlineDataManager extends DataManager {
 	}
 
 	@Override
-	public boolean hasNext() {				
-		return ((this.blockingQueue.size() > 0) || (! this.readerthread.isEndOfFile() ));
+	public boolean hasNext() {
+		boolean retVal = true;		
+		try {
+			this.readerthread.available.acquire();
+			retVal = ((this.blockingQueue.size() > 0) || (! this.readerthread.isEndOfFile() ));
+			this.readerthread.available.release();
+		} catch (InterruptedException e) {			
+			e.printStackTrace();
+		}		
+		return retVal;
 	}
 
 	@Override
@@ -89,7 +97,7 @@ public class OnlineDataManager extends DataManager {
 	public class ReaderThread implements Runnable{
 
 		  protected BlockingQueue<Instance> blockingQueue = null;
-		  private final Semaphore available = new Semaphore(1);
+		  protected final Semaphore available = new Semaphore(1);
 		  protected String filename = null;
 		  protected int d; 
 		  protected int n;
