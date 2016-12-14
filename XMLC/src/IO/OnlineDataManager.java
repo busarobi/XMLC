@@ -39,10 +39,12 @@ public class OnlineDataManager extends DataManager {
 
 	@Override
 	public boolean hasNext() {
-		boolean retVal = true;		
+		boolean retVal = (this.blockingQueue.size() > 0);
+		if (retVal) return true;
+		
 		try {
 			this.readerthread.available.acquire();
-			retVal = ((this.blockingQueue.size() > 0) || (! this.readerthread.isEndOfFile() ));
+			retVal = ! this.readerthread.isEndOfFile();
 			this.readerthread.available.release();
 		} catch (InterruptedException e) {			
 			e.printStackTrace();
@@ -140,9 +142,10 @@ public class OnlineDataManager extends DataManager {
 	            		this.endOfFile = true;
 	            	} else {     			            
 			            while(true){		            	
-			            	available.acquire();
+			            	
 			            	ni++;
-			            	Instance instance = processLine(buffer);
+			            	Instance instance = processLine(buffer);			            	
+			            	available.acquire();
 			            	blockingQueue.put(instance);
 			            	
 			            	buffer = br.readLine();
