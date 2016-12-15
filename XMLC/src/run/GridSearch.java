@@ -129,20 +129,17 @@ public class GridSearch extends LearnerManager {
 		try {
 
 			// gamma
+			//List<String> gammaArray = Arrays.asList("100.0", "70.0", "50.0", "40.0", "30.0", "20.0", "10.0", "5.0",
+			//		"1.0", "0.5", "0.1", "0.05", "0.01", "0.005", "0.001", "0.0001", "0.00001", "0.000001");
 			List<String> gammaArray = Arrays.asList("100.0", "70.0", "50.0", "40.0", "30.0", "20.0", "10.0", "5.0",
-					"1.0", "0.5", "0.1", "0.05", "0.01", "0.005", "0.001", "0.0001", "0.00001", "0.000001");
-			// List<String> gammaArray =
-			// Arrays.asList("10.0","5.0","1.0","0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001");
-			// List<String> gammaArray =
-			// Arrays.asList("100.0","70.0","50.0","40.0","30.0","20.0");
-			// //"10.0","5.0","1.0","0.5","0.1","0.01","0.001");
+					"1.0", "0.5", "0.1", "0.05");
 			hyperparameters.put("gamma", gammaArray);
 
 			// lambda
-			List<String> lambdaArray = Arrays.asList("0.5", "0.1", "0.05", "0.01", "0.005", "0.001", "0.0001",
+//			List<String> lambdaArray = Arrays.asList("0.5", "0.1", "0.05", "0.01", "0.005", "0.001", "0.0001",
+//					"0.00001", "0.000001", "0.0000001");
+			List<String> lambdaArray = Arrays.asList( "0.001", "0.0001",
 					"0.00001", "0.000001", "0.0000001");
-			// List<String> lambdaArray =
-			// Arrays.asList("0.0001","0.00001","0.000001","0.0000001");
 			hyperparameters.put("lambda", lambdaArray);
 
 			// number of leaves
@@ -159,12 +156,9 @@ public class GridSearch extends LearnerManager {
 			// hyperparameters.put("step", stepArray);
 			//
 			// // epochs
-			List<String> epochArray = Arrays.asList("5", "10", "20", "30", "50", "100");
-			// List<String> epochArray = Arrays.asList("10","50","100");
-			// List<String> epochArray = Arrays.asList("5","10","15","20");
-			// List<String> epochArray = Arrays.asList("1");
-			// List<String> epochArray = Arrays.asList("1");
-			hyperparameters.put("epochs", epochArray);
+			List<String> hiddendimArray = Arrays.asList("5", "10", "20", "30", "50", "100","200","500");
+			//List<String> hiddendimArray = Arrays.asList("5", "10");
+			hyperparameters.put("hiddendim", hiddendimArray);
 
 			// List<String> beta1Array = Arrays.asList("0.7", "0.8", "0.9");
 			// hyperparameters.put("beta1", beta1Array );
@@ -238,23 +232,20 @@ public class GridSearch extends LearnerManager {
 
 	public void runHyperParameterSearch() throws Exception {
 
-		this.readTrainData();
-		this.readValidData();
-		this.readTestData();
 
-		ExecutorService executor = Executors.newFixedThreadPool(this.numWorkers);// creating
-																					// a
-																					// pool
-																					// of
-																					// 5
-																					// threads
+		this.traindata = DataManager.managerFactory(properties.getProperty("TrainFile"), "Batch" );
+		this.testdata = DataManager.managerFactory(properties.getProperty("TestFile"), "Batch" );
+		this.validdata = DataManager.managerFactory(properties.getProperty("ValidFile"), "Batch" );
+
+		ExecutorService executor = Executors.newFixedThreadPool(this.numWorkers);// creating		
 		SimpleThread[] workers = new SimpleThread[numOfTrials];
-
+		
+		
 		for (int hpi = 0; hpi < numOfTrials; hpi++) {
 			Properties prop = getUpdatedProperties();
 			String info = getInfoString(prop);
-
-			workers[hpi] = new SimpleThread(prop, traindata, validdata, testdata, info);
+			
+			workers[hpi] = new SimpleThread(prop, this.traindata, this.validdata, this.testdata, info);
 			executor.execute(workers[hpi]);
 		}
 

@@ -51,7 +51,7 @@ public class DeepPLT extends PLT {
 		super(properties);
 		
 		System.out.println("#####################################################" );
-		System.out.println("#### Learner: PLT" );
+		System.out.println("#### Learner: DeepPLT" );
 		// learning rate
 		this.gamma = Double.parseDouble(this.properties.getProperty("gamma", "1.0"));
 		logger.info("#### gamma: " + this.gamma );
