@@ -129,17 +129,20 @@ public class GridSearch extends LearnerManager {
 		try {
 
 			// gamma
-			//List<String> gammaArray = Arrays.asList("100.0", "70.0", "50.0", "40.0", "30.0", "20.0", "10.0", "5.0",
-			//		"1.0", "0.5", "0.1", "0.05", "0.01", "0.005", "0.001", "0.0001", "0.00001", "0.000001");
 			List<String> gammaArray = Arrays.asList("100.0", "70.0", "50.0", "40.0", "30.0", "20.0", "10.0", "5.0",
-					"1.0", "0.5", "0.1", "0.05");
+					"1.0", "0.5", "0.1", "0.05", "0.01", "0.005", "0.001", "0.0001", "0.00001", "0.000001");
+			// List<String> gammaArray =
+			// Arrays.asList("10.0","5.0","1.0","0.5","0.1","0.05","0.01","0.005","0.001","0.0001","0.00001","0.000001");
+			// List<String> gammaArray =
+			// Arrays.asList("100.0","70.0","50.0","40.0","30.0","20.0");
+			// //"10.0","5.0","1.0","0.5","0.1","0.01","0.001");
 			hyperparameters.put("gamma", gammaArray);
 
 			// lambda
-//			List<String> lambdaArray = Arrays.asList("0.5", "0.1", "0.05", "0.01", "0.005", "0.001", "0.0001",
-//					"0.00001", "0.000001", "0.0000001");
-			List<String> lambdaArray = Arrays.asList( "0.001", "0.0001",
+			List<String> lambdaArray = Arrays.asList("0.5", "0.1", "0.05", "0.01", "0.005", "0.001", "0.0001",
 					"0.00001", "0.000001", "0.0000001");
+			// List<String> lambdaArray =
+			// Arrays.asList("0.0001","0.00001","0.000001","0.0000001");
 			hyperparameters.put("lambda", lambdaArray);
 
 			// number of leaves
