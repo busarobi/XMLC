@@ -143,7 +143,7 @@ public class DeepPLT extends PLT {
 		for(int i = 0; i < this.t; i++ ) {
 			this.w[i] = new double[this.hiddendim];
 			for(int j = 0; j < this.hiddendim; j++ ){
-				this.w[i][j] =  r.nextDouble() / this.d;
+				this.w[i][j] =  (2.0*r.nextDouble()-1);
 			}
 		}
 		
