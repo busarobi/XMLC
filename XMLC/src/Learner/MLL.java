@@ -39,7 +39,9 @@ public class MLL extends AbstractLearner {
 	
 	
 	transient protected FeatureHasher fh = null;
-	
+	/**
+	 * Hashed dimension, i.e. number of ML hashed features.
+	 */	
 	protected int hd;
 
 

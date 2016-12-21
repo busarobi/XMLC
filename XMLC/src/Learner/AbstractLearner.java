@@ -26,8 +26,14 @@ public abstract class AbstractLearner implements Serializable{
 
 	private static Logger logger = LoggerFactory.getLogger(AbstractLearner.class);
 
-	protected int m = 0; // num of labels
-	protected int d = 0; // number of features
+	/**
+	 * Number of labels.
+	 */
+	protected int m = 0; 
+	/**
+	 * Number of features.
+	 */
+	protected int d = 0; 
 
 
 	transient protected Properties properties = null;

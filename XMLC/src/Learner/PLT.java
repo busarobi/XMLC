@@ -31,9 +31,15 @@ import util.Tree;
 public class PLT extends AbstractLearner {
 	private static final long serialVersionUID = 1L;
 	private static Logger logger = LoggerFactory.getLogger(PLT.class);
+	/**
+	 * Number of inner node of the trees
+	 */
 	transient protected int t = 0;	
 	protected Tree tree = null;
 	
+	/**
+	 * Order of the tree (k-ary).
+	 */
 	protected int k = 2;
 	protected String treeType = "Complete";
 	protected String treeFile = null;
@@ -46,6 +52,9 @@ public class PLT extends AbstractLearner {
 	transient protected FeatureHasher fh = null;
 	protected String hasher = "Universal";
 	protected int fhseed = 1;
+	/**
+	 * Hashed dimension, i.e. number of ML hashed features.
+	 */
 	protected int hd;
 	
 	protected double[] bias;
