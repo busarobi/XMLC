@@ -32,7 +32,7 @@ public class PLT extends AbstractLearner {
 	private static final long serialVersionUID = 1L;
 	private static Logger logger = LoggerFactory.getLogger(PLT.class);
 	/**
-	 * Number of inner node of the trees
+	 * Number of node of the trees
 	 */
 	transient protected int t = 0;	
 	protected Tree tree = null;
@@ -150,7 +150,7 @@ public class PLT extends AbstractLearner {
 		this.t = this.tree.getSize(); 
 
 		logger.info( "#### Num. of labels: " + this.m + " Dim: " + this.d );
-		logger.info( "#### Num. of inner node of the trees: " + this.t  );
+		logger.info( "#### Num. of node of the trees: " + this.t  );
 		logger.info("#####################################################" );
 			
 		this.fh = FeatureHasherFactory.createFeatureHasher(this.hasher, fhseed, this.hd, this.t);
@@ -294,7 +294,17 @@ public class PLT extends AbstractLearner {
 		//logger.info("bias -> gradient, scalar, update: " + gradient + ", " + scalar +", " + update);
 	}
 	
-	
+	/**
+	 * Computes and returns {@code sigmoid(fh(x).dot(weight) + bias[label])}
+	 * 
+	 * @param x
+	 *            Sparse feature vector.
+	 * @param label
+	 *            Node index of PLT.
+	 * @return Class (1 or 0) probability estimate at node {@code label} for the
+	 *         given instance {@code x}, as per current weight vector and bias at
+	 *         node {@code label}.
+	 */
 	public double getPartialPosteriors(AVPair[] x, int label) {
 		double posterior = 0.0;
 		
