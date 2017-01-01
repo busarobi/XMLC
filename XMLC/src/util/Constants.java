@@ -18,4 +18,9 @@ public class Constants {
 		public static final String trueLabels = "trueLabels";
 		public static final String predictedLabels = "predictedLabels";
 	}
+	
+	public static class OFO {
+		public static final int defaultaSeed = 1;
+		public static final int defaultbSeed = 100;
+	}
 }
