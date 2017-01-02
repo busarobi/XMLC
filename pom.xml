@@ -21,7 +21,7 @@
 				<version>3.1</version>
 				<configuration>
 					<source>1.7</source>
-					<target>1.7</target>					
+					<target>1.7</target>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -37,8 +37,8 @@
 					</execution>
 				</executions>
 				<configuration>
-				    <finalName>XMLC_PLT</finalName>
-				    <outputDirectory>./</outputDirectory>
+					<finalName>XMLC_PLT</finalName>
+					<outputDirectory>./</outputDirectory>
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
@@ -96,6 +96,11 @@
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
 			<version>2.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>20.0</version>
 		</dependency>
 	</dependencies>
 </project>
