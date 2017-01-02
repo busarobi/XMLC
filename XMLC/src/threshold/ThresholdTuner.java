@@ -1,7 +1,6 @@
 package threshold;
 
-import java.util.Dictionary;
-import java.util.HashMap;
+import java.util.Map;
 
 import util.Constants;
 
@@ -29,7 +28,7 @@ public abstract class ThresholdTuner {
 	 *            {@link Constants.ThresholdTuningDictKeys}.
 	 * @return Tuned threshold array.
 	 */
-	abstract double[] getTunedThresholds(Dictionary<String, Object> tuningData);
+	abstract double[] getTunedThresholds(Map<String, Object> tuningData);
 
 	/**
 	 * Tunes thresholds as per the {@code tuningData}
@@ -43,6 +42,6 @@ public abstract class ThresholdTuner {
 	 *         value for threshold.
 	 * @throws Exception
 	 */
-	abstract HashMap<Integer, Double> getTunedThresholdsSparse(Dictionary<String, Object> tuningData)
+	abstract Map<Integer, Double> getTunedThresholdsSparse(Map<String, Object> tuningData)
 			throws Exception;
 }

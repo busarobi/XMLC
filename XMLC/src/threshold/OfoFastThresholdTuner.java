@@ -1,16 +1,18 @@
 package threshold;
 
 import java.util.Arrays;
-import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import util.Constants.ThresholdTuningDictKeys;
+import com.thoughtworks.xstream.mapper.Mapper.Null;
+
 import util.Constants.OFO;
+import util.Constants.ThresholdTuningDictKeys;
 
 /**
  * Tunes thresholds using online F-Measure optimization algorithm.
@@ -75,21 +77,23 @@ public class OfoFastThresholdTuner extends ThresholdTuner {
 	}
 
 	@Override
-	public double[] getTunedThresholds(Dictionary<String, Object> tuningData) {
+	public double[] getTunedThresholds(Map<String, Object> tuningData) {
 
-		@SuppressWarnings("unchecked")
-		List<HashSet<Integer>> predictedLabels = (List<HashSet<Integer>>) tuningData
-				.get(ThresholdTuningDictKeys.predictedLabels);
+		if (tuningData != null) {
+			@SuppressWarnings("unchecked")
+			List<HashSet<Integer>> predictedLabels = (List<HashSet<Integer>>) tuningData
+					.get(ThresholdTuningDictKeys.predictedLabels);
 
-		@SuppressWarnings("unchecked")
-		List<HashSet<Integer>> trueLabels = (List<HashSet<Integer>>) tuningData
-				.get(ThresholdTuningDictKeys.trueLabels);
+			@SuppressWarnings("unchecked")
+			List<HashSet<Integer>> trueLabels = (List<HashSet<Integer>>) tuningData
+					.get(ThresholdTuningDictKeys.trueLabels);
 
-		if (predictedLabels != null || trueLabels != null) {
+			if (predictedLabels != null || trueLabels != null) {
 
-			tuneAndGetAffectedLabels(predictedLabels, trueLabels);
+				tuneAndGetAffectedLabels(predictedLabels, trueLabels);
+			}
 		}
-
+		
 		double[] thresholds = new double[aThresholdNumerators.length];
 
 		for (int label = 0; label < aThresholdNumerators.length; label++) {
@@ -100,8 +104,10 @@ public class OfoFastThresholdTuner extends ThresholdTuner {
 	}
 
 	@Override
-	public HashMap<Integer, Double> getTunedThresholdsSparse(Dictionary<String, Object> tuningData) throws Exception {
-
+	public Map<Integer, Double> getTunedThresholdsSparse(Map<String, Object> tuningData) throws Exception {
+		
+		if(tuningData == null) throw new IllegalArgumentException("Incorrect tuning data");
+		
 		@SuppressWarnings("unchecked")
 		List<HashSet<Integer>> predictedLabels = (List<HashSet<Integer>>) tuningData
 				.get(ThresholdTuningDictKeys.predictedLabels);
@@ -111,7 +117,7 @@ public class OfoFastThresholdTuner extends ThresholdTuner {
 				.get(ThresholdTuningDictKeys.trueLabels);
 
 		if (predictedLabels == null || trueLabels == null)
-			throw new Exception("Missing true or predicted labels");
+			throw new IllegalArgumentException("Incorrect tuning data. Missing true or predicted labels");
 
 		HashSet<Integer> thresholdsToChange = tuneAndGetAffectedLabels(predictedLabels, trueLabels);
 		HashMap<Integer, Double> sparseThresholds = new HashMap<Integer, Double>();
@@ -149,7 +155,7 @@ public class OfoFastThresholdTuner extends ThresholdTuner {
 			for (int trueLabel : truePositives) {
 				bThresholdDenominators[trueLabel]++;
 				thresholdsToChange.add(trueLabel);
-				if (predictedLabels.contains(trueLabel))
+				if (predictedPositives.contains(trueLabel))
 					aThresholdNumerators[trueLabel]++;
 			}
 		}
