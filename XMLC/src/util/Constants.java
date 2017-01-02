@@ -14,7 +14,7 @@ public class Constants {
 	 * @author Sayan
 	 *
 	 */
-	public static class ThresholdTuningDictKeys {
+	public static class ThresholdTuningDataKeys {
 		public static final String trueLabels = "trueLabels";
 		public static final String predictedLabels = "predictedLabels";
 	}

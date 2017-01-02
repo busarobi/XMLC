@@ -9,10 +9,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.thoughtworks.xstream.mapper.Mapper.Null;
-
 import util.Constants.OFO;
-import util.Constants.ThresholdTuningDictKeys;
+import util.Constants.ThresholdTuningDataKeys;
 
 /**
  * Tunes thresholds using online F-Measure optimization algorithm.
@@ -77,23 +75,28 @@ public class OfoFastThresholdTuner extends ThresholdTuner {
 	}
 
 	@Override
+	public ThresholdTuners getTunerType() {
+		return ThresholdTuners.OfoFast;
+	}
+
+	@Override
 	public double[] getTunedThresholds(Map<String, Object> tuningData) {
 
 		if (tuningData != null) {
 			@SuppressWarnings("unchecked")
 			List<HashSet<Integer>> predictedLabels = (List<HashSet<Integer>>) tuningData
-					.get(ThresholdTuningDictKeys.predictedLabels);
+					.get(ThresholdTuningDataKeys.predictedLabels);
 
 			@SuppressWarnings("unchecked")
 			List<HashSet<Integer>> trueLabels = (List<HashSet<Integer>>) tuningData
-					.get(ThresholdTuningDictKeys.trueLabels);
+					.get(ThresholdTuningDataKeys.trueLabels);
 
 			if (predictedLabels != null || trueLabels != null) {
 
 				tuneAndGetAffectedLabels(predictedLabels, trueLabels);
 			}
 		}
-		
+
 		double[] thresholds = new double[aThresholdNumerators.length];
 
 		for (int label = 0; label < aThresholdNumerators.length; label++) {
@@ -105,16 +108,17 @@ public class OfoFastThresholdTuner extends ThresholdTuner {
 
 	@Override
 	public Map<Integer, Double> getTunedThresholdsSparse(Map<String, Object> tuningData) throws Exception {
-		
-		if(tuningData == null) throw new IllegalArgumentException("Incorrect tuning data");
-		
+
+		if (tuningData == null)
+			throw new IllegalArgumentException("Incorrect tuning data");
+
 		@SuppressWarnings("unchecked")
 		List<HashSet<Integer>> predictedLabels = (List<HashSet<Integer>>) tuningData
-				.get(ThresholdTuningDictKeys.predictedLabels);
+				.get(ThresholdTuningDataKeys.predictedLabels);
 
 		@SuppressWarnings("unchecked")
 		List<HashSet<Integer>> trueLabels = (List<HashSet<Integer>>) tuningData
-				.get(ThresholdTuningDictKeys.trueLabels);
+				.get(ThresholdTuningDataKeys.trueLabels);
 
 		if (predictedLabels == null || trueLabels == null)
 			throw new IllegalArgumentException("Incorrect tuning data. Missing true or predicted labels");

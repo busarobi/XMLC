@@ -5,20 +5,30 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Properties;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.primitives.Ints;
 
 import Data.AVPair;
 //import Data.AVTable;
 import Data.ComparablePair;
 import Data.EstimatePair;
+import Data.Instance;
 import IO.DataManager;
+import threshold.ThresholdTuner;
 import util.IoUtils;
+import util.Constants.ThresholdTuningDataKeys;
 
 
 public abstract class AbstractLearner implements Serializable{
@@ -38,6 +48,8 @@ public abstract class AbstractLearner implements Serializable{
 
 	transient protected Properties properties = null;
 	protected double[] thresholds = null;
+	
+	protected ThresholdTuner thresholdTuner;
 
 	// abstract functions
 	public abstract void allocateClassifiers( DataManager data );
@@ -216,6 +228,56 @@ public abstract class AbstractLearner implements Serializable{
 
 	public int getNumberOfLabels() {
 		return this.m;
+	}
+	
+	/**
+	 * Modifies thresholds as provided by {@code this.thresholdTuner}
+	 * 
+	 * Note: This is a potential candidate to move to AbstractLearner; subject
+	 * to feasibility check.
+	 * 
+	 * @param data
+	 * 
+	 */
+	protected void tuneThreshold(DataManager data) {
+		try {
+			Map<Integer, Double> sparseThresholds = thresholdTuner
+					.getTunedThresholdsSparse(createTuningData(data));
+			for (Entry<Integer, Double> entry : sparseThresholds.entrySet()) {
+				setThreshold(entry.getKey(), entry.getValue());
+			}
+		} catch (Exception e) {
+			logger.error("Error during tuning the threshlds.", e);
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Note: This is a potential candidate to move to AbstractLearner; subject to feasibility
+	 * check.
+	 * @param data
+	 * @return
+	 */
+	protected Map<String, Object> createTuningData(DataManager data) {
+		Map<String, Object> retVal = new HashMap<String, Object>();
+		switch (thresholdTuner.getTunerType()) {
+		case OfoFast:
+			List<HashSet<Integer>> trueLabels = new ArrayList<HashSet<Integer>>();
+			List<HashSet<Integer>> predictedLabels = new ArrayList<HashSet<Integer>>();
+			while (data.hasNext()) {
+				Instance instance = data.getNextInstance();
+				trueLabels.add(new HashSet<Integer>(Ints.asList(instance.y)));
+				predictedLabels.add(getPositiveLabels(instance.x));
+			}
+			retVal.put(ThresholdTuningDataKeys.trueLabels, trueLabels);
+			retVal.put(ThresholdTuningDataKeys.predictedLabels, predictedLabels);
+			break;
+		default:
+			logger.warn("createTuningData for " + thresholdTuner.getTunerType() + " is not yet implemented.");
+			break;
+
+		}
+		return retVal;
 	}
 	
 }

@@ -329,8 +329,8 @@ public class OfoFastThresholdTunerTests {
 		};
 		Map<String, Object> tuningData = new HashMap<String, Object>() {
 			{
-				put(Constants.ThresholdTuningDictKeys.trueLabels, trueLabels);
-				put(Constants.ThresholdTuningDictKeys.predictedLabels, predictedLabels);
+				put(Constants.ThresholdTuningDataKeys.trueLabels, trueLabels);
+				put(Constants.ThresholdTuningDataKeys.predictedLabels, predictedLabels);
 			}
 		};
 		double[] expected = { 3.0 / 80.0, 4.0 / 82.0, 4.0 / 82.0, 4.0 / 82.0, 3.0 / 80.0, 3.0 / 80.0, 3.0 / 80.0,
@@ -372,8 +372,8 @@ public class OfoFastThresholdTunerTests {
 		};
 		Map<String, Object> tuningData = new HashMap<String, Object>() {
 			{
-				put(Constants.ThresholdTuningDictKeys.trueLabels, trueLabels);
-				put(Constants.ThresholdTuningDictKeys.predictedLabels, predictedLabels);
+				put(Constants.ThresholdTuningDataKeys.trueLabels, trueLabels);
+				put(Constants.ThresholdTuningDataKeys.predictedLabels, predictedLabels);
 			}
 		};
 		double[] expected = { 3.0 / 81.0, 4.0 / 83.0, 5.0 / 84.0, 5.0 / 84.0, 3.0 / 80.0, 4.0 / 82.0, 3.0 / 81.0,
@@ -393,6 +393,7 @@ public class OfoFastThresholdTunerTests {
 
 	}
 
+	@SuppressWarnings("serial")
 	@Test(expected = IllegalArgumentException.class)
 	public void getTunedThresholdsSparse_ThrowsException_InAbsenceOfPredictedLabels() throws Exception {
 
@@ -406,7 +407,7 @@ public class OfoFastThresholdTunerTests {
 		};
 		Map<String, Object> tuningData = new HashMap<String, Object>() {
 			{
-				put(Constants.ThresholdTuningDictKeys.trueLabels, trueLabels);
+				put(Constants.ThresholdTuningDataKeys.trueLabels, trueLabels);
 			}
 		};
 
@@ -414,6 +415,7 @@ public class OfoFastThresholdTunerTests {
 		target.getTunedThresholdsSparse(tuningData);
 	}
 
+	@SuppressWarnings("serial")
 	@Test(expected = IllegalArgumentException.class)
 	public void getTunedThresholdsSparse_ThrowsException_InAbsenceOfTrueLabels() throws Exception {
 
@@ -427,7 +429,7 @@ public class OfoFastThresholdTunerTests {
 		};
 		Map<String, Object> tuningData = new HashMap<String, Object>() {
 			{
-				put(Constants.ThresholdTuningDictKeys.predictedLabels, predictedLabels);
+				put(Constants.ThresholdTuningDataKeys.predictedLabels, predictedLabels);
 			}
 		};
 
@@ -435,6 +437,7 @@ public class OfoFastThresholdTunerTests {
 		target.getTunedThresholdsSparse(tuningData);
 	}
 
+	@SuppressWarnings("serial")
 	@Test
 	public void getTunedThresholdsSparse_ReturnsCorrectLabels() throws Exception {
 
@@ -455,11 +458,11 @@ public class OfoFastThresholdTunerTests {
 		};
 		Map<String, Object> tuningData = new HashMap<String, Object>() {
 			{
-				put(Constants.ThresholdTuningDictKeys.trueLabels, trueLabels);
-				put(Constants.ThresholdTuningDictKeys.predictedLabels, predictedLabels);
+				put(Constants.ThresholdTuningDataKeys.trueLabels, trueLabels);
+				put(Constants.ThresholdTuningDataKeys.predictedLabels, predictedLabels);
 			}
 		};
-		Set<Integer> expected = new HashSet(Arrays.asList(0, 1, 2, 3, 5, 6, 7, 8, 9));
+		Set<Integer> expected = new HashSet<Integer>(Arrays.asList(0, 1, 2, 3, 5, 6, 7, 8, 9));
 
 		// act
 		Map<Integer, Double> sparseThresholds = target.getTunedThresholdsSparse(tuningData);
@@ -483,8 +486,8 @@ public class OfoFastThresholdTunerTests {
 		}
 
 		Map<String, Object> tuningData = new HashMap<String, Object>();
-		tuningData.put(Constants.ThresholdTuningDictKeys.trueLabels, trueLabels);
-		tuningData.put(Constants.ThresholdTuningDictKeys.predictedLabels, predictedLabels);
+		tuningData.put(Constants.ThresholdTuningDataKeys.trueLabels, trueLabels);
+		tuningData.put(Constants.ThresholdTuningDataKeys.predictedLabels, predictedLabels);
 		Set<Integer> expected = new HashSet<Integer>();
 		for (HashSet<Integer> labels : trueLabels) {
 			expected.addAll(labels);
