@@ -38,19 +38,21 @@ public class OnlineDataManager extends DataManager {
 	}
 
 	@Override
-	public boolean hasNext() {
+	synchronized public boolean hasNext() {
 		return ((this.blockingQueue.size() > 0) || (! this.readerthread.isEndOfFile() ));
 	}
 
 	@Override
-	public Instance getNextInstance() {
+	synchronized public Instance getNextInstance() {
 		Instance instance = null;
-		try {
-			instance = this.blockingQueue.take();
-			this.processedItem++;
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (hasNext()){
+			try {
+				instance = this.blockingQueue.take();
+				this.processedItem++;
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		return instance;		
 	}

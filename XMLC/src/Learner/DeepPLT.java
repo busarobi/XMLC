@@ -53,39 +53,9 @@ public class DeepPLT extends PLT {
 		System.out.println("#####################################################" );
 		System.out.println("#### Learner: DeepPLT" );
 		// learning rate
-		this.gamma = Double.parseDouble(this.properties.getProperty("gamma", "1.0"));
-		logger.info("#### gamma: " + this.gamma );
-
-		// scalar
-		this.lambda = Double.parseDouble(this.properties.getProperty("lambda", "1.0"));
-		logger.info("#### lambda: " + this.lambda );
-
-		// epochs
-		this.epochs = Integer.parseInt(this.properties.getProperty("epochs", "30"));
-		logger.info("#### epochs: " + this.epochs );
-
-		// epochs
-		this.hasher = this.properties.getProperty("hasher", "Mask");
-		logger.info("#### Hasher: " + this.hasher );
-		
-		
-		this.hd = Integer.parseInt(this.properties.getProperty("MLFeatureHashing", "50000000")); 
-		logger.info("#### Number of ML hashed features: " + this.hd );
 
 		this.hiddendim = Integer.parseInt(this.properties.getProperty("hiddendim", "100")); 
 		logger.info("#### Number of hidden dimension: " + this.hiddendim );
-
-		// k-ary tree
-		this.k = Integer.parseInt(this.properties.getProperty("k", "2"));
-		logger.info("#### k (order of the tree): " + this.k );
-
-		// tree type (Complete, Precomputed, Huffman)
-		this.treeType = this.properties.getProperty("treeType", "Complete");
-		logger.info("#### tree type " + this.treeType );
-
-		// tree file name
-		this.treeFile = this.properties.getProperty("treeFile", null);
-		logger.info("#### tree file name " + this.treeFile );
 		
 		this.hiddenVectorsFile = this.properties.getProperty("hiddenvectorsFile", null);
 		logger.info("#### hidden vectors file name " + this.hiddenVectorsFile );
@@ -175,9 +145,7 @@ public class DeepPLT extends PLT {
 		for (int ep = 0; ep < this.epochs; ep++) {
 
 			logger.info("#############--> BEGIN of Epoch: {} ({})", (ep + 1), this.epochs );
-			// random permutation
-			
-			
+
 			while( data.hasNext() == true ){
 				
 				Instance instance = data.getNextInstance();
