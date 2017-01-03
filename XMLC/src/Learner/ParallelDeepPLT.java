@@ -5,8 +5,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.PriorityQueue;
 import java.util.Properties;
 import java.util.Random;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,15 +20,17 @@ import com.google.common.util.concurrent.AtomicDouble;
 import com.google.common.util.concurrent.AtomicDoubleArray;
 
 import Data.AVPair;
+import Data.EstimatePair;
 import Data.Instance;
+import Data.NodeComparatorPLT;
+import Data.NodePLT;
 import IO.DataManager;
-import IO.DataReader;
 import preprocessing.FeatureHasherFactory;
 import util.CompleteTree;
 import util.HuffmanTree;
 import util.PrecomputedTree;
 
-public class ParallelDeepPLT extends DeepPLT {
+public class ParallelDeepPLT extends PLT {
 	private static final long serialVersionUID = 1L;
 	private static Logger logger = LoggerFactory.getLogger(ParallelDeepPLT.class);
 
@@ -226,6 +230,76 @@ public class ParallelDeepPLT extends DeepPLT {
 
 		return hiddenRepresentation;
 	}
+	@Override
+	public double getPosteriors(AVPair[] x, int label) {
+		double posterior = 1.0;
+
+		double[] hiddenRepresentation = this.getHiddenRepresentation(x);
+		
+		int treeIndex = this.tree.getTreeIndex(label);
+
+		posterior *= getPartialPosteriors(hiddenRepresentation, treeIndex);
+
+		while(treeIndex > 0) {
+
+			treeIndex = this.tree.getParent(treeIndex); //Math.floor((treeIndex - 1)/2);
+			posterior *= getPartialPosteriors(hiddenRepresentation, treeIndex);
+
+		}
+		//if(posterior > 0.5) logger.info("Posterior: " + posterior + "Label: " + label);
+		return posterior;
+	}
+
+	public double getPartialPosteriors(double[] x, int label) {
+		double posterior = 0.0;
+		
+		
+		for (int i = 0; i < this.hiddendim; i++) {			
+			posterior += x[i] * (1.0/this.scalararray[label].get()) * this.w[label].get(i);
+		}
+		
+		posterior += (1.0/this.scalararray[label].get()) * this.bias[label].get(); 
+		posterior = s.value(posterior);		
+		
+		return posterior;
+
+	}
+
+	public TreeSet<EstimatePair> getTopKEstimates(AVPair[] x, int k) {
+		double[] hiddenRepresentation = this.getHiddenRepresentation(x);
+		
+		TreeSet<EstimatePair> positiveLabels = new TreeSet<EstimatePair>();
+
+	    int foundTop = 0;
+	    
+	    NodeComparatorPLT nodeComparator = new NodeComparatorPLT();
+
+		PriorityQueue<NodePLT> queue = new PriorityQueue<NodePLT>(11, nodeComparator);
+
+		queue.add(new NodePLT(0,1.0));
+		
+		while(!queue.isEmpty() && (foundTop < k)) {
+
+			NodePLT node = queue.poll();
+
+			double currentP = node.p;
+			
+			if(!this.tree.isLeaf(node.treeIndex)) {
+				
+				for(int childNode: this.tree.getChildNodes(node.treeIndex)) {
+					queue.add(new NodePLT(childNode, currentP * getPartialPosteriors(hiddenRepresentation, childNode)));
+				}
+				
+			} else {
+				
+				positiveLabels.add(new EstimatePair(this.tree.getLabelIndex(node.treeIndex), currentP));
+				foundTop++;
+				
+			}
+		}
+
+		return positiveLabels;
+	}
 
 	public class UpdateThread implements Runnable {
 		DataManager data = null;
@@ -400,41 +474,6 @@ public class ParallelDeepPLT extends DeepPLT {
 
 		}
 
-	}
-
-	@Override
-	public double getPosteriors(AVPair[] x, int label) {
-		double posterior = 1.0;
-
-		double[] hiddenRepresentation = this.getHiddenRepresentation(x);
-		
-		int treeIndex = this.tree.getTreeIndex(label);
-
-		posterior *= getPartialPosteriors(hiddenRepresentation, treeIndex);
-
-		while(treeIndex > 0) {
-
-			treeIndex = this.tree.getParent(treeIndex); //Math.floor((treeIndex - 1)/2);
-			posterior *= getPartialPosteriors(hiddenRepresentation, treeIndex);
-
-		}
-		//if(posterior > 0.5) logger.info("Posterior: " + posterior + "Label: " + label);
-		return posterior;
-	}
-
-	public double getPartialPosteriors(double[] x, int label) {
-		double posterior = 0.0;
-		
-		
-		for (int i = 0; i < this.hiddendim; i++) {			
-			posterior += x[i] * (1.0/this.scalararray[label].get()) * this.w[label].get(i);
-		}
-		
-		posterior += (1.0/this.scalararray[label].get()) * this.bias[label].get(); 
-		posterior = s.value(posterior);		
-		
-		return posterior;
-
-	}
-
+	}	
+	
 }
