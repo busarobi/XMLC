@@ -105,7 +105,7 @@ public class DataReader {
 					indexy++;
 				} else {  // features
 					x[indexx] = new AVPair();
-					x[indexx].index = Integer.parseInt(tokens[0])-1;         // the indexing starts at 0
+					x[indexx].index = Integer.parseInt(tokens[0]);         // the indexing starts at 0
 					if (additionalStat) 
 						hashsetFeatures.add(x[indexx].index);
 					x[indexx++].value = Double.parseDouble(tokens[1]);							
