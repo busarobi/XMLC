@@ -188,7 +188,7 @@ public class ParallelDeepPLT extends PLT {
 		try {
 			BufferedWriter bf = new BufferedWriter(new FileWriter(outfname));
 
-			for (int i = 0; i < this.m; i++) {
+			for (int i = 0; i < this.hd; i++) {
 				int hi = fh.getIndex(1, i);
 
 				bf.write(i + "," + hi);
