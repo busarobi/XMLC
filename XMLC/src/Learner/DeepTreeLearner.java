@@ -18,15 +18,12 @@ import org.slf4j.LoggerFactory;
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
-import org.apache.commons.math3.util.Pair;
-
 import Data.AVPair;
 import Data.Instance;
 import IO.DataManager;
 import IO.Evaluator;
 import IO.ReadProperty;
 import util.PrecomputedTree;
-import util.Tree;
 
 public class DeepTreeLearner extends AbstractLearner {
 	private static final long serialVersionUID = 1L;
@@ -96,7 +93,7 @@ public class DeepTreeLearner extends AbstractLearner {
 		treeIndices.add(0); // root
 		
 		hierarchicalClustering(0, indices);
-		//this.tree = new PrecomputedTree( treeIndices );
+		this.tree = new PrecomputedTree( treeIndices );
 	}
 	
 	private int treeIdx = -1;
@@ -137,9 +134,12 @@ public class DeepTreeLearner extends AbstractLearner {
 		} else {			
 			for( int i = 0; i < indices.size(); i++ ){
 				int currentIdx = ++treeIdx;
-
 				this.treeIndices.add(parent);
 				this.treeIndices.add(currentIdx);
+				this.treeIndices.add(0);				
+
+				this.treeIndices.add(currentIdx);
+				this.treeIndices.add(indices.get(i));
 				this.treeIndices.add(1);				
 			}
 		}
@@ -212,7 +212,7 @@ public class DeepTreeLearner extends AbstractLearner {
 		
 		try{
 			//BufferedReader fp = new BufferedReader(new FileReader(this.hiddenVectorsFile));
-			BufferedReader fp = new BufferedReader(new FileReader("/Users/busarobi/work/XMLC/Clustering/data/hiddenvectors_parallel_rgai3.txt"));
+			BufferedReader fp = new BufferedReader(new FileReader("/Users/busarobi/work/XMLC/Clustering/data/hiddenvectors_parallel_local.txt"));
 			
 			for(int i = 0; i < this.d; i++)
 			{
