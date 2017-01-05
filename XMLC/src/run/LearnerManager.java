@@ -226,7 +226,8 @@ public class LearnerManager {
 		}
 
 		// train
-		this.readTrainData();
+		// this.readTrainData();
+		traindata = new BatchDataManager(properties.getProperty("TrainFile"));
 		learner.allocateClassifiers(traindata);
 		learner.train(traindata);
 		traindata.close();

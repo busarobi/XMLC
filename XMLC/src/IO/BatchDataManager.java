@@ -37,8 +37,11 @@ public class BatchDataManager extends DataManager {
 
 	@Override
 	public Instance getNextInstance() {
-		Instance instance = new Instance(data.x[currentIndex], data.y[currentIndex]);
-		currentIndex++;
+		Instance instance = null;
+		if (currentIndex < data.n){
+			instance = new Instance(data.x[currentIndex], data.y[currentIndex]);
+			currentIndex++;
+		}
 		return instance;
 	}
 

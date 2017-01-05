@@ -74,8 +74,8 @@ public class PrecomputedTree extends Tree implements Serializable {
 			int parent = indices.get(i);
 			int child = indices.get(i+1);
 			int type = indices.get(i+2);
-
-			if (parent == child) { // parent,child: root node index
+			
+			if ( (parent == child) & (type==0)) { // parent,child: root node index
 				this.tree = new TreeNode(parent);
 				this.indexToNode.put(parent, this.tree);
 			} else if (type == 0) { // parent: parent node index, child: child node index
@@ -208,9 +208,17 @@ public class PrecomputedTree extends Tree implements Serializable {
 	}
 
 	public static void main(String[] argv) {
-		String treeFile = "examples/exampleTreeFile2";
+		String treeFile = "examples/bad_tree_raw.txt";
 		System.out.println(treeFile);
 		PrecomputedTree ct = new PrecomputedTree(treeFile);
+		
+//		for( int i = 0; i < 2000; i++ ){
+//			int nodeIdx = ct.getTreeIndex(i);
+//			System.out.println( i + " " + nodeIdx  );
+//		}
+
+		
+		ct.writeTree("examples/bad_tree_raw_out.txt");
 		for (int i = 0; i < ct.indexToNode.size(); i++) {
 			System.out.println("-------------------");
 			TreeNode currNode = (TreeNode) ct.indexToNode.get(i);

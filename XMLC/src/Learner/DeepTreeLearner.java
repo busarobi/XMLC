@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import Data.AVPair;
+import Data.EstimatePair;
 import Data.Instance;
 import IO.DataManager;
 import IO.Evaluator;
@@ -68,7 +70,7 @@ public class DeepTreeLearner extends AbstractLearner {
 		logger.info("#### hidden label vectors file name " + this.hiddenLabelVectorsFile);
 
 		// epochs
-		this.treebuildingepochs = Integer.parseInt(this.properties.getProperty("epochs", "1"));
+		this.treebuildingepochs = Integer.parseInt(this.properties.getProperty("treeepochs", "1"));
 		logger.info("#### epochs: " + this.treebuildingepochs );
 		
 		//
@@ -112,9 +114,9 @@ public class DeepTreeLearner extends AbstractLearner {
 			this.treeIndices.add(0);
 			
 			logger.info("Clustering the label representation... ( " + indices.size() + ")" );
-			List<ClusteringWrapper> clusterInput = new ArrayList<ClusteringWrapper>(this.m);
+			List<ClusteringWrapper> clusterInput = new ArrayList<ClusteringWrapper>();
 			for (int i = 0; i < indices.size(); i++ )
-			    clusterInput.add(new ClusteringWrapper(this.hiddenLabelRep[i], indices.get(i)));
+			    clusterInput.add(new ClusteringWrapper(this.hiddenLabelRep[indices.get(i)], indices.get(i)));
 			
 			// initialize a new clustering algorithm. 
 			// we use KMeans++ with 10 clusters and 10000 iterations maximum.
@@ -156,14 +158,14 @@ public class DeepTreeLearner extends AbstractLearner {
 			this.hiddenLabelRep[i] = new double[this.hiddendim];
 		}
 
-		data.reset();		
+				
 		int[] numelOfSums = new int[this.m];
 		int ni = 0;
 		while( data.hasNext() == true ){			
 			Instance instance = data.getNextInstance();
 			ni++;
 			if (ni % 100000 == 0)
-				logger.info("Processed label " + ni );
+				logger.info("Processed instances " + ni );
 			
 			for(int labi = 0; labi < instance.y.length; labi++ ){				
 				for( int xi = 0; xi < instance.x.length; xi++ ){
@@ -179,9 +181,10 @@ public class DeepTreeLearner extends AbstractLearner {
 			for( int hdi = 0; hdi < this.hiddendim; hdi++ ){
 				this.hiddenLabelRep[i][hdi] /= numelOfSums[i];
 			}
-		}
+		}	
 		
 		data.reset();
+		logger.info("Hidden label representations are computed...");
 	}
 	
 	
@@ -246,25 +249,27 @@ public class DeepTreeLearner extends AbstractLearner {
 
 		this.learner = new ParallelDeepPLT(this.properties);
 		this.learner.allocateClassifiers(data);
-		this.train(data);
-		this.hiddenWeights = this.learner.getDeepRepresentation();
+		this.learner.train(data);
+		
 		
 		for (int ep = 0; ep < this.treebuildingepochs; ep++) {
 
 			logger.info("#############################################################################");
 			logger.info("##########################--> BEGIN of Tree learning Epoch: {} ({})", (ep + 1), this.treebuildingepochs);
-
+			
+			this.hiddenWeights = this.learner.getDeepRepresentation();
 			//this.readDeepRepresentationOfFeatures();
 			this.buildLabelHiddenPresenation( data);
 			//this.writeHiddenLabelVectors(this.hiddenLabelVectorsFile);		
 			this.treeBuilding();
 			
-			//this.tree.writeTree(this.treeFile);
-			//this.writeTreeIndices();
+//			this.tree.writeTree(this.treeFile);
+//			this.writeTreeIndices();
+			
 			
 			this.learner = new ParallelDeepPLT(this.properties);
 			this.learner.allocateClassifiers(data, this.tree);
-			
+						
 			this.learner.train(data);
 			logger.info("--> END of tree laerning epoch: " + (ep + 1) + " (" + this.treebuildingepochs + ")");
 		}
@@ -289,8 +294,8 @@ public class DeepTreeLearner extends AbstractLearner {
 			this.writeHiddenLabelVectors(this.hiddenLabelVectorsFile);		
 			this.treeBuilding();
 			
-			this.tree.writeTree(this.treeFile);
-			this.writeTreeIndices();
+			//this.tree.writeTree(this.treeFile);
+			//this.writeTreeIndices();
 			
 			this.learner = new ParallelDeepPLT(this.properties);
 			this.learner.allocateClassifiers(data, this.tree);
@@ -309,7 +314,7 @@ public class DeepTreeLearner extends AbstractLearner {
 			file = new File(this.treeFile.replace(".txt", "_raw.txt"));
 			wr = new FileWriter(file);
 			for(int i = 0; i < this.treeIndices.size(); i++ ){
-				wr.write(this.treeIndices.get(i));
+				wr.write(this.treeIndices.get(i).toString());
 				if ((i+1)%3==0)
 					wr.write("\n");
 				else
@@ -327,6 +332,11 @@ public class DeepTreeLearner extends AbstractLearner {
 		return this.learner.getPosteriors(x, label);
 	}
 
+	public TreeSet<EstimatePair> getTopKEstimates(AVPair[] x, int k) {
+		return this.learner.getTopKEstimates(x, k);
+	}
+	
+	
 	public static void main(String[] args) {
 		Properties properties = ReadProperty.readProperty("./examples/rcv1_traineval.config");
 		
