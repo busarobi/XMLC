@@ -90,10 +90,10 @@ public class DeepTreeLearner extends AbstractLearner {
 		for( int i = 0; i < this.m; i++) indices.add(i);
 		this.treeIndices = new ArrayList<Pair<Integer,Integer>>();
 		
-		this.treeIdx = this.m;
-		treeIndices.add(new Pair<Integer,Integer>(this.treeIdx,this.treeIdx)); // root
+		this.treeIdx = 1;
+		treeIndices.add(new Pair<Integer,Integer>(0,0)); // root
 		
-		hierarchicalClustering(this.treeIdx, indices);
+		hierarchicalClustering(0, indices);
 		this.tree = new PrecomputedTree( treeIndices );
 	}
 	
