@@ -271,6 +271,37 @@ public class DeepTreeLearner extends AbstractLearner {
 		
 	}
 
+
+	public void ttrain(DataManager data) {
+
+//		this.learner = new ParallelDeepPLT(this.properties);
+//		this.learner.allocateClassifiers(data);
+//		this.train(data);
+//		this.hiddenWeights = this.learner.getDeepRepresentation();
+		
+		for (int ep = 0; ep < this.treebuildingepochs; ep++) {
+
+			logger.info("#############################################################################");
+			logger.info("##########################--> BEGIN of Tree learning Epoch: {} ({})", (ep + 1), this.treebuildingepochs);
+
+			this.readDeepRepresentationOfFeatures();
+			this.buildLabelHiddenPresenation( data);
+			this.writeHiddenLabelVectors(this.hiddenLabelVectorsFile);		
+			this.treeBuilding();
+			
+			this.tree.writeTree(this.treeFile);
+			this.writeTreeIndices();
+			
+			this.learner = new ParallelDeepPLT(this.properties);
+			this.learner.allocateClassifiers(data, this.tree);
+			
+			this.learner.train(data);
+			logger.info("--> END of tree laerning epoch: " + (ep + 1) + " (" + this.treebuildingepochs + ")");
+		}
+		
+	}
+	
+	
 	protected void writeTreeIndices(){
 		File file;
 		Writer wr;
@@ -303,7 +334,7 @@ public class DeepTreeLearner extends AbstractLearner {
 		
 		DataManager traindata = DataManager.managerFactory(properties.getProperty("TrainFile"), "Online" );
 		learner.allocateClassifiers(traindata);
-		learner.train(traindata);
+		learner.ttrain(traindata);
 
 		DataManager testdata = DataManager.managerFactory(properties.getProperty("TestFile"), "Online" );
 		Map<String, Double> perftestpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);
