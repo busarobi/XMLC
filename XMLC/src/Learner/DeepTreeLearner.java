@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
@@ -20,6 +21,7 @@ import org.apache.commons.math3.util.Pair;
 import Data.AVPair;
 import Data.Instance;
 import IO.DataManager;
+import IO.Evaluator;
 import IO.ReadProperty;
 import util.PrecomputedTree;
 import util.Tree;
@@ -35,11 +37,13 @@ public class DeepTreeLearner extends AbstractLearner {
 	
 	protected int k = 2;
 	protected String treeFile = null;
-	protected Tree tree = null;
+	protected PrecomputedTree tree = null;
+	protected int epochs = 1;
 	
 	protected DataManager traindata = null;
 	protected double[][] hiddenWeights = null;		
 	protected double[][] hiddenLabelRep = null;
+	protected ParallelDeepPLT learner = null;
 	
 	public DeepTreeLearner(Properties properties) {
 		super(properties);
@@ -96,12 +100,12 @@ public class DeepTreeLearner extends AbstractLearner {
 	
 	protected void hierarchicalClustering(int parent, ArrayList<Integer> indices ){
 		if (indices.size() >= this.k){
-			int currentIdx = treeIdx++;
+			int currentIdx = ++treeIdx;
 			this.treeIndices.add(new Pair<Integer,Integer>(parent,currentIdx) );
 			
-			logger.info("Clustering the label representation...");
+			logger.info("Clustering the label representation... ( " + indices.size() + ")" );
 			List<ClusteringWrapper> clusterInput = new ArrayList<ClusteringWrapper>(this.m);
-			for (int i = 0; i < this.m; i++ )
+			for (int i = 0; i < indices.size(); i++ )
 			    clusterInput.add(new ClusteringWrapper(this.hiddenLabelRep[i], indices.get(i)));
 			
 			// initialize a new clustering algorithm. 
@@ -124,9 +128,10 @@ public class DeepTreeLearner extends AbstractLearner {
 				this.hierarchicalClustering(currentIdx, childIndices);
 			}
 		} else {
+			int currentIdx = ++treeIdx;
+			this.treeIndices.add(new Pair<Integer,Integer>(parent,currentIdx) ); // add an inner node whose children are those that are in the indices currently 
+			
 			for( int i = 0; i < indices.size(); i++ ){
-				int currentIdx = treeIdx++;
-				this.treeIndices.add(new Pair<Integer,Integer>(parent,currentIdx) );
 				this.treeIndices.add(new Pair<Integer,Integer>(currentIdx,-indices.get(i)) );
 			}
 		}
@@ -164,6 +169,7 @@ public class DeepTreeLearner extends AbstractLearner {
 			}
 		}
 		
+		data.reset();
 	}
 	
 	
@@ -224,16 +230,35 @@ public class DeepTreeLearner extends AbstractLearner {
 	
 	@Override
 	public void train(DataManager data) {
-		this.readDeepRepresentationOfFeatures();
-		this.buildLabelHiddenPresenation( data);
-		this.writeHiddenLabelVectors(this.hiddenLabelVectorsFile);		
-		this.treeBuilding();
+
+//		this.learner = new ParallelDeepPLT(this.properties);
+//		this.learner.allocateClassifiers(data, this.tree);
+//		this.train(data);
+		
+		for (int ep = 0; ep < this.epochs; ep++) {
+
+			logger.info("#############################################################################");
+			logger.info("##########################--> BEGIN of Tree learning Epoch: {} ({})", (ep + 1), this.epochs);
+
+			this.readDeepRepresentationOfFeatures();
+			this.buildLabelHiddenPresenation( data);
+			this.writeHiddenLabelVectors(this.hiddenLabelVectorsFile);		
+			this.treeBuilding();
+			
+			this.tree.writeTree(this.treeFile);
+			
+			this.learner = new ParallelDeepPLT(this.properties);
+			this.learner.allocateClassifiers(data, this.tree);
+			
+			this.learner.train(data);
+			logger.info("--> END of tree laerning epoch: " + (ep + 1) + " (" + this.epochs + ")");
+		}
+		
 	}
 
 	@Override
-	public double getPosteriors(AVPair[] x, int label) {
-		// TODO Auto-generated method stub
-		return 0;
+	public double getPosteriors(AVPair[] x, int label) {		
+		return this.learner.getPosteriors(x, label);
 	}
 
 	public static void main(String[] args) {
@@ -245,6 +270,15 @@ public class DeepTreeLearner extends AbstractLearner {
 		learner.allocateClassifiers(traindata);
 		learner.train(traindata);
 
+		DataManager testdata = DataManager.managerFactory(properties.getProperty("TestFile"), "Online" );
+		Map<String, Double> perftestpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);
+		
+		for (String perfName : perftestpreck.keySet()) {
+			logger.info("##### Test " + perfName + ": " + perftestpreck.get(perfName));
+		}	
+		testdata.close();		
+		
+		
 	}
 
 	// wrapper class

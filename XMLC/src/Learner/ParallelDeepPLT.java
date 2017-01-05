@@ -29,6 +29,7 @@ import preprocessing.FeatureHasherFactory;
 import util.CompleteTree;
 import util.HuffmanTree;
 import util.PrecomputedTree;
+import util.Tree;
 
 public class ParallelDeepPLT extends PLT {
 	private static final long serialVersionUID = 1L;
@@ -94,7 +95,42 @@ public class ParallelDeepPLT extends PLT {
 		logger.info("#### Num. of labels: " + this.m + " Dim: " + this.d);
 		logger.info("#### Num. of inner node of the trees: " + this.t);
 		logger.info("#####################################################");
+		
+		
+		this.allocateMemory(data);
+		
+	}
 
+	
+	public void allocateClassifiers(DataManager data, Tree tree) {
+		this.traindata = data;
+		this.m = data.getNumberOfLabels();
+		this.d = data.getNumberOfFeatures();
+		this.tree = tree;
+		this.t = this.tree.getSize();
+
+		logger.info("#### Num. of labels: " + this.m + " Dim: " + this.d);
+		logger.info("#### Num. of inner node of the trees: " + this.t);
+		logger.info("#####################################################");
+		
+		
+		this.allocateMemory(data);
+		
+	}
+	
+	public double[][] getDeepRepresentation(){
+		double[][] retval = new double[this.hd][];
+		for (int i = 0; i < this.hd; i++) {
+			retval[i] = new double[this.hiddendim];
+			for (int j = 0; j < this.hiddendim; j++) {
+				retval[i][j] = this.hiddenWeights[i].get(j);
+			}
+		}
+		return retval;
+	}
+	
+	
+	public void allocateMemory(DataManager data) {
 		this.fh = FeatureHasherFactory.createFeatureHasher(this.hasher, fhseed, this.hd, 1);
 
 		logger.info("Allocate the learners...");
@@ -142,7 +178,9 @@ public class ParallelDeepPLT extends PLT {
 
 		logger.info("Done.");
 	}
-
+	
+	
+	
 	@Override
 	public void train(DataManager data) {
 		for (int ep = 0; ep < this.epochs; ep++) {

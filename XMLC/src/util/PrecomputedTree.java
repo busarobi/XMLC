@@ -153,7 +153,7 @@ public class PrecomputedTree extends Tree implements Serializable {
 		return str.toString();
 	}
 
-	protected void writeTree(String treeFileName) {
+	public void writeTree(String treeFileName) {
 		File file;
 		Writer wr;
 		try {
