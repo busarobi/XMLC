@@ -37,7 +37,7 @@ public class DeepTreeLearner extends AbstractLearner {
 	protected int k = 2;
 	protected String treeFile = null;
 	protected PrecomputedTree tree = null;
-	protected int epochs = 1;
+	protected int treebuildingepochs = 1;
 	
 	protected DataManager traindata = null;
 	protected double[][] hiddenWeights = null;		
@@ -66,6 +66,10 @@ public class DeepTreeLearner extends AbstractLearner {
 
 		this.hiddenLabelVectorsFile = this.properties.getProperty("hiddenlabelvectorsFile", null);
 		logger.info("#### hidden label vectors file name " + this.hiddenLabelVectorsFile);
+
+		// epochs
+		this.treebuildingepochs = Integer.parseInt(this.properties.getProperty("epochs", "1"));
+		logger.info("#### epochs: " + this.treebuildingepochs );
 		
 		//
 		this.numOfThreads = Integer.parseInt(this.properties.getProperty("numThreads", "4"));
@@ -240,17 +244,17 @@ public class DeepTreeLearner extends AbstractLearner {
 	@Override
 	public void train(DataManager data) {
 
-//		this.learner = new ParallelDeepPLT(this.properties);
-//		this.learner.allocateClassifiers(data, this.tree);
-//		this.train(data);
-//		this.hiddenWeights = this.learner.getDeepRepresentation();
+		this.learner = new ParallelDeepPLT(this.properties);
+		this.learner.allocateClassifiers(data, this.tree);
+		this.train(data);
+		this.hiddenWeights = this.learner.getDeepRepresentation();
 		
-		for (int ep = 0; ep < this.epochs; ep++) {
+		for (int ep = 0; ep < this.treebuildingepochs; ep++) {
 
 			logger.info("#############################################################################");
-			logger.info("##########################--> BEGIN of Tree learning Epoch: {} ({})", (ep + 1), this.epochs);
+			logger.info("##########################--> BEGIN of Tree learning Epoch: {} ({})", (ep + 1), this.treebuildingepochs);
 
-			this.readDeepRepresentationOfFeatures();
+			//this.readDeepRepresentationOfFeatures();
 			this.buildLabelHiddenPresenation( data);
 			this.writeHiddenLabelVectors(this.hiddenLabelVectorsFile);		
 			this.treeBuilding();
@@ -262,7 +266,7 @@ public class DeepTreeLearner extends AbstractLearner {
 			this.learner.allocateClassifiers(data, this.tree);
 			
 			this.learner.train(data);
-			logger.info("--> END of tree laerning epoch: " + (ep + 1) + " (" + this.epochs + ")");
+			logger.info("--> END of tree laerning epoch: " + (ep + 1) + " (" + this.treebuildingepochs + ")");
 		}
 		
 	}
