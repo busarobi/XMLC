@@ -245,7 +245,7 @@ public class DeepTreeLearner extends AbstractLearner {
 	public void train(DataManager data) {
 
 		this.learner = new ParallelDeepPLT(this.properties);
-		this.learner.allocateClassifiers(data, this.tree);
+		this.learner.allocateClassifiers(data);
 		this.train(data);
 		this.hiddenWeights = this.learner.getDeepRepresentation();
 		
@@ -256,11 +256,11 @@ public class DeepTreeLearner extends AbstractLearner {
 
 			//this.readDeepRepresentationOfFeatures();
 			this.buildLabelHiddenPresenation( data);
-			this.writeHiddenLabelVectors(this.hiddenLabelVectorsFile);		
+			//this.writeHiddenLabelVectors(this.hiddenLabelVectorsFile);		
 			this.treeBuilding();
 			
-			this.tree.writeTree(this.treeFile);
-			this.writeTreeIndices();
+			//this.tree.writeTree(this.treeFile);
+			//this.writeTreeIndices();
 			
 			this.learner = new ParallelDeepPLT(this.properties);
 			this.learner.allocateClassifiers(data, this.tree);
