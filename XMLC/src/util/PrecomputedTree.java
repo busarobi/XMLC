@@ -35,40 +35,43 @@ public class PrecomputedTree extends Tree implements Serializable {
 	}
 
 	public PrecomputedTree(String treeFileName) {
-		initialize(treeFileName);
-		this.size = this.indexToNode.size();
-		this.numberOfInternalNodes = (int) this.size / 2;
+		ArrayList<Integer> indices = readTreeFile(treeFileName);
+//		System.out.println(indices);
+		this.createTreeFromArray(indices);
 	}
 
-	public PrecomputedTree(ArrayList<Pair<Integer,Integer>> indices ) {
-		for(int i = 0; i < indices.size(); i++ ){
-			int parent = indices.get(i).getFirst();
-			int child = indices.get(i).getSecond();
+	public PrecomputedTree(ArrayList<Integer> indices){//ArrayList<Pair<Integer,Integer>> indices ) {
+		this.createTreeFromArray(indices);
+	}
+	
+	private void createTreeFromArray(ArrayList<Integer> indices){
 
-			if (parent == child) { // root
+		for(int i = 0; i < indices.size(); i+=3 ){
+			int parent = indices.get(i);
+			int child = indices.get(i+1);
+			int type = indices.get(i+2);
+
+			if (parent == child) { // parent,child: root node index
 				this.tree = new TreeNode(parent);
 				this.indexToNode.put(parent, this.tree);
-			} else if (child > 0) { // internal node
+			} else if (type == 0) { // parent: parent node index, child: child node index
 				TreeNode node = new TreeNode(child);
 				TreeNode parent_node = this.indexToNode.get(new Integer(parent));
 				node.parent = parent_node;
 				parent_node.children.add(node);
 				this.indexToNode.put(child, node);
-			} else { // leaf and label index
-				int label = -child;
+			} else { // parent:leaf node index, child:label
 				TreeNode node = this.indexToNode.get(new Integer(parent));
-				node.label = label;
-				this.labelToIndex.put(label, parent);
+				node.label = child;
+				this.labelToIndex.put(child, parent);
 				assert (node.children.size() == 0);
 			}
 		}
-		
 		super.initialize(this.k, this.m);
 		this.size = this.indexToNode.size();
 		this.numberOfInternalNodes = (int) this.size / 2;
 	}
-	
-	
+
 	public class TreeNode {
 		public int index;
 		public int label;
@@ -89,45 +92,23 @@ public class PrecomputedTree extends Tree implements Serializable {
 		}
 	}
 
-	public void initialize(String treeFileName) {
-		readTreeFile(treeFileName);
-		super.initialize(this.k, this.m);
-	}
 
-	protected void readTreeFile(String treeFileName) {
+	protected ArrayList<Integer> readTreeFile(String treeFileName) {
 		File file = null;
 		Scanner inputScanner = null;
+		ArrayList<Integer> indices = null;
 		try {
-
 			file = new File(treeFileName);
 			inputScanner = new Scanner(file);
-
+			indices = new ArrayList<>();
 			while (inputScanner.hasNextInt()) {
-				int parent = inputScanner.nextInt();
-				int child = inputScanner.nextInt();
-
-				if (parent == child) { // root
-					this.tree = new TreeNode(parent);
-					this.indexToNode.put(parent, this.tree);
-				} else if (child > 0) { // internal node
-					TreeNode node = new TreeNode(child);
-					TreeNode parent_node = this.indexToNode.get(new Integer(parent));
-					node.parent = parent_node;
-					parent_node.children.add(node);
-					this.indexToNode.put(child, node);
-				} else { // leaf and label index
-					int label = -child;
-					TreeNode node = this.indexToNode.get(new Integer(parent));
-					node.label = label;
-					this.labelToIndex.put(label, parent);
-					assert (node.children.size() == 0);
-				}
+				indices.add(inputScanner.nextInt());
 			}
-
 			inputScanner.close();
 		} catch (java.io.IOException e) {
 			e.printStackTrace();
 		}
+		return indices;
 	}
 
 	protected String bfsTree() {
@@ -203,7 +184,7 @@ public class PrecomputedTree extends Tree implements Serializable {
 	}
 
 	public static void main(String[] argv) {
-		String treeFile = "examples/huffmantree";
+		String treeFile = "examples/exampleTreeFile2";
 		System.out.println(treeFile);
 		PrecomputedTree ct = new PrecomputedTree(treeFile);
 		for (int i = 0; i < ct.indexToNode.size(); i++) {
@@ -215,17 +196,6 @@ public class PrecomputedTree extends Tree implements Serializable {
 			System.out.println("children: " + ct.getChildNodes(i));
 			System.out.println("isLeaf: " + ct.isLeaf(i));
 		}
-		System.out.println("-------------------");
-		int treeIndex = 2;
-		System.out.println("Label of tree index " + treeIndex + ": " + ct.getLabelIndex(treeIndex));
-		treeIndex = 5;
-		System.out.println("Label of tree index " + treeIndex + ": " + ct.getLabelIndex(treeIndex));
-
-		int labelIndex = 3;
-		System.out.println("Tree index of label " + labelIndex + ": " + ct.getTreeIndex(labelIndex));
-		labelIndex = 2;
-		System.out.println("Tree index of label " + labelIndex + ": " + ct.getTreeIndex(labelIndex));
-
 	}
 
 }
