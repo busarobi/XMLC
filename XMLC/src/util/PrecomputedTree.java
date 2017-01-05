@@ -18,6 +18,30 @@ import java.util.Scanner;
 
 /**
  * Created by Kalina on 12.11.2016.
+ * Example tree description in the used format:
+ * - tree node indices:
+ *      0
+ *    /   \
+ *   1    2
+ *  /\
+ * 3 4
+ * - lables assigned to  the leaves:
+ * 2: 0, 3:1, 4:2
+ * - tree description records:
+ *  - for the root you need a record like this: root_index root_index 0
+ *  - for each pair parent-child in the tree you need: parent_index child_index 0
+ *  - for each leaf-label assignment you need: leaf_index label 1
+ * - so for this example the content of the tree file should be:
+ *  0 0 0
+ *  0 1 0
+ *  0 2 0
+ *  1 3 0
+ *  1 4 0
+ *  2 0 1
+ *  3 1 1
+ *  4 2 1
+ * - the ArrayList<Integer> with the indices should contain:
+ * {0, 0, 0, 0, 1, 0, 0, 2, 0, 1, 3, 0, 1, 4, 0, 2, 0, 1, 3, 1, 1, 4, 2, 1}
  */
 public class PrecomputedTree extends Tree implements Serializable {
 	private static final long serialVersionUID = 5656121729850759773L;
