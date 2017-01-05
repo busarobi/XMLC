@@ -88,22 +88,27 @@ public class DeepTreeLearner extends AbstractLearner {
 	protected void treeBuilding() {
 		ArrayList<Integer> indices = new ArrayList<Integer>();
 		for( int i = 0; i < this.m; i++) indices.add(i);
-		this.treeIndices = new ArrayList<Pair<Integer,Integer>>();
+		this.treeIndices = new ArrayList<Integer>();
 		
-		this.treeIdx = 1;
-		treeIndices.add(new Pair<Integer,Integer>(0,0)); // root
+		this.treeIdx = 0;
+		treeIndices.add(0); // root
+		treeIndices.add(0); // root
+		treeIndices.add(0); // root
 		
 		hierarchicalClustering(0, indices);
-		this.tree = new PrecomputedTree( treeIndices );
+		//this.tree = new PrecomputedTree( treeIndices );
 	}
 	
 	private int treeIdx = -1;
-	private ArrayList<Pair<Integer,Integer>> treeIndices = null;
+	private ArrayList<Integer> treeIndices = null;
 	
 	protected void hierarchicalClustering(int parent, ArrayList<Integer> indices ){
 		if (indices.size() >= this.k){
 			int currentIdx = ++treeIdx;
-			this.treeIndices.add(new Pair<Integer,Integer>(parent,currentIdx) );
+			
+			this.treeIndices.add(parent);
+			this.treeIndices.add(currentIdx);
+			this.treeIndices.add(0);
 			
 			logger.info("Clustering the label representation... ( " + indices.size() + ")" );
 			List<ClusteringWrapper> clusterInput = new ArrayList<ClusteringWrapper>(this.m);
@@ -132,8 +137,10 @@ public class DeepTreeLearner extends AbstractLearner {
 		} else {			
 			for( int i = 0; i < indices.size(); i++ ){
 				int currentIdx = ++treeIdx;
-				this.treeIndices.add(new Pair<Integer,Integer>(parent,currentIdx) ); // add an inner node whose children are those that are in the indices currently 
-				this.treeIndices.add(new Pair<Integer,Integer>(currentIdx,-indices.get(i)) );
+
+				this.treeIndices.add(parent);
+				this.treeIndices.add(currentIdx);
+				this.treeIndices.add(1);				
 			}
 		}
 	}
@@ -204,7 +211,8 @@ public class DeepTreeLearner extends AbstractLearner {
 		}
 		
 		try{
-			BufferedReader fp = new BufferedReader(new FileReader(this.hiddenVectorsFile));
+			//BufferedReader fp = new BufferedReader(new FileReader(this.hiddenVectorsFile));
+			BufferedReader fp = new BufferedReader(new FileReader("/Users/busarobi/work/XMLC/Clustering/data/hiddenvectors_parallel_rgai3.txt"));
 			
 			for(int i = 0; i < this.d; i++)
 			{
@@ -235,6 +243,7 @@ public class DeepTreeLearner extends AbstractLearner {
 //		this.learner = new ParallelDeepPLT(this.properties);
 //		this.learner.allocateClassifiers(data, this.tree);
 //		this.train(data);
+//		this.hiddenWeights = this.learner.getDeepRepresentation();
 		
 		for (int ep = 0; ep < this.epochs; ep++) {
 
@@ -265,7 +274,11 @@ public class DeepTreeLearner extends AbstractLearner {
 			file = new File(this.treeFile.replace(".txt", "_raw.txt"));
 			wr = new FileWriter(file);
 			for(int i = 0; i < this.treeIndices.size(); i++ ){
-				wr.write(this.treeIndices.get(i).getFirst() + " " + this.treeIndices.get(i).getSecond()+"\n");
+				wr.write(this.treeIndices.get(i));
+				if ((i+1)%3==0)
+					wr.write("\n");
+				else
+					wr.write(" ");
 			}
 			wr.close();
 		} catch (java.io.IOException e) {
