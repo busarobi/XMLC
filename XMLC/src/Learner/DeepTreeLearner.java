@@ -2,9 +2,11 @@ package Learner;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -127,11 +129,10 @@ public class DeepTreeLearner extends AbstractLearner {
 					childIndices.add(locationWrapper.getInd());
 				this.hierarchicalClustering(currentIdx, childIndices);
 			}
-		} else {
-			int currentIdx = ++treeIdx;
-			this.treeIndices.add(new Pair<Integer,Integer>(parent,currentIdx) ); // add an inner node whose children are those that are in the indices currently 
-			
+		} else {			
 			for( int i = 0; i < indices.size(); i++ ){
+				int currentIdx = ++treeIdx;
+				this.treeIndices.add(new Pair<Integer,Integer>(parent,currentIdx) ); // add an inner node whose children are those that are in the indices currently 
 				this.treeIndices.add(new Pair<Integer,Integer>(currentIdx,-indices.get(i)) );
 			}
 		}
@@ -246,6 +247,7 @@ public class DeepTreeLearner extends AbstractLearner {
 			this.treeBuilding();
 			
 			this.tree.writeTree(this.treeFile);
+			this.writeTreeIndices();
 			
 			this.learner = new ParallelDeepPLT(this.properties);
 			this.learner.allocateClassifiers(data, this.tree);
@@ -256,6 +258,22 @@ public class DeepTreeLearner extends AbstractLearner {
 		
 	}
 
+	protected void writeTreeIndices(){
+		File file;
+		Writer wr;
+		try {
+			file = new File(this.treeFile.replace(".txt", "_raw.txt"));
+			wr = new FileWriter(file);
+			for(int i = 0; i < this.treeIndices.size(); i++ ){
+				wr.write(this.treeIndices.get(i).getFirst() + " " + this.treeIndices.get(i).getSecond()+"\n");
+			}
+			wr.close();
+		} catch (java.io.IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
 	@Override
 	public double getPosteriors(AVPair[] x, int label) {		
 		return this.learner.getPosteriors(x, label);
