@@ -5,18 +5,24 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.StringTokenizer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.google.common.util.concurrent.AtomicDoubleArray;
+import org.apache.commons.math3.ml.clustering.CentroidCluster;
+import org.apache.commons.math3.ml.clustering.Clusterable;
+import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
+import org.apache.commons.math3.util.Pair;
 
 import Data.AVPair;
 import Data.Instance;
 import IO.DataManager;
 import IO.ReadProperty;
+import util.PrecomputedTree;
+import util.Tree;
 
 public class DeepTreeLearner extends AbstractLearner {
 	private static final long serialVersionUID = 1L;
@@ -27,6 +33,10 @@ public class DeepTreeLearner extends AbstractLearner {
 	protected String hiddenLabelVectorsFile;
 	protected int numOfThreads = 1;
 	
+	protected int k = 2;
+	protected String treeFile = null;
+	protected Tree tree = null;
+	
 	protected DataManager traindata = null;
 	protected double[][] hiddenWeights = null;		
 	protected double[][] hiddenLabelRep = null;
@@ -36,6 +46,15 @@ public class DeepTreeLearner extends AbstractLearner {
 		System.out.println("#####################################################");
 		System.out.println("#### Learner: DeepTreeLearner");
 
+		// k-ary tree
+		this.k = Integer.parseInt(this.properties.getProperty("k", "2"));
+		logger.info("#### k (order of the tree): " + this.k );
+
+		// tree file name
+		this.treeFile = this.properties.getProperty("treeFile", null);
+		logger.info("#### tree file name " + this.treeFile );
+		
+		
 		this.hiddendim = Integer.parseInt(this.properties.getProperty("hiddendim", "100"));
 		logger.info("#### Number of hidden dimension: " + this.hiddendim);
 
@@ -58,12 +77,61 @@ public class DeepTreeLearner extends AbstractLearner {
 		this.traindata = data;
 		this.m = data.getNumberOfLabels();
 		this.d = data.getNumberOfFeatures();
-
-		this.readDeepRepresentationOfFeatures();
-		this.buildLabelHiddenPresenation( data);
-		this.writeHiddenLabelVectors(this.hiddenLabelVectorsFile);
 	}
 
+	protected void treeBuilding() {
+		ArrayList<Integer> indices = new ArrayList<Integer>();
+		for( int i = 0; i < this.m; i++) indices.add(i);
+		this.treeIndices = new ArrayList<Pair<Integer,Integer>>();
+		
+		this.treeIdx = this.m;
+		treeIndices.add(new Pair<Integer,Integer>(this.treeIdx,this.treeIdx)); // root
+		
+		hierarchicalClustering(this.treeIdx, indices);
+		this.tree = new PrecomputedTree( treeIndices );
+	}
+	
+	private int treeIdx = -1;
+	private ArrayList<Pair<Integer,Integer>> treeIndices = null;
+	
+	protected void hierarchicalClustering(int parent, ArrayList<Integer> indices ){
+		if (indices.size() >= this.k){
+			int currentIdx = treeIdx++;
+			this.treeIndices.add(new Pair<Integer,Integer>(parent,currentIdx) );
+			
+			logger.info("Clustering the label representation...");
+			List<ClusteringWrapper> clusterInput = new ArrayList<ClusteringWrapper>(this.m);
+			for (int i = 0; i < this.m; i++ )
+			    clusterInput.add(new ClusteringWrapper(this.hiddenLabelRep[i], indices.get(i)));
+			
+			// initialize a new clustering algorithm. 
+			// we use KMeans++ with 10 clusters and 10000 iterations maximum.
+			// we did not specify a distance measure; the default (euclidean distance) is used.
+			KMeansPlusPlusClusterer<ClusteringWrapper> clusterer = new KMeansPlusPlusClusterer<ClusteringWrapper>(10, 10000);
+			List<CentroidCluster<ClusteringWrapper>> clusterResults = clusterer.cluster(clusterInput);
+	
+			// output the clusters
+	//		for (int i=0; i<clusterResults.size(); i++) {
+	//		    System.out.println("Cluster " + i);
+	//		    for (ClusteringWrapper locationWrapper : clusterResults.get(i).getPoints())
+	//		        System.out.println(locationWrapper.getInd());
+	//		    System.out.println();
+	//		}		
+			for (int i=0; i<clusterResults.size(); i++) {		    			
+				ArrayList<Integer> childIndices = new ArrayList<Integer>();
+				for (ClusteringWrapper locationWrapper : clusterResults.get(i).getPoints())
+					childIndices.add(locationWrapper.getInd());
+				this.hierarchicalClustering(currentIdx, childIndices);
+			}
+		} else {
+			for( int i = 0; i < indices.size(); i++ ){
+				int currentIdx = treeIdx++;
+				this.treeIndices.add(new Pair<Integer,Integer>(parent,currentIdx) );
+				this.treeIndices.add(new Pair<Integer,Integer>(currentIdx,-indices.get(i)) );
+			}
+		}
+	}
+	
 	protected void buildLabelHiddenPresenation( DataManager data) {
 		logger.info("Computing the hidden label representations...");
 		this.hiddenLabelRep = new double[this.m][];
@@ -156,8 +224,10 @@ public class DeepTreeLearner extends AbstractLearner {
 	
 	@Override
 	public void train(DataManager data) {
-		// TODO Auto-generated method stub
-
+		this.readDeepRepresentationOfFeatures();
+		this.buildLabelHiddenPresenation( data);
+		this.writeHiddenLabelVectors(this.hiddenLabelVectorsFile);		
+		this.treeBuilding();
 	}
 
 	@Override
@@ -173,8 +243,28 @@ public class DeepTreeLearner extends AbstractLearner {
 		
 		DataManager traindata = DataManager.managerFactory(properties.getProperty("TrainFile"), "Online" );
 		learner.allocateClassifiers(traindata);
-		
+		learner.train(traindata);
 
 	}
 
+	// wrapper class
+	public static class ClusteringWrapper implements Clusterable {
+	    private double[] points;
+	    private int ind = -1;
+
+	    public ClusteringWrapper(double[] data, int i) {
+	        this.points = data;
+	        this.ind = i;
+	    }
+
+	    public int getInd() {
+	    	return this.ind;
+	    }
+	    
+	    public double[] getPoint() {
+	        return points;
+	    }
+	}
+	
+	
 }

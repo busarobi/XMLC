@@ -1,5 +1,6 @@
 package util;
 
+import org.apache.commons.math3.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,6 +40,35 @@ public class PrecomputedTree extends Tree implements Serializable {
 		this.numberOfInternalNodes = (int) this.size / 2;
 	}
 
+	public PrecomputedTree(ArrayList<Pair<Integer,Integer>> indices ) {
+		for(int i = 0; i < indices.size(); i++ ){
+			int parent = indices.get(i).getFirst();
+			int child = indices.get(i).getSecond();
+
+			if (parent == child) { // root
+				this.tree = new TreeNode(parent);
+				this.indexToNode.put(parent, this.tree);
+			} else if (child > 0) { // internal node
+				TreeNode node = new TreeNode(child);
+				TreeNode parent_node = this.indexToNode.get(new Integer(parent));
+				node.parent = parent_node;
+				parent_node.children.add(node);
+				this.indexToNode.put(child, node);
+			} else { // leaf and label index
+				int label = -child;
+				TreeNode node = this.indexToNode.get(new Integer(parent));
+				node.label = label;
+				this.labelToIndex.put(label, parent);
+				assert (node.children.size() == 0);
+			}
+		}
+		
+		super.initialize(this.k, this.m);
+		this.size = this.indexToNode.size();
+		this.numberOfInternalNodes = (int) this.size / 2;
+	}
+	
+	
 	public class TreeNode {
 		public int index;
 		public int label;
@@ -104,8 +134,8 @@ public class PrecomputedTree extends Tree implements Serializable {
 		StringBuilder str = new StringBuilder();
 
 		LinkedList<Integer> indexes = new LinkedList<>();
-		indexes.add(0);
-		str.append(0 + " " + 0 + "\n");
+		indexes.add(this.tree.index);
+		str.append(this.tree.index + " " + this.tree.index + "\n");
 		int i;
 		ArrayList<Integer> children;
 		while (!indexes.isEmpty()) {
