@@ -11,17 +11,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.apache.commons.math3.exception.ConvergenceException;
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
+import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer.EmptyClusterStrategy;
+import org.apache.commons.math3.ml.distance.EuclideanDistance;
+import org.apache.commons.math3.random.JDKRandomGenerator;
+
 import Data.AVPair;
 import Data.EstimatePair;
 import Data.Instance;
+import IO.BatchDataManager;
 import IO.DataManager;
 import IO.Evaluator;
 import IO.ReadProperty;
@@ -107,13 +114,10 @@ public class DeepTreeLearner extends AbstractLearner {
 	
 	protected void hierarchicalClustering(int parent, ArrayList<Integer> indices ){
 		if (indices.size() >= this.k){
-			int currentIdx = ++treeIdx;
 			
-			this.treeIndices.add(parent);
-			this.treeIndices.add(currentIdx);
-			this.treeIndices.add(0);
-			
-			logger.info("Cluster... ( " + indices.size() + ")" );
+						
+			//logger.info("Clustering... (size: " + indices.size() + ")" + indices.toString() );
+			logger.info("Clustering... (size: " + indices.size() + ")");
 			List<ClusteringWrapper> clusterInput = new ArrayList<ClusteringWrapper>();
 			for (int i = 0; i < indices.size(); i++ )
 			    clusterInput.add(new ClusteringWrapper(this.hiddenLabelRep[indices.get(i)], indices.get(i)));
@@ -121,39 +125,83 @@ public class DeepTreeLearner extends AbstractLearner {
 			// initialize a new clustering algorithm. 
 			// we use KMeans++ with 10 clusters and 10000 iterations maximum.
 			// we did not specify a distance measure; the default (euclidean distance) is used.
-			KMeansPlusPlusClusterer<ClusteringWrapper> clusterer = new KMeansPlusPlusClusterer<ClusteringWrapper>(this.k, 10000);
-			List<CentroidCluster<ClusteringWrapper>> clusterResults = clusterer.cluster(clusterInput);
-	
-			// output the clusters
-	//		for (int i=0; i<clusterResults.size(); i++) {
-	//		    System.out.println("Cluster " + i);
-	//		    for (ClusteringWrapper locationWrapper : clusterResults.get(i).getPoints())
-	//		        System.out.println(locationWrapper.getInd());
-	//		    System.out.println();
-	//		}		
-			for (int i=0; i<clusterResults.size(); i++) {		    			
-				ArrayList<Integer> childIndices = new ArrayList<Integer>();
-				for (ClusteringWrapper locationWrapper : clusterResults.get(i).getPoints())
-					childIndices.add(locationWrapper.getInd());
-				this.hierarchicalClustering(currentIdx, childIndices);
+			KMeansPlusPlusClusterer<ClusteringWrapper> clusterer 
+					= new KMeansPlusPlusClusterer<ClusteringWrapper>(this.k, 1000,
+																	 new EuclideanDistance(), new JDKRandomGenerator(), EmptyClusterStrategy.LARGEST_VARIANCE );
+																	 //new Random(), 
+																	 //EmptyClusterStrategy.LARGEST_VARIANCE  );
+			//System.out.println(clusterer.getEmptyClusterStrategy());
+			List<CentroidCluster<ClusteringWrapper>> clusterResults = null;
+			try {
+				clusterResults = clusterer.cluster(clusterInput);
+			} catch (ConvergenceException e) {
+				logger.info(e.getMessage());
+				addIndicesToTree(parent, indices );
+				return;
 			}
-		} else {			
-			logger.info("Cluster ... ( " + indices.size() + ")" );
-			for( int i = 0; i < indices.size(); i++ ){
+	
+			
+			// remove empty clusters
+			ArrayList<CentroidCluster<ClusteringWrapper> >  filteredClusters = new ArrayList<CentroidCluster<ClusteringWrapper> >();
+			for (int i=0; i<clusterResults.size(); i++) {
+				CentroidCluster<ClusteringWrapper> currentCluster = clusterResults.get(i);
+				int size = currentCluster.getPoints().size();
+				if (size>0){
+					filteredClusters.add(currentCluster);
+				}
+			}			
+			
+			// output cluster size
+			ArrayList<Integer> sizeOfClusters = new ArrayList<Integer>();
+			logger.info( "Number of clusters: {}", filteredClusters.size() );
+			for (int i=0; i<filteredClusters.size(); i++) {
+				CentroidCluster<ClusteringWrapper> currentCluster = filteredClusters.get(i);
+				int size = currentCluster.getPoints().size();
+				sizeOfClusters.add(size);							
+			}			
+			//logger.info( "-------> Size of cluster: " + sizeOfClusters.toString() );
+			
+			
+			if (filteredClusters.size()<=1) {
+				addIndicesToTree(parent, indices );
+			} else { // recursion
 				int currentIdx = ++treeIdx;
 				this.treeIndices.add(parent);
 				this.treeIndices.add(currentIdx);
-				this.treeIndices.add(0);				
+				this.treeIndices.add(0);
 
-				this.treeIndices.add(currentIdx);
-				this.treeIndices.add(indices.get(i));
-				this.treeIndices.add(1);				
+				for (int i=0; i<filteredClusters.size(); i++) {		    			
+					ArrayList<Integer> childIndices = new ArrayList<Integer>();
+					CentroidCluster<ClusteringWrapper> currentCluster = filteredClusters.get(i);
+					
+					if( currentCluster.getPoints().size()>0){
+						for (ClusteringWrapper locationWrapper : currentCluster.getPoints())
+							childIndices.add(locationWrapper.getInd());
+						
+						this.hierarchicalClustering(currentIdx, childIndices);
+					}				
+				}
 			}
+		} else {			
+			//logger.info("Cluster ... (" + indices.size() + ")" );
+			addIndicesToTree(parent, indices );
 		}
 	}
-	
+	private void addIndicesToTree(int parent, ArrayList<Integer> indices ){
+		for( int i = 0; i < indices.size(); i++ ){
+			int currentIdx = ++treeIdx;
+			this.treeIndices.add(parent);
+			this.treeIndices.add(currentIdx);
+			this.treeIndices.add(0);				
+
+			this.treeIndices.add(currentIdx);
+			this.treeIndices.add(indices.get(i));
+			this.treeIndices.add(1);				
+		}
+
+	}
 	protected void buildLabelHiddenPresenation( DataManager data) {
-		logger.info("Computing the hidden label representations...");
+		logger.info("Computing hidden label representations...");
 		this.hiddenLabelRep = new double[this.m][];
 		for (int i = 0; i < this.m; i++) {
 			this.hiddenLabelRep[i] = new double[this.hiddendim];
@@ -179,8 +227,10 @@ public class DeepTreeLearner extends AbstractLearner {
 		}
 		
 		for (int i = 0; i < this.m; i++) {
-			for( int hdi = 0; hdi < this.hiddendim; hdi++ ){
-				this.hiddenLabelRep[i][hdi] /= numelOfSums[i];
+			if (numelOfSums[i]>0){
+				for( int hdi = 0; hdi < this.hiddendim; hdi++ ){
+					this.hiddenLabelRep[i][hdi] /= numelOfSums[i];
+				}
 			}
 		}	
 		
@@ -277,33 +327,32 @@ public class DeepTreeLearner extends AbstractLearner {
 		
 	}
 
+	
+	protected void initepoch(DataManager data ) {
+		this.learner = new ParallelDeepPLT(this.properties);
+		this.learner.allocateClassifiers(data);
+		this.learner.train(data);	
+	}
+	
+	protected int currentEpoch = 0;
+	protected void epochtrain(DataManager data) {
 
-	public void ttrain(DataManager data) {
+		currentEpoch++;
 
-//		this.learner = new ParallelDeepPLT(this.properties);
-//		this.learner.allocateClassifiers(data);
-//		this.train(data);
-//		this.hiddenWeights = this.learner.getDeepRepresentation();
+		logger.info("#############################################################################");
+		logger.info("##########################--> BEGIN of Tree learning Epoch: {} ", currentEpoch);
+
+		this.hiddenWeights = this.learner.getDeepRepresentation();
 		
-		for (int ep = 0; ep < this.treebuildingepochs; ep++) {
-
-			logger.info("#############################################################################");
-			logger.info("##########################--> BEGIN of Tree learning Epoch: {} ({})", (ep + 1), this.treebuildingepochs);
-
-			this.readDeepRepresentationOfFeatures();
-			this.buildLabelHiddenPresenation( data);
-			this.writeHiddenLabelVectors(this.hiddenLabelVectorsFile);		
-			this.treeBuilding();
+		this.buildLabelHiddenPresenation( data);		
+		this.treeBuilding();
 			
-			//this.tree.writeTree(this.treeFile);
-			//this.writeTreeIndices();
 			
-			this.learner = new ParallelDeepPLT(this.properties);
-			this.learner.allocateClassifiers(data, this.tree);
+		this.learner = new ParallelDeepPLT(this.properties);
+		this.learner.allocateClassifiers(data, this.tree);
 			
-			this.learner.train(data);
-			logger.info("--> END of tree laerning epoch: " + (ep + 1) + " (" + this.treebuildingepochs + ")");
-		}
+		this.learner.train(data);
+		logger.info("--> END of tree laerning epoch: {} ", currentEpoch );
 		
 	}
 	
@@ -339,22 +388,41 @@ public class DeepTreeLearner extends AbstractLearner {
 	
 	
 	public static void main(String[] args) {
-		Properties properties = ReadProperty.readProperty("./examples/rcv1_traineval.config");
+		Properties properties = ReadProperty.readProperty(args[0]);
 		
 		DeepTreeLearner learner = new DeepTreeLearner(properties);
 		
-		DataManager traindata = DataManager.managerFactory(properties.getProperty("TrainFile"), "Online" );
+		DataManager traindata = new BatchDataManager(properties.getProperty("TrainFile")); 
+//		DataManager traindata = DataManager.managerFactory(properties.getProperty("TrainFile"), "Online" );
 		learner.allocateClassifiers(traindata);
-		learner.ttrain(traindata);
+		
 
-		DataManager testdata = DataManager.managerFactory(properties.getProperty("TestFile"), "Online" );
+//		DataManager testdata = DataManager.managerFactory(properties.getProperty("TestFile"), "Online" );
+		DataManager testdata = new BatchDataManager(properties.getProperty("TestFile") );
+
+		// no tree building
+		learner.initepoch(traindata);
+		logger.info("#################### Evaluating the model (no tree learning) #############################");
+		
 		Map<String, Double> perftestpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);
 		
 		for (String perfName : perftestpreck.keySet()) {
 			logger.info("##### Test " + perfName + ": " + perftestpreck.get(perfName));
 		}	
-		testdata.close();		
 		
+		
+		for (int ep = 0; ep < 5; ep ++ ) {
+			learner.epochtrain(traindata);
+			
+			logger.info("#################### Evaluating the model #############################");
+			
+			perftestpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);
+			
+			for (String perfName : perftestpreck.keySet()) {
+				logger.info("##### Test " + perfName + ": " + perftestpreck.get(perfName));
+			}	
+			
+		}		
 		
 	}
 

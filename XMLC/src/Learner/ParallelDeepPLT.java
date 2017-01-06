@@ -119,11 +119,12 @@ public class ParallelDeepPLT extends PLT {
 	}
 	
 	public double[][] getDeepRepresentation(){
-		double[][] retval = new double[this.hd][];
-		for (int i = 0; i < this.hd; i++) {
+		double[][] retval = new double[this.d][];
+		for (int i = 0; i < this.d; i++) {
+			int hi = fh.getIndex(1, i);
 			retval[i] = new double[this.hiddendim];
 			for (int j = 0; j < this.hiddendim; j++) {
-				retval[i][j] = this.hiddenWeights[i].get(j);
+				retval[i][j] = this.hiddenWeights[hi].get(j);
 			}
 		}
 		return retval;
