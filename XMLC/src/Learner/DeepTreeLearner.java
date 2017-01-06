@@ -113,7 +113,7 @@ public class DeepTreeLearner extends AbstractLearner {
 			this.treeIndices.add(currentIdx);
 			this.treeIndices.add(0);
 			
-			logger.info("Clustering the label representation... ( " + indices.size() + ")" );
+			logger.info("Cluster... ( " + indices.size() + ")" );
 			List<ClusteringWrapper> clusterInput = new ArrayList<ClusteringWrapper>();
 			for (int i = 0; i < indices.size(); i++ )
 			    clusterInput.add(new ClusteringWrapper(this.hiddenLabelRep[indices.get(i)], indices.get(i)));
@@ -121,7 +121,7 @@ public class DeepTreeLearner extends AbstractLearner {
 			// initialize a new clustering algorithm. 
 			// we use KMeans++ with 10 clusters and 10000 iterations maximum.
 			// we did not specify a distance measure; the default (euclidean distance) is used.
-			KMeansPlusPlusClusterer<ClusteringWrapper> clusterer = new KMeansPlusPlusClusterer<ClusteringWrapper>(10, 10000);
+			KMeansPlusPlusClusterer<ClusteringWrapper> clusterer = new KMeansPlusPlusClusterer<ClusteringWrapper>(this.k, 10000);
 			List<CentroidCluster<ClusteringWrapper>> clusterResults = clusterer.cluster(clusterInput);
 	
 			// output the clusters
@@ -138,6 +138,7 @@ public class DeepTreeLearner extends AbstractLearner {
 				this.hierarchicalClustering(currentIdx, childIndices);
 			}
 		} else {			
+			logger.info("Cluster ... ( " + indices.size() + ")" );
 			for( int i = 0; i < indices.size(); i++ ){
 				int currentIdx = ++treeIdx;
 				this.treeIndices.add(parent);
