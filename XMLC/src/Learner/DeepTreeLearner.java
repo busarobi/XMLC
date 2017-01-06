@@ -415,7 +415,7 @@ public class DeepTreeLearner extends AbstractLearner {
 			learner.epochtrain(traindata);
 			
 			logger.info("#################### Evaluating the model #############################");
-			
+			testdata.reset();
 			perftestpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);
 			
 			for (String perfName : perftestpreck.keySet()) {
