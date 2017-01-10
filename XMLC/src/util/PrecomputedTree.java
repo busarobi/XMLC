@@ -1,6 +1,5 @@
 package util;
 
-import org.apache.commons.math3.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,13 +7,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.Serializable;
 import java.io.Writer;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Created by Kalina on 12.11.2016.
@@ -74,6 +67,7 @@ public class PrecomputedTree extends Tree implements Serializable {
 			int parent = indices.get(i);
 			int child = indices.get(i+1);
 			int type = indices.get(i+2);
+//			System.out.println("parent " + parent + " child " + child + " type " + type);
 			
 			if ( (parent == child) & (type==0)) { // parent,child: root node index
 				this.tree = new TreeNode(parent);
@@ -207,16 +201,111 @@ public class PrecomputedTree extends Tree implements Serializable {
 		return this.indexToNode.get(nodeIndex).isLeaf();
 	}
 
+	private class ProcessTreeResult{
+		public HashSet<Integer> hashes;
+		public HashSet<Integer> cluster;
+		public HashSet<HashSet<Integer>> clusters;
+		public ProcessTreeResult(){}
+	}
+
+	private ProcessTreeResult  process_node_aproximate(PrecomputedTree t, TreeNode node){
+		if (t.isLeaf(node.index)){
+			ProcessTreeResult ptr = new ProcessTreeResult();
+			ptr.cluster = new HashSet<>();
+			ptr.cluster.add(node.label);
+			ptr.hashes = new HashSet<>();
+			return ptr;
+		} else{
+			ProcessTreeResult ptr = new ProcessTreeResult();
+			ptr.hashes = new HashSet<>();
+			ptr.cluster = new HashSet<>();
+			for (Integer child: t.getChildNodes(node.index)){
+				ProcessTreeResult child_ptr = process_node_aproximate(t, t.indexToNode.get(child));
+				ptr.cluster.addAll(child_ptr.cluster);
+				ptr.hashes.addAll(child_ptr.hashes);
+			}
+			ptr.hashes.add(ptr.cluster.hashCode());
+			return ptr;
+		}
+	}
+
+	private HashSet<Integer> process_tree_approximate(PrecomputedTree t){
+		ProcessTreeResult res = process_node_aproximate(t, t.tree);
+		return res.hashes;
+	}
+
+	/**
+	 * The value of approximate R-F metric is always smaller or equal to the true value of R-F metric
+	 *
+	 * Uses hashes to reduce the space required
+	 */
+	public double robinsonFouldsDistance_approximate(PrecomputedTree other_tree) {
+		if (this.tree != null && other_tree.tree != null){
+			// process this tree
+			HashSet<Integer> clusters1 = process_tree_approximate(this);
+			// process the other tree
+			HashSet<Integer> clusters2 = process_tree_approximate(other_tree);
+
+			int N1 = clusters1.size();
+			int N2 = clusters2.size();
+
+			clusters1.retainAll(clusters2);
+			int common = clusters1.size();
+
+			double dist = ((double) N1 + (double) N2) * 0.5 - (double) common;
+
+			return dist;
+		}
+		return 0;
+	}
+
+	private ProcessTreeResult process_node(PrecomputedTree t, TreeNode node){
+		if (t.isLeaf(node.index)){
+			ProcessTreeResult ptr = new ProcessTreeResult();
+			ptr.cluster = new HashSet<>();
+			ptr.cluster.add(node.label);
+			ptr.clusters = new HashSet<>();
+			return ptr;
+		} else{
+			ProcessTreeResult ptr = new ProcessTreeResult();
+			ptr.clusters = new HashSet<>();
+			ptr.cluster = new HashSet<>();
+			for (Integer child: t.getChildNodes(node.index)){
+				ProcessTreeResult child_ptr = process_node(t, t.indexToNode.get(child));
+				ptr.cluster.addAll(child_ptr.cluster);
+				ptr.clusters.addAll(child_ptr.clusters);
+			}
+			ptr.clusters.add(ptr.cluster);
+			return ptr;
+		}
+	}
+
+	private HashSet<HashSet<Integer>> process_tree(PrecomputedTree t){
+		ProcessTreeResult res = process_node(t, t.tree);
+		return res.clusters;
+	}
+
+	public double robinsonFouldsDistance(PrecomputedTree other_tree) {
+		if (this.tree != null && other_tree.tree != null){
+			HashSet<HashSet<Integer>> clusters1 = process_tree(this);
+			HashSet<HashSet<Integer>> clusters2 = process_tree(other_tree);
+
+			int N1 = clusters1.size();
+			int N2 = clusters2.size();
+
+			clusters1.retainAll(clusters2);
+			int common = clusters1.size();
+
+			double dist = ((double) N1 + (double) N2) * 0.5 - (double) common;
+			return dist;
+		}
+		return 0;
+	}
+
 	public static void main(String[] argv) {
 		String treeFile = "examples/bad_tree_raw.txt";
 		System.out.println(treeFile);
 		PrecomputedTree ct = new PrecomputedTree(treeFile);
-		
-//		for( int i = 0; i < 2000; i++ ){
-//			int nodeIdx = ct.getTreeIndex(i);
-//			System.out.println( i + " " + nodeIdx  );
-//		}
-
 		
 		ct.writeTree("examples/bad_tree_raw_out.txt");
 		for (int i = 0; i < ct.indexToNode.size(); i++) {
@@ -229,5 +318,4 @@ public class PrecomputedTree extends Tree implements Serializable {
 			System.out.println("isLeaf: " + ct.isLeaf(i));
 		}
 	}
-
 }
