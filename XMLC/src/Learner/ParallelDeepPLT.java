@@ -3,6 +3,7 @@ package Learner;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.PriorityQueue;
@@ -132,6 +133,10 @@ public class ParallelDeepPLT extends PLT {
 	
 	
 	public void allocateMemory(DataManager data) {
+		if (this.hasher.compareTo("Identical")==0) { 
+			this.hd = this.d;
+		}
+		
 		this.fh = FeatureHasherFactory.createFeatureHasher(this.hasher, fhseed, this.hd, 1);
 
 		logger.info("Allocate the learners...");

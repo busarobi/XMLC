@@ -226,13 +226,29 @@ public class LearnerManager {
 		}
 
 		// train
-		// this.readTrainData();
+		//this.readTrainData();
 		traindata = new BatchDataManager(properties.getProperty("TrainFile"));
 		learner.allocateClassifiers(traindata);
 		learner.train(traindata);
 		traindata.close();
+		traindata = null;
+		
+		//this.readValidData();
+		String validFileName = properties.getProperty("ValidFile");
+		if (validFileName != null) {
 
-		this.readTestData();
+			this.validdata = new BatchDataManager(validFileName);
+			Map<String, Double> perfvalidpreck = Evaluator.computePrecisionAtk(this.learner, this.validdata, 5);
+			
+			for (String perfName : perfvalidpreck.keySet()) {
+				logger.info("##### Valid " + perfName + ": " + perfvalidpreck.get(perfName));
+			}	
+			this.validdata.close();		
+			this.validdata = null;
+		}
+		
+		//this.readTestData();
+		this.testdata = new BatchDataManager(properties.getProperty("TestFile"));
 		Map<String, Double> perftestpreck = Evaluator.computePrecisionAtk(this.learner, this.testdata, 5);
 		
 		for (String perfName : perftestpreck.keySet()) {

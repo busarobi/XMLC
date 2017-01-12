@@ -14,6 +14,8 @@ public class FeatureHasherFactory {
 			fh = new MurmurHasher(fhseed, hd, d);
 		} else if ( hasher.compareTo("Mask") == 0 ) {
 			fh = new MaskHasher(fhseed, hd, d);
+		} else if ( hasher.compareTo("Identical") == 0 ) {
+			fh = new Identical();
 		} else {
 			logger.info("Unknown hasher");
 			System.exit(-1);

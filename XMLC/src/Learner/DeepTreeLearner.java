@@ -52,6 +52,11 @@ public class DeepTreeLearner extends AbstractLearner {
 	protected double[][] hiddenWeights = null;		
 	protected double[][] hiddenLabelRep = null;
 	protected ParallelDeepPLT learner = null;
+
+	protected ArrayList<PrecomputedTree> treeArray  = new ArrayList<PrecomputedTree>(); 
+	protected ArrayList<ArrayList<Double>> treeDistances = new ArrayList<ArrayList<Double>>();
+	
+	
 	
 	public DeepTreeLearner(Properties properties) {
 		super(properties);
@@ -117,7 +122,7 @@ public class DeepTreeLearner extends AbstractLearner {
 			
 						
 			//logger.info("Clustering... (size: " + indices.size() + ")" + indices.toString() );
-			logger.info("Clustering... (size: " + indices.size() + ")");
+			//logger.info("Clustering... (size: " + indices.size() + ")");
 			List<ClusteringWrapper> clusterInput = new ArrayList<ClusteringWrapper>();
 			for (int i = 0; i < indices.size(); i++ )
 			    clusterInput.add(new ClusteringWrapper(this.hiddenLabelRep[indices.get(i)], indices.get(i)));
@@ -153,7 +158,7 @@ public class DeepTreeLearner extends AbstractLearner {
 			
 			// output cluster size
 			ArrayList<Integer> sizeOfClusters = new ArrayList<Integer>();
-			logger.info( "Number of clusters: {}", filteredClusters.size() );
+			//logger.info( "Number of clusters: {}", filteredClusters.size() );
 			for (int i=0; i<filteredClusters.size(); i++) {
 				CentroidCluster<ClusteringWrapper> currentCluster = filteredClusters.get(i);
 				int size = currentCluster.getPoints().size();
@@ -187,6 +192,7 @@ public class DeepTreeLearner extends AbstractLearner {
 			addIndicesToTree(parent, indices );
 		}
 	}
+	
 	private void addIndicesToTree(int parent, ArrayList<Integer> indices ){
 		for( int i = 0; i < indices.size(); i++ ){
 			int currentIdx = ++treeIdx;
@@ -200,6 +206,7 @@ public class DeepTreeLearner extends AbstractLearner {
 		}
 
 	}
+
 	protected void buildLabelHiddenPresenation( DataManager data) {
 		logger.info("Computing hidden label representations...");
 		this.hiddenLabelRep = new double[this.m][];
@@ -314,7 +321,11 @@ public class DeepTreeLearner extends AbstractLearner {
 			//this.writeHiddenLabelVectors(this.hiddenLabelVectorsFile);		
 			this.treeBuilding();
 			
-//			this.tree.writeTree(this.treeFile);
+			if (this.treeFile!=null) {
+				String tmpTreeFile = this.treeFile + "_" + (ep+1) + ".txt";
+				logger.info("Write tree to " + this.treeFile );
+				this.tree.writeTree(tmpTreeFile);
+			}
 //			this.writeTreeIndices();
 			
 			
@@ -331,7 +342,7 @@ public class DeepTreeLearner extends AbstractLearner {
 	protected void initepoch(DataManager data ) {
 		this.learner = new ParallelDeepPLT(this.properties);
 		this.learner.allocateClassifiers(data);
-		this.learner.train(data);	
+		this.learner.train(data);		
 	}
 	
 	protected int currentEpoch = 0;
@@ -346,7 +357,14 @@ public class DeepTreeLearner extends AbstractLearner {
 		
 		this.buildLabelHiddenPresenation( data);		
 		this.treeBuilding();
-			
+		
+		this.computeTreeDistanceAndOutput();
+		
+		if (this.treeFile!=null) {
+			String tmpTreeFile = this.treeFile + "_" + currentEpoch + ".txt";
+			logger.info("Write tree to " + this.treeFile );
+			this.tree.writeTree(tmpTreeFile);
+		}
 			
 		this.learner = new ParallelDeepPLT(this.properties);
 		this.learner.allocateClassifiers(data, this.tree);
@@ -356,6 +374,22 @@ public class DeepTreeLearner extends AbstractLearner {
 		
 	}
 	
+	protected void computeTreeDistanceAndOutput() {
+		this.treeArray.add(this.tree);
+		this.treeDistances.add(new ArrayList<Double>());
+		
+		for(int i = 0; i < this.treeArray.size()-1; i++) {
+			double dist = this.tree.robinsonFouldsDistance(this.treeArray.get(i));
+			this.treeDistances.get(i).add(dist);
+		}
+		
+		for(int i = 0; i < this.treeDistances.size()-1; i++) {
+			for( int j = 0; j < this.treeDistances.get(i).size(); j++ ){
+				logger.info("Tree " + i + " Tree " + (j+1) + " " + this.treeDistances.get(i).get(j));
+			}
+		}
+		
+	}
 	
 	protected void writeTreeIndices(){
 		File file;
@@ -411,7 +445,7 @@ public class DeepTreeLearner extends AbstractLearner {
 		}	
 		
 		
-		for (int ep = 0; ep < 5; ep ++ ) {
+		for (int ep = 0; ep < learner.treebuildingepochs; ep ++ ) {
 			learner.epochtrain(traindata);
 			
 			logger.info("#################### Evaluating the model #############################");

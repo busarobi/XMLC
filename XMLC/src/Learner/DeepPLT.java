@@ -3,34 +3,26 @@ package Learner;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Properties;
 import java.util.Random;
 import java.util.TreeSet;
 
-import org.apache.commons.math3.analysis.function.Sigmoid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import Data.AVPair;
-import Data.AVTable;
 import Data.EstimatePair;
 import Data.Instance;
 import Data.NodeComparatorPLT;
 import Data.NodePLT;
 import IO.DataManager;
-import preprocessing.FeatureHasher;
 import preprocessing.FeatureHasherFactory;
 import util.CompleteTree;
 import util.HuffmanTree;
 import util.PrecomputedTree;
-import util.Tree;
 
 public class DeepPLT extends PLT {
 	private static final long serialVersionUID = 1L;
@@ -384,7 +376,7 @@ public class DeepPLT extends PLT {
 		try{
 			BufferedWriter bf = new BufferedWriter(new FileWriter(outfname) );
 			
-			for( int i = 0; i<this.m; i++)
+			for( int i = 0; i<this.d; i++)
 			{
 				int hi = fh.getIndex(1,  i);
 				
