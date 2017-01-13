@@ -355,4 +355,132 @@ public class PrecomputedTreeTest {
 //        double dist = tree1.robinsonFouldsDistance(tree2);
 //        Assert.assertEquals(0.0, dist, 0.000001);
 //    }
+
+    // Tree distance up to K
+    @org.junit.Test
+    public void robinsonFouldsDistanceUpT0K30() throws Exception {
+        Integer k = 3;
+        Integer[] arr1 =  new Integer[] {0,0,0, 0,1,0, 0,2,0, 1,3,0, 1,4,0, 2,5,0, 2,6,0, 3,7,0, 3,8,0, 4,9,0, 4,10,0, 5,11,0, 5,12,0, 6,13,0, 6,14,0,
+                7,1,1, 8,2,1, 9,3,1, 10,4,1, 11,5,1, 12,6,1, 13,7,1, 14,8,1};
+        Integer[] arr2 =  new Integer[] {0,0,0, 0,1,0, 0,2,0, 1,3,0, 1,4,0, 2,5,0, 2,6,0, 3,7,0, 3,8,0, 4,9,0, 4,10,0, 5,11,0, 5,12,0, 6,13,0, 6,14,0,
+                7,1,1, 8,2,1, 9,3,1, 10,4,1, 11,5,1, 12,6,1, 13,7,1, 14,8,1};
+
+        ArrayList<Integer> indices1 = new ArrayList<Integer>(Arrays.asList(arr1));
+        ArrayList<Integer> indices2 = new ArrayList<Integer>(Arrays.asList(arr2));
+
+        PrecomputedTree tree1 = new PrecomputedTree(indices1);
+        PrecomputedTree tree2 = new PrecomputedTree(indices2);
+
+        double dist = tree1.robinsonFouldsDistanceUpToDepthK(tree2, k);
+        Assert.assertEquals(0.0, dist, 0.000001);
+    }
+    @org.junit.Test
+    public void robinsonFouldsDistanceUpT0K31() throws Exception {
+        Integer k = 1;
+        Integer[] arr1 =  new Integer[] {0,0,0, 0,1,0, 0,2,0, 1,3,0, 1,4,0, 2,5,0, 2,6,0, 3,7,0, 3,8,0, 4,9,0, 4,10,0, 5,11,0, 5,12,0, 6,13,0, 6,14,0,
+                7,1,1, 8,2,1, 9,3,1, 10,4,1, 11,5,1, 12,6,1, 13,7,1, 14,8,1};
+        Integer[] arr2 =  new Integer[] {0,0,0, 0,1,0, 0,2,0, 1,3,0, 1,4,0, 2,5,0, 2,6,0, 3,7,0, 3,8,0, 4,9,0, 4,10,0, 5,11,0, 5,12,0, 6,13,0, 6,14,0,
+                7,1,1, 8,2,1, 9,3,1, 10,4,1, 11,5,1, 12,6,1, 13,7,1, 14,8,1};
+
+        ArrayList<Integer> indices1 = new ArrayList<Integer>(Arrays.asList(arr1));
+        ArrayList<Integer> indices2 = new ArrayList<Integer>(Arrays.asList(arr2));
+
+        PrecomputedTree tree1 = new PrecomputedTree(indices1);
+        PrecomputedTree tree2 = new PrecomputedTree(indices2);
+
+        double dist = tree1.robinsonFouldsDistanceUpToDepthK(tree2, k);
+        Assert.assertEquals(0.0, dist, 0.000001);
+    }
+    @org.junit.Test
+    public void robinsonFouldsDistanceUpT0K32() throws Exception {
+        Integer k = 1;
+        Integer[] arr1 =  new Integer[] {0,0,0, 0,1,0, 0,2,0, 1,3,0, 1,4,0, 2,5,0, 2,6,0, 3,7,0, 3,8,0, 4,9,0, 4,10,0, 5,11,0, 5,12,0, 6,13,0, 6,14,0,
+                7,1,1, 8,2,1, 9,3,1, 10,4,1, 11,5,1, 12,6,1, 13,7,1, 14,8,1};
+        Integer[] arr2 =  new Integer[] {0,0,0, 0,1,0, 0,2,0, 1,3,0, 1,4,0, 2,5,0, 2,6,0, 3,7,0, 3,8,0, 4,9,0, 4,10,0, 5,11,0, 5,12,0, 6,13,0, 6,14,0,
+                7,1,1, 8,3,1, 9,2,1, 10,4,1, 11,5,1, 12,6,1, 13,7,1, 14,8,1};
+
+        ArrayList<Integer> indices1 = new ArrayList<Integer>(Arrays.asList(arr1));
+        ArrayList<Integer> indices2 = new ArrayList<Integer>(Arrays.asList(arr2));
+
+        PrecomputedTree tree1 = new PrecomputedTree(indices1);
+        PrecomputedTree tree2 = new PrecomputedTree(indices2);
+
+        double dist = tree1.robinsonFouldsDistanceUpToDepthK(tree2, k);
+        Assert.assertEquals(2.0, dist, 0.000001);
+    }
+    @org.junit.Test
+    public void robinsonFouldsDistanceUpT0K33() throws Exception {
+        Integer k = 2;
+        Integer[] arr1 =  new Integer[] {0,0,0, 0,1,0, 0,2,0, 1,3,0, 1,4,0, 2,5,0, 2,6,0, 3,7,0, 3,8,0, 4,9,0, 4,10,0, 5,11,0, 5,12,0, 6,13,0, 6,14,0,
+                7,1,1, 8,2,1, 9,3,1, 10,4,1, 11,5,1, 12,6,1, 13,7,1, 14,8,1};
+        Integer[] arr2 =  new Integer[] {0,0,0, 0,1,0, 0,2,0, 1,3,0, 1,4,0, 2,5,0, 2,6,0, 3,7,0, 3,8,0, 4,9,0, 4,10,0, 5,11,0, 5,12,0, 6,13,0, 6,14,0,
+                7,1,1, 8,2,1, 9,5,1, 10,6,1, 11,3,1, 12,4,1, 13,7,1, 14,8,1};
+
+        ArrayList<Integer> indices1 = new ArrayList<Integer>(Arrays.asList(arr1));
+        ArrayList<Integer> indices2 = new ArrayList<Integer>(Arrays.asList(arr2));
+
+        PrecomputedTree tree1 = new PrecomputedTree(indices1);
+        PrecomputedTree tree2 = new PrecomputedTree(indices2);
+
+        double dist = tree1.robinsonFouldsDistanceUpToDepthK(tree2, k);
+        Assert.assertEquals(2.0, dist, 0.000001);
+
+        k = 1;
+        dist = tree1.robinsonFouldsDistanceUpToDepthK(tree2, k);
+        Assert.assertEquals(0.0, dist, 0.000001);
+
+
+    }
+    @org.junit.Test
+    public void robinsonFouldsDistanceUpT0K34() throws Exception {
+        Integer k = -1;
+        Integer[] arr1 =  new Integer[] {0,0,0, 0,1,0, 0,2,0, 1,3,0, 1,4,0, 2,5,0, 2,6,0, 3,7,0, 3,8,0, 4,9,0, 4,10,0, 5,11,0, 5,12,0, 6,13,0, 6,14,0,
+                9,15,0, 9,16,0, 10,17,0, 10,18,0,
+                7,1,1, 8,2,1, 15,3,1, 15,4,1, 17,5,1, 18,6,1, 11,7,1, 12,8,1, 13,9,1, 14,10,1};
+        Integer[] arr2 =  new Integer[] {0,0,0, 0,1,0, 0,2,0, 1,3,0, 1,4,0, 2,5,0, 2,6,0, 3,7,0, 3,8,0, 4,9,0, 4,10,0, 5,11,0, 5,12,0, 6,13,0, 6,14,0,
+                9,15,0, 9,16,0, 10,17,0, 10,18,0,
+                7,1,1, 8,2,1, 15,3,1, 15,4,1, 17,5,1, 18,6,1, 11,7,1, 12,8,1, 13,9,1, 14,10,1};
+        ArrayList<Integer> indices1 = new ArrayList<Integer>(Arrays.asList(arr1));
+        ArrayList<Integer> indices2 = new ArrayList<Integer>(Arrays.asList(arr2));
+
+        PrecomputedTree tree1 = new PrecomputedTree(indices1);
+        PrecomputedTree tree2 = new PrecomputedTree(indices2);
+
+        double dist = tree1.robinsonFouldsDistanceUpToDepthK(tree2, k);
+        Assert.assertEquals(0.0, dist, 0.000001);
+
+        k = 2;
+        dist = tree1.robinsonFouldsDistanceUpToDepthK(tree2, k);
+        Assert.assertEquals(0.0, dist, 0.000001);
+    }
+
+    @org.junit.Test
+    public void robinsonFouldsDistanceUpT0K35() throws Exception {
+        Integer k = -1;
+        Integer[] arr1 =  new Integer[] {0,0,0, 0,1,0, 0,2,0, 1,3,0, 1,4,0, 2,5,0, 2,6,0, 3,7,0, 3,8,0, 4,9,0, 4,10,0, 5,11,0, 5,12,0, 6,13,0, 6,14,0,
+                9,15,0, 9,16,0, 10,17,0, 10,18,0,
+                7,1,1, 8,2,1,
+                15,3,1, 16,4,1, 17,5,1, 18,6,1,
+                11,7,1, 12,8,1, 13,9,1, 14,10,1};
+        Integer[] arr2 =  new Integer[] {0,0,0, 0,1,0, 0,2,0, 1,3,0, 1,4,0, 2,5,0, 2,6,0, 3,7,0, 3,8,0, 4,9,0, 4,10,0, 5,11,0, 5,12,0, 6,13,0, 6,14,0,
+                9,15,0, 9,16,0, 10,17,0, 10,18,0,
+                7,1,1, 8,2,1,
+                15,7,1, 16,8,1, 17,9,1, 18,10,1,
+                11,3,1, 12,4,1, 13,5,1, 14,6,1};
+        ArrayList<Integer> indices1 = new ArrayList<Integer>(Arrays.asList(arr1));
+        ArrayList<Integer> indices2 = new ArrayList<Integer>(Arrays.asList(arr2));
+
+        PrecomputedTree tree1 = new PrecomputedTree(indices1);
+        PrecomputedTree tree2 = new PrecomputedTree(indices2);
+
+        double dist = tree1.robinsonFouldsDistanceUpToDepthK(tree2, k);
+        Assert.assertEquals(1.0, dist, 0.000001);
+
+        k = 2;
+        dist = tree1.robinsonFouldsDistanceUpToDepthK(tree2, k);
+        Assert.assertEquals(0.0, dist, 0.000001);
+        k = 1;
+        dist = tree1.robinsonFouldsDistanceUpToDepthK(tree2, k);
+        Assert.assertEquals(0.0, dist, 0.000001);
+    }
 }

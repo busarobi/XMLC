@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
 
@@ -53,6 +52,8 @@ public class DeepTreeLearner extends AbstractLearner {
 	protected double[][] hiddenLabelRep = null;
 	protected ParallelDeepPLT learner = null;
 
+	protected int kForRFdistance = -1;
+
 	protected ArrayList<PrecomputedTree> treeArray  = new ArrayList<PrecomputedTree>(); 
 	protected ArrayList<ArrayList<Double>> treeDistances = new ArrayList<ArrayList<Double>>();
 	
@@ -88,6 +89,10 @@ public class DeepTreeLearner extends AbstractLearner {
 		//
 		this.numOfThreads = Integer.parseInt(this.properties.getProperty("numThreads", "4"));
 		logger.info("#### num of threads: " + this.numOfThreads);
+
+		// depth for the RF distance up to a depth
+		this.kForRFdistance = Integer.parseInt(this.properties.getProperty("kForRFdistance", "-1"));
+		logger.info("#### k for RF distance: " + this.kForRFdistance);
 
 		System.out.println("#####################################################");
 
@@ -379,7 +384,7 @@ public class DeepTreeLearner extends AbstractLearner {
 		this.treeDistances.add(new ArrayList<Double>());
 		
 		for(int i = 0; i < this.treeArray.size()-1; i++) {
-			double dist = this.tree.robinsonFouldsDistance(this.treeArray.get(i));
+			double dist = this.tree.robinsonFouldsDistanceUpToDepthK(this.treeArray.get(i), this.kForRFdistance);
 			this.treeDistances.get(i).add(dist);
 		}
 		
