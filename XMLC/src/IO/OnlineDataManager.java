@@ -91,7 +91,6 @@ public class OnlineDataManager extends DataManager {
 	public class ReaderThread implements Runnable{
 
 		  protected BlockingQueue<Instance> blockingQueue = null;
-		  protected final Semaphore available = new Semaphore(1);
 		  protected String filename = null;
 		  protected int d; 
 		  protected int n;
@@ -122,49 +121,43 @@ public class OnlineDataManager extends DataManager {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		    
 		  }
 
-		  @Override
-		  public void run() {		    
-		     try {		    	 
-		    	 	available.acquire();
-		            String buffer = br.readLine();
-		            if (buffer == null ) {
-		            	this.endOfFile = true;
-		            }
-		            available.release();
-	            		
-	            	if (this.endOfFile == false ) {     			            
-			            while(true){		            	
-			            	Instance instance = processLine(buffer);			            	
-			            	
-			            	available.acquire();
-			            	blockingQueue.put(instance);			            	
-			            	buffer = br.readLine();
-			            	if (buffer == null ) {
-			            		this.endOfFile = true;
-			            		available.release();
-			            		break;
-			            	}		            	
-			                available.release();		                
-			            }
-		            
-	            	}		            
+		@Override
+		public void run() {
+			try {
+				String buffer = br.readLine();
+				if (buffer == null) {
+					synchronized (this) {
+						this.endOfFile = true;
+					}
+				}
+				if (this.endOfFile == false) {
+					while (true) {
+						Instance instance = processLine(buffer);
+						buffer = br.readLine();
 
-		        } catch (Exception e) {
-		            e.printStackTrace();
-		        }finally{
-		            try {
-		                br.close();
-		            } catch (IOException e) {
-		                e.printStackTrace();
-		            }
-		        }
+						synchronized (this) {
+							blockingQueue.put(instance);
+							if (buffer == null) {
+								this.endOfFile = true;
+								break;
+							}
+						}
+					}
 
+				}
 
-		  }
-
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
 
 		  public int getD() {
 			return d;
