@@ -219,7 +219,7 @@ public class LearnerManager {
 	
 	public void traineval() throws Exception{
 		this.learner = AbstractLearner.learnerFactory(properties);
-
+				 
 		if (properties.containsKey("seed")) {
 			long seed = Long.parseLong(properties.getProperty("seed"));
 			MasterSeed.setSeed(seed);
@@ -233,12 +233,15 @@ public class LearnerManager {
 		traindata.close();
 		traindata = null;
 		
+		
+		int numOfThreads = Integer.parseInt(this.properties.getProperty("numThreads", "4"));
 		//this.readValidData();
 		String validFileName = properties.getProperty("ValidFile");
 		if (validFileName != null) {
 
 			this.validdata = new BatchDataManager(validFileName);
-			Map<String, Double> perfvalidpreck = Evaluator.computePrecisionAtk(this.learner, this.validdata, 5);
+			//Map<String, Double> perfvalidpreck = Evaluator.computePrecisionAtk(this.learner, this.validdata, 5);
+			Map<String, Double> perfvalidpreck = Evaluator.computePrecisionAtk(this.learner, this.validdata, 5, numOfThreads);
 			
 			for (String perfName : perfvalidpreck.keySet()) {
 				logger.info("##### Valid " + perfName + ": " + perfvalidpreck.get(perfName));
@@ -249,7 +252,9 @@ public class LearnerManager {
 		
 		//this.readTestData();
 		this.testdata = new BatchDataManager(properties.getProperty("TestFile"));
-		Map<String, Double> perftestpreck = Evaluator.computePrecisionAtk(this.learner, this.testdata, 5);
+		//Map<String, Double> perftestpreck = Evaluator.computePrecisionAtk(this.learner, this.testdata, 5);
+		Map<String, Double> perftestpreck = Evaluator.computePrecisionAtk(this.learner, this.testdata, 5, numOfThreads);
+		
 		
 		for (String perfName : perftestpreck.keySet()) {
 			logger.info("##### Test " + perfName + ": " + perftestpreck.get(perfName));

@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +17,7 @@ import Data.AVTable;
 import Data.EstimatePair;
 import Data.Instance;
 import Learner.AbstractLearner;
+import Learner.ParallelDeepPLT.UpdateThread;
 
 public class Evaluator {
 
@@ -145,7 +148,52 @@ public class Evaluator {
 		return arr;
 
     }
+    
+    public static TreeMap<String,Double> computePrecisionAtk(AbstractLearner learner, DataManager data, int k, int numOfCores ) {
+    	
+		
+    	ComputePrecisionAtk[] processingThreads = new ComputePrecisionAtk[numOfCores];
 
+		ExecutorService executor = Executors.newFixedThreadPool(numOfCores);
+		for (int i = 0; i < numOfCores; i++) {
+			processingThreads[i] = new ComputePrecisionAtk(learner, data, k);
+			executor.execute(processingThreads[i]);
+		}
+
+		executor.shutdown();
+
+		while (!executor.isTerminated()) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+
+		data.reset();
+		int numOfInstance = 0;
+		double[] precisionatK = new double[k];
+		for (int i = 0; i < numOfCores; i++) {
+			numOfInstance += processingThreads[i].numOfInstance;
+			for (int j=0; j < k; j++ ){
+				precisionatK[j] += processingThreads[i].precisionatK[j];				
+			}
+		}
+
+		for( int j = 0; j < k; j++ ) {
+			precisionatK[j] /= ((double) numOfInstance);
+		}
+    			
+		TreeMap<String,Double> arr = new TreeMap<String,Double>();
+		for(int i=0; i < k; i++){
+			arr.put( "PrecAtK["+(i+1)+"]", precisionatK[i] );
+		}
+		
+    	return arr;
+    	
+    }
+    
+    
     public static TreeMap<String,Double> computePrecisionAtk(AbstractLearner learner, DataManager data, int k) {
     	double[] precisionatK = new double[k];
     	int numOfInstance = 0;
@@ -181,9 +229,9 @@ public class Evaluator {
 			while(!predictedLabels.isEmpty()) {
 				
 				EstimatePair eP = predictedLabels.pollFirst();
-				
+			
 				int label = eP.getLabel();
-				double p = eP.getP();
+				//double p = eP.getP();
 				
 				//logger.info(index + " label: " + label + " p: " + p);
 				
@@ -227,6 +275,7 @@ public class Evaluator {
 		//	logger.info("Label: " + i + " num: " + numLabels[i]);
 		//}
 		//logger.info("Num instances: " + data.n);
+		data.reset();
 		
 		TreeMap<String,Double> arr = new TreeMap<String,Double>();
 		for(int i=0; i < k; i++){
