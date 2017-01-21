@@ -429,6 +429,8 @@ public class DeepTreeLearner extends AbstractLearner {
 	public static void main(String[] args) {
 		Properties properties = ReadProperty.readProperty(args[0]);
 		
+		int numOfThreads = Integer.parseInt(properties.getProperty("numThreads", "4"));
+		
 		DeepTreeLearner learner = new DeepTreeLearner(properties);
 		
 		DataManager traindata = new BatchDataManager(properties.getProperty("TrainFile")); 
@@ -443,7 +445,9 @@ public class DeepTreeLearner extends AbstractLearner {
 		learner.initepoch(traindata);
 		logger.info("#################### Evaluating the model (no tree learning) #############################");
 		
-		Map<String, Double> perftestpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);
+		
+		
+		Map<String, Double> perftestpreck = Evaluator.computePrecisionAtk(learner, testdata, 5, numOfThreads );
 		
 		for (String perfName : perftestpreck.keySet()) {
 			logger.info("##### Test " + perfName + ": " + perftestpreck.get(perfName));
@@ -455,7 +459,7 @@ public class DeepTreeLearner extends AbstractLearner {
 			
 			logger.info("#################### Evaluating the model #############################");
 			testdata.reset();
-			perftestpreck = Evaluator.computePrecisionAtk(learner, testdata, 5);
+			perftestpreck = Evaluator.computePrecisionAtk(learner, testdata, 5, numOfThreads );
 			
 			for (String perfName : perftestpreck.keySet()) {
 				logger.info("##### Test " + perfName + ": " + perftestpreck.get(perfName));

@@ -76,7 +76,9 @@ public abstract class AbstractLearner implements Serializable{
 		else if (learnerName.compareTo("ParallelDeepPLT") == 0)
 			learner = new ParallelDeepPLT(properties);
 		else if (learnerName.compareTo("DeepTreeLearner") == 0)
-			learner = new DeepTreeLearner(properties);				
+			learner = new DeepTreeLearner(properties);
+		else if (learnerName.compareTo("ParallelDeepPLTSimpleGradient") == 0)
+			learner = new ParallelDeepPLTSimpleGradient(properties);		
 		else {
 			System.err.println("Unknown learner");
 			System.exit(-1);

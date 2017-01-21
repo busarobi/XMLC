@@ -226,8 +226,8 @@ public class LearnerManager {
 		}
 
 		// train
-		//this.readTrainData();
-		traindata = new BatchDataManager(properties.getProperty("TrainFile"));
+		this.readTrainData();
+		//traindata = new BatchDataManager(properties.getProperty("TrainFile"));
 		learner.allocateClassifiers(traindata);
 		learner.train(traindata);
 		traindata.close();
@@ -250,8 +250,8 @@ public class LearnerManager {
 			this.validdata = null;
 		}
 		
-		//this.readTestData();
-		this.testdata = new BatchDataManager(properties.getProperty("TestFile"));
+		this.readTestData();
+		//this.testdata = new BatchDataManager(properties.getProperty("TestFile"));
 		//Map<String, Double> perftestpreck = Evaluator.computePrecisionAtk(this.learner, this.testdata, 5);
 		Map<String, Double> perftestpreck = Evaluator.computePrecisionAtk(this.learner, this.testdata, 5, numOfThreads);
 		

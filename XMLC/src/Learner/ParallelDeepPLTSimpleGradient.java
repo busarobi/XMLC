@@ -3,7 +3,6 @@ package Learner;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.PriorityQueue;
@@ -14,6 +13,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.math3.analysis.function.Sigmoid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,37 +26,66 @@ import Data.Instance;
 import Data.NodeComparatorPLT;
 import Data.NodePLT;
 import IO.DataManager;
-import preprocessing.FeatureHasherFactory;
+import Learner.ParallelDeepPLT.UpdateThread;
 import util.CompleteTree;
 import util.HuffmanTree;
 import util.PrecomputedTree;
 import util.Tree;
 
-public class ParallelDeepPLT extends PLT {
+public class ParallelDeepPLTSimpleGradient extends AbstractLearner {
 	private static final long serialVersionUID = 1L;
-	private static Logger logger = LoggerFactory.getLogger(ParallelDeepPLT.class);
-
+	private static Logger logger = LoggerFactory.getLogger(ParallelDeepPLTSimpleGradient.class);
+	
 	protected AtomicDoubleArray[] w = null;
 	protected AtomicDoubleArray[] hiddenWeights = null;
 	protected AtomicDouble[] bias = null;
 
+	
+	protected double gamma = 0.33; // learning rate
+	protected int epochs = 10; // training epochs
+		
+	protected int k = 2; // k-ary tree
+	protected String treeType = "Complete";
+	protected String treeFile = null;
+	transient protected int t = 0;	
+	protected Tree tree = null;
+
+	protected AtomicInteger[] Tarray;
+	protected AtomicInteger[] Tarrayhidden = null;
+	protected int maxNumOfUpdate = 0;
+	
 	protected int numOfThreads = 4;
 
 	protected int hiddendim = 100;
 	protected String hiddenVectorsFile = null;
-
-	transient protected AtomicInteger[] Tarray = null;
-	protected AtomicDouble[] scalararray = null;
-
-	transient protected AtomicInteger[] Tarrayhidden = null;
-	protected AtomicDouble[] scalararrayhidden = null;
-
-	public ParallelDeepPLT(Properties properties) {
+	static Sigmoid s = new Sigmoid();
+	
+	public ParallelDeepPLTSimpleGradient(Properties properties) {
 		super(properties);
-
+		
 		System.out.println("#####################################################");
 		System.out.println("#### Learner: ParallelDeepPLT");
 
+		// scalar
+		this.gamma = Double.parseDouble(this.properties.getProperty("gamma", "1.0"));
+		logger.info("#### gamma: " + this.gamma );
+
+		// epochs
+		this.epochs = Integer.parseInt(this.properties.getProperty("epochs", "30"));
+		logger.info("#### epochs: " + this.epochs );
+		
+		// k-ary tree
+		this.k = Integer.parseInt(this.properties.getProperty("k", "2"));
+		logger.info("#### k (order of the tree): " + this.k );
+
+		// tree type (Complete, Precomputed, Huffman)
+		this.treeType = this.properties.getProperty("treeType", "Complete");
+		logger.info("#### tree type " + this.treeType );
+
+		// tree file name
+		this.treeFile = this.properties.getProperty("treeFile", null);
+		logger.info("#### tree file name " + this.treeFile );
+		
 		this.hiddendim = Integer.parseInt(this.properties.getProperty("hiddendim", "100"));
 		logger.info("#### Number of hidden dimension: " + this.hiddendim);
 
@@ -68,28 +97,36 @@ public class ParallelDeepPLT extends PLT {
 		logger.info("#### num of threads: " + this.numOfThreads);
 
 		System.out.println("#####################################################");
+		
+	}
 
+	public void printParameters() {
+		super.printParameters();	
+		logger.info("#### gamma: " + this.gamma );		
+		logger.info("#### epochs: " + this.epochs );
+		logger.info("#### k (order of the tree): " + this.k );		
+		logger.info("#### tree type: " + this.treeType );
+		logger.info("#### tree file: " + this.treeFile );
 	}
 
 	@Override
-	public void allocateClassifiers(DataManager data) {
-		this.traindata = data;
+	public void allocateClassifiers(DataManager data) {		
 		this.m = data.getNumberOfLabels();
 		this.d = data.getNumberOfFeatures();
 
 		switch (this.treeType) {
-		case CompleteTree.name:
-			this.tree = new CompleteTree(this.k, this.m);
-			break;
-		case PrecomputedTree.name:
-			this.tree = new PrecomputedTree(this.treeFile);
-			break;
-		case HuffmanTree.name:
-			this.tree = new HuffmanTree(data, this.treeFile);
-			break;
-		default:
-			System.err.println("Unknown tree type!");
-			System.exit(-1);
+			case CompleteTree.name:
+				this.tree = new CompleteTree(this.k, this.m);
+				break;
+			case PrecomputedTree.name:
+				this.tree = new PrecomputedTree(this.treeFile);
+				break;
+			case HuffmanTree.name:
+				this.tree = new HuffmanTree(data, this.treeFile);
+				break;
+			default:
+				System.err.println("Unknown tree type!");
+				System.exit(-1);
 		}
 		this.t = this.tree.getSize();
 
@@ -98,13 +135,11 @@ public class ParallelDeepPLT extends PLT {
 		logger.info("#####################################################");
 		
 		
-		this.allocateMemory(data);
-		
+		this.allocateMemory(data);		
 	}
 
 	
-	public void allocateClassifiers(DataManager data, Tree tree) {
-		this.traindata = data;
+	public void allocateClassifiers(DataManager data, Tree tree) {		
 		this.m = data.getNumberOfLabels();
 		this.d = data.getNumberOfFeatures();
 		this.tree = tree;
@@ -115,46 +150,50 @@ public class ParallelDeepPLT extends PLT {
 		logger.info("#####################################################");
 		
 		
-		this.allocateMemory(data);
-		
+		this.allocateMemory(data);		
 	}
 	
 	public double[][] getDeepRepresentation(){
 		double[][] retval = new double[this.d][];
 		for (int i = 0; i < this.d; i++) {
-			int hi = fh.getIndex(1, i);
 			retval[i] = new double[this.hiddendim];
 			for (int j = 0; j < this.hiddendim; j++) {
-				retval[i][j] = this.hiddenWeights[hi].get(j);
+				retval[i][j] = this.hiddenWeights[i].get(j);
 			}
 		}
 		return retval;
 	}
 	
-	
-	public void allocateMemory(DataManager data) {
-		if (this.hasher.compareTo("Identical")==0) { 
-			this.hd = this.d;
-		}
-		
-		this.fh = FeatureHasherFactory.createFeatureHasher(this.hasher, fhseed, this.hd, 1);
-
+	public void allocateMemory(DataManager data) {				
 		logger.info("Allocate the learners...");
-
-		Random r = new Random();
-		this.hiddenWeights = new AtomicDoubleArray[this.hd];
-		for (int i = 0; i < this.hd; i++) {
+		
+		Random r = new Random();		
+		double scaleOfInit = 2.0;
+		
+		this.hiddenWeights = new AtomicDoubleArray[this.d];
+		for (int i = 0; i < this.d; i++) {
 			this.hiddenWeights[i] = new AtomicDoubleArray(this.hiddendim);
 			for (int j = 0; j < this.hiddendim; j++) {
-				this.hiddenWeights[i].set(j, 2.0 * r.nextDouble() - 1.0);
+				this.hiddenWeights[i].set(j, scaleOfInit * r.nextDouble() - (scaleOfInit/2.0));
 			}
+			
+			double tmpsum = 0.0;
+			for (int j = 0; j < hiddendim; j++) {
+				tmpsum += Math.abs(hiddenWeights[i].get(j));
+			}
+			if (tmpsum > 0.00001) {
+				for (int j = 0; j < hiddendim; j++) {
+					hiddenWeights[i].set(j, hiddenWeights[i].get(j)/tmpsum);
+				}
+			}
+			
 		}
 
 		this.w = new AtomicDoubleArray[this.t];
 		for (int i = 0; i < this.t; i++) {
 			this.w[i] = new AtomicDoubleArray(this.hiddendim);
 			for (int j = 0; j < this.hiddendim; j++) {
-				this.w[i].set(j, 2.0 * r.nextDouble() - 1);
+				this.w[i].set(j, scaleOfInit * r.nextDouble() - (scaleOfInit / 2.0));
 			}
 		}
 
@@ -168,27 +207,25 @@ public class ParallelDeepPLT extends PLT {
 			this.bias[i] = new AtomicDouble(0.0);
 		}
 
-		this.Tarray = new AtomicInteger[this.t];
-		this.scalararray = new AtomicDouble[this.t];
+		this.maxNumOfUpdate = this.epochs * 500000;
+		
+		this.Tarray = new AtomicInteger[this.t];		
 		for (int i = 0; i < this.t; i++) {
 			this.Tarray[i] = new AtomicInteger(1);
-			this.scalararray[i] = new AtomicDouble(1.0);
 		}
-
-		this.Tarrayhidden = new AtomicInteger[this.hd];
-		this.scalararrayhidden = new AtomicDouble[this.hd];
-		for (int i = 0; i < this.hd; i++) {
+		this.Tarrayhidden = new AtomicInteger[this.d];		
+		for (int i = 0; i < this.d; i++) {
 			this.Tarrayhidden[i] = new AtomicInteger(1);
-			this.scalararrayhidden[i] = new AtomicDouble(1.0);
 		}
 
 		logger.info("Done.");
 	}
+
 	
 	
 	
 	@Override
-	public void train(DataManager data) {
+	public void train(DataManager data) {		 
 		for (int ep = 0; ep < this.epochs; ep++) {
 
 			logger.info("#############--> BEGIN of Epoch: {} ({})", (ep + 1), this.epochs);
@@ -196,8 +233,8 @@ public class ParallelDeepPLT extends PLT {
 			// UpdateThread processingThread = new UpdateThread(data);
 			// processingThread.run();
 
-			UpdateThread[] processingThreads = new UpdateThread[this.numOfThreads];
-
+			UpdateThreadSimpleGradient[] processingThreads = new UpdateThreadSimpleGradient[this.numOfThreads];
+			
 			ExecutorService executor = Executors.newFixedThreadPool(this.numOfThreads);
 			for (int i = 0; i < this.numOfThreads; i++) {
 				processingThreads[i] = getUpdaterThread(data, (ep * this.numOfThreads) + i);
@@ -228,22 +265,16 @@ public class ParallelDeepPLT extends PLT {
 
 	}
 
-	protected UpdateThread getUpdaterThread(DataManager data, int id ) {
-		return new UpdateThread( data, id );
-	}
-	
 	public void writeHiddenVectors(String outfname) {
 		try {
 			BufferedWriter bf = new BufferedWriter(new FileWriter(outfname));
 
 			for (int i = 0; i < this.d; i++) {
-				int hi = fh.getIndex(1, i);
-
-				bf.write(i + "," + hi);
+				bf.write(i+"");
 				// labels
 				for (int j = 0; j < this.hiddendim; j++) {
 					// logger.info(data.y[i][j]);
-					bf.write("," + this.hiddenWeights[hi].get(j));
+					bf.write("," + this.hiddenWeights[i].get(j));
 				}
 
 				bf.write("\n");
@@ -254,7 +285,7 @@ public class ParallelDeepPLT extends PLT {
 			System.out.println(e.getMessage());
 		}
 	}
-
+	
 	@Override
 	public double getPosteriors(AVPair[] x, int label) {
 		double posterior = 1.0;
@@ -266,28 +297,31 @@ public class ParallelDeepPLT extends PLT {
 		posterior *= getPartialPosteriors(hiddenRepresentation, treeIndex);
 
 		while(treeIndex > 0) {
-
-			treeIndex = this.tree.getParent(treeIndex); //Math.floor((treeIndex - 1)/2);
+			treeIndex = this.tree.getParent(treeIndex); 
 			posterior *= getPartialPosteriors(hiddenRepresentation, treeIndex);
 
 		}
-		//if(posterior > 0.5) logger.info("Posterior: " + posterior + "Label: " + label);
+
 		return posterior;
 	}
-
+	
+	
 	public double getPartialPosteriors(double[] x, int label) {
 		double posterior = 0.0;
-		
-		
+				
 		for (int i = 0; i < this.hiddendim; i++) {			
-			posterior += x[i] * (1.0/this.scalararray[label].get()) * this.w[label].get(i);
+			posterior += x[i] * this.w[label].get(i);
 		}
 		
-		posterior += (1.0/this.scalararray[label].get()) * this.bias[label].get(); 
+		posterior += this.bias[label].get(); 
 		posterior = s.value(posterior);		
 		
 		return posterior;
 
+	}
+	
+	protected UpdateThreadSimpleGradient getUpdaterThread(DataManager data, int id ) {
+		return new UpdateThreadSimpleGradient( data, id );
 	}
 
 	protected double[] getHiddenRepresentation(AVPair[] x) {
@@ -295,11 +329,8 @@ public class ParallelDeepPLT extends PLT {
 		// aggregate the the word2vec representation
 		double sum = 0;
 		for (int i = 0; i < x.length; i++) {
-			int hi = fh.getIndex(1, x[i].index);
-			// int sign = fh.getSign(1, x[i].index);
-
 			for (int j = 0; j < hiddendim; j++) {
-				hiddenRepresentation[j] += x[i].value * (1.0/this.scalararrayhidden[hi].get()) * hiddenWeights[hi].get(j);
+				hiddenRepresentation[j] += x[i].value * hiddenWeights[x[i].index].get(j);
 				sum += x[i].value;
 			}
 
@@ -313,9 +344,7 @@ public class ParallelDeepPLT extends PLT {
 
 		return hiddenRepresentation;
 	}
-	
-	
-	
+
 	public TreeSet<EstimatePair> getTopKEstimates(AVPair[] x, int k) {
 		double[] hiddenRepresentation = this.getHiddenRepresentation(x);
 		
@@ -351,8 +380,11 @@ public class ParallelDeepPLT extends PLT {
 
 		return positiveLabels;
 	}
-
-	public class UpdateThread implements Runnable {
+	
+	
+	
+	
+	public class UpdateThreadSimpleGradient implements Runnable{						
 		DataManager data = null;
 		protected double[] updatevec = null;
 		private final int ID;
@@ -370,7 +402,7 @@ public class ParallelDeepPLT extends PLT {
 			return numOfProcessedInstance;
 		}
 
-		public UpdateThread(DataManager data, int ID) {
+		public UpdateThreadSimpleGradient(DataManager data, int ID) {
 			this.data = data;
 			this.updatevec = new double[hiddendim];
 			this.ID = ID;
@@ -461,9 +493,8 @@ public class ParallelDeepPLT extends PLT {
 			}
 
 		}
-
+		
 		synchronized protected void updateHiddenRepresentation(Instance instance) {
-
 			double sum = 0.0;
 			for (int j = 0; j < instance.x.length; j++) {
 				sum += instance.x[j].value;
@@ -473,44 +504,49 @@ public class ParallelDeepPLT extends PLT {
 			}
 
 			for (int i = 0; i < instance.x.length; i++) {
-				int hi = fh.getIndex(1, instance.x[i].index);
-				// int sign = fh.getSign(1, instance.x[i].index);
-
-				double learningRate = gamma / (1 + gamma * lambda * Tarrayhidden[hi].get());
+				int hi = instance.x[i].index;
+				double learningRate = gamma / (1.0 -  ((double)Tarrayhidden[hi].get()) / ((double) maxNumOfUpdate));
+				
 				Tarrayhidden[hi].addAndGet(1);
-				scalararrayhidden[hi].set(scalararrayhidden[hi].get() * (1 + learningRate * lambda));
 
 				for (int j = 0; j < hiddendim; j++) {
-					// double gradient = this.scalararrayhidden[hi] * inc *
-					// this.w[ind][j] * sum * instance.x[i].value;
-					double gradient = scalararrayhidden[hi].get() * this.updatevec[j] * sum * instance.x[i].value;
+					double gradient = this.updatevec[j] * sum * instance.x[i].value;
 					double update = (learningRate * gradient);// / this.scalar;
 					hiddenWeights[hi].addAndGet(j, -update);
 				}
 
+				double tmpsum = 0.0;
+				for (int j = 0; j < hiddendim; j++) {
+					tmpsum += Math.abs(hiddenWeights[hi].get(j));
+				}
+				if (tmpsum > 0.00001) {
+					for (int j = 0; j < hiddendim; j++) {
+						hiddenWeights[hi].set(j, hiddenWeights[hi].get(j)/tmpsum);
+					}
+				}
+				
+				
 			}
 		}
 
+	
 		synchronized protected void updatedTreePosteriors(double[] x, int label, double inc) {
-			double learningRate = gamma / (1 + gamma * lambda * Tarray[label].get());
+			double learningRate = gamma / (1.0 - ((double)Tarray[label].get()) / ((double) maxNumOfUpdate) );
 			Tarray[label].addAndGet(1);
-			scalararray[label].set(scalararray[label].get() * (1 + learningRate * lambda));
-
-			int n = x.length;
 
 			for (int i = 0; i < hiddendim; i++) {
-				double gradient = scalararray[label].get() * inc * x[i];
+				double gradient = inc * x[i];
 				double update = (learningRate * gradient);// / this.scalar;
 				w[label].getAndAdd(i, -update);
 
 				this.updatevec[i] += inc * w[label].get(i);
 			}
 
-			double gradient = scalararray[label].get() * inc;
-			double update = (learningRate * gradient);// / this.scalar;
+			double update = (learningRate * inc);// / this.scalar;
 			bias[label].addAndGet(-update);
 		}
 
 	}	
+
 	
 }
