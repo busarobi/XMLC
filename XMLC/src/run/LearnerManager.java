@@ -259,7 +259,9 @@ public class LearnerManager {
 		for (String perfName : perftestpreck.keySet()) {
 			logger.info("##### Test " + perfName + ": " + perftestpreck.get(perfName));
 		}	
-		this.testdata.close();		
+		this.testdata.close();
+		
+		System.exit(0);
 	}
 	
 	

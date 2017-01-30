@@ -50,7 +50,7 @@ public class DeepTreeLearner extends AbstractLearner {
 	protected DataManager traindata = null;
 	protected double[][] hiddenWeights = null;		
 	protected double[][] hiddenLabelRep = null;
-	protected ParallelDeepPLT learner = null;
+	protected ParallelDeepPLTSimpleGradient learner = null;
 
 	protected int kForRFdistance = -1;
 
@@ -310,7 +310,7 @@ public class DeepTreeLearner extends AbstractLearner {
 	@Override
 	public void train(DataManager data) {
 
-		this.learner = new ParallelDeepPLT(this.properties);
+		this.learner = new ParallelDeepPLTSimpleGradient(this.properties);
 		this.learner.allocateClassifiers(data);
 		this.learner.train(data);
 		
@@ -334,7 +334,7 @@ public class DeepTreeLearner extends AbstractLearner {
 //			this.writeTreeIndices();
 			
 			
-			this.learner = new ParallelDeepPLT(this.properties);
+			this.learner = new ParallelDeepPLTSimpleGradient(this.properties);
 			this.learner.allocateClassifiers(data, this.tree);
 						
 			this.learner.train(data);
@@ -345,7 +345,7 @@ public class DeepTreeLearner extends AbstractLearner {
 
 	
 	protected void initepoch(DataManager data ) {
-		this.learner = new ParallelDeepPLT(this.properties);
+		this.learner = new ParallelDeepPLTSimpleGradient(this.properties);
 		this.learner.allocateClassifiers(data);
 		this.learner.train(data);		
 	}
@@ -371,7 +371,7 @@ public class DeepTreeLearner extends AbstractLearner {
 			this.tree.writeTree(tmpTreeFile);
 		}
 			
-		this.learner = new ParallelDeepPLT(this.properties);
+		this.learner = new ParallelDeepPLTSimpleGradient(this.properties);
 		this.learner.allocateClassifiers(data, this.tree);
 			
 		this.learner.train(data);

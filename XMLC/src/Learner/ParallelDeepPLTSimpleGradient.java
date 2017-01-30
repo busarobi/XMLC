@@ -177,15 +177,15 @@ public class ParallelDeepPLTSimpleGradient extends AbstractLearner {
 				this.hiddenWeights[i].set(j, scaleOfInit * r.nextDouble() - (scaleOfInit/2.0));
 			}
 			
-			double tmpsum = 0.0;
-			for (int j = 0; j < hiddendim; j++) {
-				tmpsum += Math.abs(hiddenWeights[i].get(j));
-			}
-			if (tmpsum > 0.00001) {
-				for (int j = 0; j < hiddendim; j++) {
-					hiddenWeights[i].set(j, hiddenWeights[i].get(j)/tmpsum);
-				}
-			}
+//			double tmpsum = 0.0;
+//			for (int j = 0; j < hiddendim; j++) {
+//				tmpsum += Math.abs(hiddenWeights[i].get(j));
+//			}
+//			if (tmpsum > 0.00001) {
+//				for (int j = 0; j < hiddendim; j++) {
+//					hiddenWeights[i].set(j, hiddenWeights[i].get(j)/tmpsum);
+//				}
+//			}
 			
 		}
 
@@ -515,15 +515,15 @@ public class ParallelDeepPLTSimpleGradient extends AbstractLearner {
 					hiddenWeights[hi].addAndGet(j, -update);
 				}
 
-				double tmpsum = 0.0;
-				for (int j = 0; j < hiddendim; j++) {
-					tmpsum += Math.abs(hiddenWeights[hi].get(j));
-				}
-				if (tmpsum > 0.00001) {
-					for (int j = 0; j < hiddendim; j++) {
-						hiddenWeights[hi].set(j, hiddenWeights[hi].get(j)/tmpsum);
-					}
-				}
+//				double tmpsum = 0.0;
+//				for (int j = 0; j < hiddendim; j++) {
+//					tmpsum += Math.abs(hiddenWeights[hi].get(j));
+//				}
+//				if (tmpsum > 0.00001) {
+//					for (int j = 0; j < hiddendim; j++) {
+//						hiddenWeights[hi].set(j, hiddenWeights[hi].get(j)/tmpsum);
+//					}
+//				}
 				
 				
 			}

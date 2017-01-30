@@ -146,7 +146,7 @@ public class ParallelDeepPLT extends PLT {
 		for (int i = 0; i < this.hd; i++) {
 			this.hiddenWeights[i] = new AtomicDoubleArray(this.hiddendim);
 			for (int j = 0; j < this.hiddendim; j++) {
-				this.hiddenWeights[i].set(j, 2.0 * r.nextDouble() - 1.0);
+				this.hiddenWeights[i].set(j, 20.0 * r.nextDouble() - 10.0);
 			}
 		}
 
@@ -154,7 +154,7 @@ public class ParallelDeepPLT extends PLT {
 		for (int i = 0; i < this.t; i++) {
 			this.w[i] = new AtomicDoubleArray(this.hiddendim);
 			for (int j = 0; j < this.hiddendim; j++) {
-				this.w[i].set(j, 2.0 * r.nextDouble() - 1);
+				this.w[i].set(j, 20.0 * r.nextDouble() - 10.0);
 			}
 		}
 
@@ -166,6 +166,7 @@ public class ParallelDeepPLT extends PLT {
 		this.bias = new AtomicDouble[this.t];
 		for (int i = 0; i < this.t; i++) {
 			this.bias[i] = new AtomicDouble(0.0);
+			this.bias[i].set(20.0 * r.nextDouble() - 10.0);
 		}
 
 		this.Tarray = new AtomicInteger[this.t];
