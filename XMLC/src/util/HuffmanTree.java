@@ -61,8 +61,6 @@ public class HuffmanTree extends PrecomputedTree {
 				counts[instance.y[i]]++;
 			}
 			nInstances++;
-//			if (nInstances== 38968)
-//				System.out.printf("%d\n", nInstances);
 		}
 		data.reset();
 		
