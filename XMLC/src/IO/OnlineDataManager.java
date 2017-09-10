@@ -100,7 +100,7 @@ public class OnlineDataManager extends DataManager {
 		  protected int m;
 		  
 		  protected volatile boolean endOfFile = false;
-		  public volatile boolean flag = true;
+		  public volatile boolean shutdown = true;
 		  
 		  BufferedReader br = null;
 		  
@@ -139,14 +139,16 @@ public class OnlineDataManager extends DataManager {
 			            while(true){		            	
 			            	Instance instance = processLine(buffer);			            	
 
-			            	blockingQueue.put(instance);			            	
+			            	blockingQueue.put(instance);
+
 			            	buffer = br.readLine();
 			            	if (buffer == null ) {
 			            		this.endOfFile = true;
 			            		break;
 			            	}
+
+			            	if (shutdown ==false) return;
 			            }
-		            
 	            	}		            
 
 		        } catch (Exception e) {
@@ -240,7 +242,7 @@ public class OnlineDataManager extends DataManager {
 	
 	public void close() {
 		if ( ( this.readerthread != null ) && (this.readerthread.endOfFile==false) ){
-			this.readerthread.flag = false;
+			this.readerthread.shutdown = false;
 			this.getNextInstance();
 		}
 	}
