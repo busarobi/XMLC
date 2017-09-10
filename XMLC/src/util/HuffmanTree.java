@@ -1,12 +1,11 @@
 package util;
 
-import java.util.PriorityQueue;
-
+import Data.Instance;
+import IO.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import Data.Instance;
-import IO.DataManager;
+import java.util.PriorityQueue;
 
 public class HuffmanTree extends PrecomputedTree {
 	private static Logger logger = LoggerFactory.getLogger(HuffmanTree.class);
@@ -62,6 +61,8 @@ public class HuffmanTree extends PrecomputedTree {
 				counts[instance.y[i]]++;
 			}
 			nInstances++;
+//			if (nInstances== 38968)
+//				System.out.printf("%d\n", nInstances);
 		}
 		data.reset();
 		

@@ -1,19 +1,13 @@
 package IO;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import Data.AVPair;
+import Data.Instance;
+
+import java.io.*;
 import java.util.Arrays;
 import java.util.StringTokenizer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Semaphore;
-
-import Data.AVPair;
-import Data.Instance;
 
 public class OnlineDataManager extends DataManager {
 	protected ReaderThread  readerthread = null;
@@ -39,7 +33,17 @@ public class OnlineDataManager extends DataManager {
 
 	@Override
 	public boolean hasNext() {
-		return ((this.blockingQueue.size() > 0) || (! this.readerthread.isEndOfFile() ));
+		if (this.blockingQueue.size() > 0) return true;
+		if ((! this.readerthread.isEndOfFile() )) { // not end of line, but we do not know whether new instance will come
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (this.blockingQueue.size() > 0) return true;
+			if (this.readerthread.isEndOfFile()) return false;
+		}
+		return false;
 	}
 
 	@Override
@@ -89,7 +93,7 @@ public class OnlineDataManager extends DataManager {
 	public class ReaderThread implements Runnable{
 
 		  protected BlockingQueue<Instance> blockingQueue = null;
-		  protected final Semaphore available = new Semaphore(1);
+		  //protected final Semaphore available = new Semaphore(1);
 		  protected String filename = null;
 		  protected int d; 
 		  protected int n;
@@ -124,28 +128,23 @@ public class OnlineDataManager extends DataManager {
 		  }
 
 		  @Override
-		  public void run() {		    
-		     try {		    	 
-		    	 	available.acquire();
+		  public void run() {
+		     try {
 		            String buffer = br.readLine();
 		            if (buffer == null ) {
 		            	this.endOfFile = true;
 		            }
-		            available.release();
-	            		
+
 	            	if (this.endOfFile == false ) {     			            
 			            while(true){		            	
 			            	Instance instance = processLine(buffer);			            	
-			            	
-			            	available.acquire();
+
 			            	blockingQueue.put(instance);			            	
 			            	buffer = br.readLine();
 			            	if (buffer == null ) {
 			            		this.endOfFile = true;
-			            		available.release();
 			            		break;
-			            	}		            	
-			                available.release();		                
+			            	}
 			            }
 		            
 	            	}		            
