@@ -1,19 +1,13 @@
 package IO;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import Data.AVPair;
+import Data.Instance;
+
+import java.io.*;
 import java.util.Arrays;
 import java.util.StringTokenizer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Semaphore;
-
-import Data.AVPair;
-import Data.Instance;
 
 public class OnlineDataManager extends DataManager {
 	protected ReaderThread  readerthread = null;
@@ -38,21 +32,29 @@ public class OnlineDataManager extends DataManager {
 	}
 
 	@Override
-	synchronized public boolean hasNext() {
-		return ((this.blockingQueue.size() > 0) || (! this.readerthread.isEndOfFile() ));
+	public boolean hasNext() {
+		if (this.blockingQueue.size() > 0) return true;
+		if ((! this.readerthread.isEndOfFile() )) { // not end of line, but we do not know whether new instance will come
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (this.blockingQueue.size() > 0) return true;
+			if (this.readerthread.isEndOfFile()) return false;
+		}
+		return false;
 	}
 
 	@Override
-	synchronized public Instance getNextInstance() {
+	public Instance getNextInstance() {
 		Instance instance = null;
-		if (hasNext()){
-			try {
-				instance = this.blockingQueue.take();
-				this.processedItem++;
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		try {
+			instance = this.blockingQueue.take();
+			this.processedItem++;
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		return instance;		
 	}
@@ -91,13 +93,14 @@ public class OnlineDataManager extends DataManager {
 	public class ReaderThread implements Runnable{
 
 		  protected BlockingQueue<Instance> blockingQueue = null;
+		  //protected final Semaphore available = new Semaphore(1);
 		  protected String filename = null;
 		  protected int d; 
 		  protected int n;
 		  protected int m;
 		  
 		  protected volatile boolean endOfFile = false;
-		  public volatile boolean flag = true;
+		  public volatile boolean shutdown = true;
 		  
 		  BufferedReader br = null;
 		  
@@ -121,43 +124,46 @@ public class OnlineDataManager extends DataManager {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		    
 		  }
 
-		@Override
-		public void run() {
-			try {
-				String buffer = br.readLine();
-				if (buffer == null) {
-					synchronized (this) {
-						this.endOfFile = true;
-					}
-				}
-				if (this.endOfFile == false) {
-					while (true) {
-						Instance instance = processLine(buffer);
-						buffer = br.readLine();
+		  @Override
+		  public void run() {
+		     try {
+		            String buffer = br.readLine();
+		            if (buffer == null ) {
+		            	this.endOfFile = true;
+		            }
 
-						synchronized (this) {
-							blockingQueue.put(instance);
-							if (buffer == null) {
-								this.endOfFile = true;
-								break;
-							}
-						}
-					}
+	            	if (this.endOfFile == false ) {     			            
+			            while(true){		            	
+			            	Instance instance = processLine(buffer);			            	
 
-				}
+			            	blockingQueue.put(instance);
 
-			} catch (Exception e) {
-				e.printStackTrace();
-			} finally {
-				try {
-					br.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
-		}
+			            	buffer = br.readLine();
+			            	if (buffer == null ) {
+			            		this.endOfFile = true;
+			            		break;
+			            	}
+
+			            	if (shutdown ==false) return;
+			            }
+	            	}		            
+
+		        } catch (Exception e) {
+		            e.printStackTrace();
+		        }finally{
+		            try {
+		                br.close();
+		            } catch (IOException e) {
+		                e.printStackTrace();
+		            }
+		        }
+
+
+		  }
+
 
 		  public int getD() {
 			return d;
@@ -218,7 +224,7 @@ public class OnlineDataManager extends DataManager {
 					indexy++;
 				} else {  // features
 					x[indexx] = new AVPair();
-					x[indexx].index = Integer.parseInt(tokens[0]);         // the indexing starts at 0
+					x[indexx].index = Integer.parseInt(tokens[0])-1;         // the indexing starts at 0
 					x[indexx++].value = Double.parseDouble(tokens[1]);							
 				}
 			}
@@ -236,7 +242,7 @@ public class OnlineDataManager extends DataManager {
 	
 	public void close() {
 		if ( ( this.readerthread != null ) && (this.readerthread.endOfFile==false) ){
-			this.readerthread.flag = false;
+			this.readerthread.shutdown = false;
 			this.getNextInstance();
 		}
 	}
