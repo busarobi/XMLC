@@ -1,29 +1,19 @@
 package run;
 
-import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import Data.AVTable;
 import IO.DataManager;
 import IO.Evaluator;
 import Learner.AbstractLearner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import util.MasterSeed;
+
+import java.io.BufferedWriter;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class GridSearch extends LearnerManager {
 	private static Logger logger = LoggerFactory.getLogger(GridSearch.class);
@@ -146,8 +136,8 @@ public class GridSearch extends LearnerManager {
 			hyperparameters.put("lambda", lambdaArray);
 
 			// number of leaves
-			// List<String> kArray = Arrays.asList("2","4","8","16","32","64");
-			List<String> kArray = Arrays.asList("2", "3", "4", "8", "16", "32", "64", "128", "256", "512");
+			 List<String> kArray = Arrays.asList("2","4","8","16","32","64");
+//			List<String> kArray = Arrays.asList("2", "3", "4", "8", "16", "32", "64", "128", "256", "512");
 			// List<String> kArray = Arrays.asList("2","4","8");
 			// List<String> lambdaArray =
 			// Arrays.asList("0.0001","0.00001","0.000001","0.0000001");

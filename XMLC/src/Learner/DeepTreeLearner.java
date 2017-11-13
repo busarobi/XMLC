@@ -1,29 +1,5 @@
 package Learner;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.StringTokenizer;
-import java.util.TreeSet;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.apache.commons.math3.exception.ConvergenceException;
-import org.apache.commons.math3.ml.clustering.CentroidCluster;
-import org.apache.commons.math3.ml.clustering.Clusterable;
-import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
-import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer.EmptyClusterStrategy;
-import org.apache.commons.math3.ml.distance.EuclideanDistance;
-import org.apache.commons.math3.random.JDKRandomGenerator;
-
 import Data.AVPair;
 import Data.EstimatePair;
 import Data.Instance;
@@ -31,7 +7,19 @@ import IO.BatchDataManager;
 import IO.DataManager;
 import IO.Evaluator;
 import IO.ReadProperty;
+import org.apache.commons.math3.exception.ConvergenceException;
+import org.apache.commons.math3.ml.clustering.CentroidCluster;
+import org.apache.commons.math3.ml.clustering.Clusterable;
+import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
+import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer.EmptyClusterStrategy;
+import org.apache.commons.math3.ml.distance.DistanceMeasure;
+import org.apache.commons.math3.random.JDKRandomGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import util.PrecomputedTree;
+
+import java.io.*;
+import java.util.*;
 
 public class DeepTreeLearner extends AbstractLearner {
 	private static final long serialVersionUID = 1L;
@@ -56,8 +44,27 @@ public class DeepTreeLearner extends AbstractLearner {
 
 	protected ArrayList<PrecomputedTree> treeArray  = new ArrayList<PrecomputedTree>(); 
 	protected ArrayList<ArrayList<Double>> treeDistances = new ArrayList<ArrayList<Double>>();
-	
-	
+
+	public class CosineDistance implements DistanceMeasure {
+		private static final long serialVersionUID = 1717556319784040040L;
+
+		public CosineDistance() {
+		}
+
+		public double compute(double[] a, double[] b)
+		{
+			double dotProduct = 0.0;
+			double norma = 0.0;
+			double normb = 0.0;
+			for (int i = 0; i < a.length; i++) {
+				dotProduct += a[i] * b[i];
+				norma += a[i] * a[i];
+				normb += b[i] * b[i];
+			}
+			return 1.0 - dotProduct / (Math.sqrt(norma) * Math.sqrt(norma));
+		}
+	}
+
 	
 	public DeepTreeLearner(Properties properties) {
 		super(properties);
@@ -135,11 +142,17 @@ public class DeepTreeLearner extends AbstractLearner {
 			// initialize a new clustering algorithm. 
 			// we use KMeans++ with 10 clusters and 10000 iterations maximum.
 			// we did not specify a distance measure; the default (euclidean distance) is used.
-			KMeansPlusPlusClusterer<ClusteringWrapper> clusterer 
+//			KMeansPlusPlusClusterer<ClusteringWrapper> clusterer
+//					= new KMeansPlusPlusClusterer<ClusteringWrapper>(this.k, 1000,
+//																	 new EuclideanDistance(), new JDKRandomGenerator(), EmptyClusterStrategy.LARGEST_VARIANCE );
+//																	 //new Random(),
+//																	 //EmptyClusterStrategy.LARGEST_VARIANCE  );
+			KMeansPlusPlusClusterer<ClusteringWrapper> clusterer
 					= new KMeansPlusPlusClusterer<ClusteringWrapper>(this.k, 1000,
-																	 new EuclideanDistance(), new JDKRandomGenerator(), EmptyClusterStrategy.LARGEST_VARIANCE );
-																	 //new Random(), 
-																	 //EmptyClusterStrategy.LARGEST_VARIANCE  );
+					new CosineDistance(), new JDKRandomGenerator(), EmptyClusterStrategy.LARGEST_VARIANCE );
+			//new Random(),
+			//EmptyClusterStrategy.LARGEST_VARIANCE  );
+
 			//System.out.println(clusterer.getEmptyClusterStrategy());
 			List<CentroidCluster<ClusteringWrapper>> clusterResults = null;
 			try {

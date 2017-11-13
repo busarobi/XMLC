@@ -1,36 +1,24 @@
 package Learner;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.PriorityQueue;
-import java.util.Properties;
-import java.util.Random;
-import java.util.TreeSet;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import Data.*;
+import IO.DataManager;
 import com.google.common.util.concurrent.AtomicDouble;
 import com.google.common.util.concurrent.AtomicDoubleArray;
-
-import Data.AVPair;
-import Data.EstimatePair;
-import Data.Instance;
-import Data.NodeComparatorPLT;
-import Data.NodePLT;
-import IO.DataManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import preprocessing.FeatureHasherFactory;
 import util.CompleteTree;
 import util.HuffmanTree;
 import util.PrecomputedTree;
 import util.Tree;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ParallelDeepPLT extends PLT {
 	private static final long serialVersionUID = 1L;
@@ -199,6 +187,7 @@ public class ParallelDeepPLT extends PLT {
 
 			UpdateThread[] processingThreads = new UpdateThread[this.numOfThreads];
 
+			data.reset();
 			ExecutorService executor = Executors.newFixedThreadPool(this.numOfThreads);
 			for (int i = 0; i < this.numOfThreads; i++) {
 				processingThreads[i] = getUpdaterThread(data, (ep * this.numOfThreads) + i);
@@ -209,7 +198,7 @@ public class ParallelDeepPLT extends PLT {
 
 			while (!executor.isTerminated()) {
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(100);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

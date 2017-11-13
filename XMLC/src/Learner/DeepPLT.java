@@ -1,28 +1,18 @@
 package Learner;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.PriorityQueue;
-import java.util.Properties;
-import java.util.Random;
-import java.util.TreeSet;
-
+import Data.*;
+import IO.DataManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import Data.AVPair;
-import Data.EstimatePair;
-import Data.Instance;
-import Data.NodeComparatorPLT;
-import Data.NodePLT;
-import IO.DataManager;
 import preprocessing.FeatureHasherFactory;
 import util.CompleteTree;
 import util.HuffmanTree;
 import util.PrecomputedTree;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.*;
 
 public class DeepPLT extends PLT {
 	private static final long serialVersionUID = 1L;
@@ -147,35 +137,24 @@ public class DeepPLT extends PLT {
 				HashSet<Integer> negativeTreeIndices = new HashSet<Integer>();
 
 				for (int j = 0; j < instance.y.length; j++) {
-
 					int treeIndex = this.tree.getTreeIndex(instance.y[j]); // + traindata.m - 1;
 					positiveTreeIndices.add(treeIndex);
 
 					while(treeIndex > 0) {
-
 						treeIndex = this.tree.getParent(treeIndex); // Math.floor((treeIndex - 1)/2);
 						positiveTreeIndices.add(treeIndex);
-
 					}
 				}
 
 				if(positiveTreeIndices.size() == 0) {
-
 					negativeTreeIndices.add(0);
-
 				} else {
-
-					
 					for(int positiveNode : positiveTreeIndices) {
-						
 						if(!this.tree.isLeaf(positiveNode)) {
-							
 							for(int childNode: this.tree.getChildNodes(positiveNode)) {
-								
 								if(!positiveTreeIndices.contains(childNode)) {
 									negativeTreeIndices.add(childNode);
 								}
-								
 							}
 							
 						}
@@ -187,7 +166,6 @@ public class DeepPLT extends PLT {
 				
 				//logger.info("Negative tree indices: " + negativeTreeIndices.toString());
 				for(int j:positiveTreeIndices) {
-
 					double posterior = getPartialPosteriors(hiddenRepresentation,j);
 					double inc = -(1.0 - posterior); 
 
@@ -195,7 +173,6 @@ public class DeepPLT extends PLT {
 				}
 
 				for(int j:negativeTreeIndices) {
-
 					if(j >= this.t) logger.info("ALARM");
 
 					double posterior = getPartialPosteriors(hiddenRepresentation,j);
@@ -235,8 +212,7 @@ public class DeepPLT extends PLT {
 		for( int i = 0; i < instance.x.length; i++ ) {
 			int hi = fh.getIndex(1,  instance.x[i].index); 
 			//int sign = fh.getSign(1, instance.x[i].index);
-		
-			
+
 			this.learningRate = this.gamma / (1 + this.gamma * this.lambda * this.Tarrayhidden[hi]);
 			this.Tarrayhidden[hi]++;
 			this.scalararrayhidden[hi] *= (1 + this.learningRate * this.lambda);
@@ -307,7 +283,6 @@ public class DeepPLT extends PLT {
 		double[] hiddenRepresentation = this.getHiddenRepresentation(x);
 		
 		int treeIndex = this.tree.getTreeIndex(label);
-
 		posterior *= getPartialPosteriors(hiddenRepresentation, treeIndex);
 
 		while(treeIndex > 0) {
@@ -337,39 +312,61 @@ public class DeepPLT extends PLT {
 	
 	public TreeSet<EstimatePair> getTopKEstimates(AVPair[] x, int k) {
 		double[] hiddenRepresentation = this.getHiddenRepresentation(x);
-		
 		TreeSet<EstimatePair> positiveLabels = new TreeSet<EstimatePair>();
 
 	    int foundTop = 0;
-	    
 	    NodeComparatorPLT nodeComparator = new NodeComparatorPLT();
-
 		PriorityQueue<NodePLT> queue = new PriorityQueue<NodePLT>(11, nodeComparator);
-
 		queue.add(new NodePLT(0,1.0));
-		
-		while(!queue.isEmpty() && (foundTop < k)) {
 
+		while(!queue.isEmpty() && (foundTop < k)) {
 			NodePLT node = queue.poll();
 
 			double currentP = node.p;
-			
 			if(!this.tree.isLeaf(node.treeIndex)) {
-				
 				for(int childNode: this.tree.getChildNodes(node.treeIndex)) {
 					queue.add(new NodePLT(childNode, currentP * getPartialPosteriors(hiddenRepresentation, childNode)));
 				}
-				
 			} else {
-				
 				positiveLabels.add(new EstimatePair(this.tree.getLabelIndex(node.treeIndex), currentP));
 				foundTop++;
-				
 			}
 		}
 
 		return positiveLabels;
 	}
+
+	@Override
+	public PriorityQueue<ComparablePair> getPositiveLabelsAndPosteriors(AVPair[] x) {
+		double[] hiddenRepresentation = this.getHiddenRepresentation(x);
+
+		PriorityQueue<ComparablePair> positiveLabels = new PriorityQueue<>();
+		NodeComparatorPLT nodeComparator = new NodeComparatorPLT();
+
+		PriorityQueue<NodePLT> queue = new PriorityQueue<NodePLT>(11, nodeComparator);
+		queue.add(new NodePLT(0,1.0));
+
+		while(!queue.isEmpty()) {
+			NodePLT node = queue.poll();
+
+			double currentP = node.p * getPartialPosteriors(hiddenRepresentation, node.treeIndex);
+			if(currentP > this.thresholds[node.treeIndex]) {
+
+				if(!this.tree.isLeaf(node.treeIndex)) {
+					for(int childNode: this.tree.getChildNodes(node.treeIndex)) {
+						queue.add(new NodePLT(childNode, currentP));
+					}
+				} else {
+					positiveLabels.add(new ComparablePair( currentP, this.tree.getLabelIndex(node.treeIndex)));
+				}
+			}
+		}
+
+		//logger.info("Predicted labels: " + positiveLabels.toString());
+		return positiveLabels;
+	}
+
+
 
 	public void writeHiddenVectors( String outfname ) 
 	{

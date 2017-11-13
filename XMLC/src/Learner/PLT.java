@@ -1,32 +1,20 @@
 package Learner;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.PriorityQueue;
-import java.util.Properties;
-import java.util.TreeSet;
-
+import Data.*;
+import IO.DataManager;
 import org.apache.commons.math3.analysis.function.Sigmoid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import Data.AVPair;
-//import Data.AVTable;
-import Data.ComparablePair;
-import Data.EstimatePair;
-import Data.Instance;
-import Data.NodeComparatorPLT;
-import Data.NodePLT;
-import IO.DataManager;
 import preprocessing.FeatureHasher;
 import preprocessing.FeatureHasherFactory;
 import util.CompleteTree;
 import util.HuffmanTree;
 import util.PrecomputedTree;
 import util.Tree;
+
+import java.util.*;
+
+//import Data.AVTable;
 
 public class PLT extends AbstractLearner {
 	private static final long serialVersionUID = 1L;
@@ -394,37 +382,28 @@ public class PLT extends AbstractLearner {
 	@Override
 	public PriorityQueue<ComparablePair> getPositiveLabelsAndPosteriors(AVPair[] x) {
 		PriorityQueue<ComparablePair> positiveLabels = new PriorityQueue<>();
-
 	    NodeComparatorPLT nodeComparator = new NodeComparatorPLT();
 
 		PriorityQueue<NodePLT> queue = new PriorityQueue<NodePLT>(11, nodeComparator);
-
 		queue.add(new NodePLT(0,1.0));
 
 		while(!queue.isEmpty()) {
-
 			NodePLT node = queue.poll();
 
 			double currentP = node.p * getPartialPosteriors(x, node.treeIndex);
-
 			if(currentP > this.thresholds[node.treeIndex]) {
 
 				if(!this.tree.isLeaf(node.treeIndex)) {
-					
 					for(int childNode: this.tree.getChildNodes(node.treeIndex)) {
 						queue.add(new NodePLT(childNode, currentP));
 					}
-					
 				} else {
-
 					positiveLabels.add(new ComparablePair( currentP, this.tree.getLabelIndex(node.treeIndex)));
-
 				}
 			}
 		}
 
 		//logger.info("Predicted labels: " + positiveLabels.toString());
-
 		return positiveLabels;
 	}
 	
@@ -437,22 +416,16 @@ public class PLT extends AbstractLearner {
 	    NodeComparatorPLT nodeComparator = new NodeComparatorPLT();
 
 		PriorityQueue<NodePLT> queue = new PriorityQueue<>(11, nodeComparator);
-
 		queue.add(new NodePLT(0,1.0));
 
 		while(!queue.isEmpty()) {
-
 			NodePLT node = queue.poll();
 
 			double currentP = node.p * getPartialPosteriors(x, node.treeIndex);
-
-			
 			if(!this.tree.isLeaf(node.treeIndex)) {
-				
 				for(int childNode: this.tree.getChildNodes(node.treeIndex)) {
 					queue.add(new NodePLT(childNode, currentP));
 				}
-				
 			} else {
 				positiveLabels[indi++] = this.tree.getLabelIndex(node.treeIndex);
 			}
@@ -463,7 +436,6 @@ public class PLT extends AbstractLearner {
 		}
 	
 		//logger.info("Predicted labels: " + positiveLabels.toString());
-
 		return positiveLabels;
 	}
 	

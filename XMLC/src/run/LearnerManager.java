@@ -1,37 +1,22 @@
 package run;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.StandardOpenOption;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Properties;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import Data.AVTable;
 import Data.Instance;
 import IO.BatchDataManager;
 import IO.DataManager;
-import IO.DataReader;
 import IO.Evaluator;
 import IO.ReadProperty;
 import Learner.AbstractLearner;
-import threshold.TTEum;
-import threshold.TTEumFast;
-import threshold.TTExuFast;
-import threshold.TTOfoFast;
-import threshold.ThresholdTuning;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import util.MasterSeed;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Properties;
 
 public class LearnerManager {
 	private static Logger logger = LoggerFactory.getLogger(LearnerManager.class);
@@ -53,7 +38,7 @@ public class LearnerManager {
 
 	public void readTrainData() throws Exception {		
 		//traindata = new BatchDataManager(properties.getProperty("TrainFile"));
-		traindata = DataManager.managerFactory(properties.getProperty("TrainFile"), "Online" );
+		traindata = DataManager.managerFactory(properties.getProperty("TrainFile"), properties.getProperty("DataManager", "Online") );
 	}
 
 	public void readTestData() throws Exception {		
